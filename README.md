@@ -2,7 +2,7 @@
 # blizzard
 A simple weather application for collaborative work for GADS team-aad-388. 
 
-### Goal 🥅
+### Goal ✅
  Display the weather information for a given city entered by the user
 
 ### API Details
