@@ -14,7 +14,7 @@
     <string name="searched_city">The Searched City</string>
     <string name="humidity">Humidity:</string>
     <string name="temp">Temp:</string>
-    <string name="search_hint">Enter the City</string>
+    <string name="search_hint">Search City\'s Weather</string>
     <string name="clear_sky">Clear sky</string>
     <string name="current_city">My Current City</string>
 </resources>
