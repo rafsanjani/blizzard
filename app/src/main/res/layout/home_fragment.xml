@@ -113,8 +113,7 @@
         android:id="@+id/search_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="#DDEDEF">
+        android:layout_marginTop="16dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -127,6 +126,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
+                android:background="@android:color/holo_blue_bright"
                 android:drawableEnd="@android:drawable/ic_menu_search"
                 android:text="@string/search"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -137,14 +137,20 @@
                 android:id="@+id/enter_city"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="14dp"
+                android:layout_margin="8dp"
+                android:layout_marginStart="0dp"
+                android:background="#DDEDEF"
                 android:ems="10"
                 android:hint="@string/search_hint"
                 android:inputType="text|textCapWords"
+                android:padding="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toTopOf="@+id/button_search"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
 
