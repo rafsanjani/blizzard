@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SearchFragment">
+
+    <FrameLayout
+        android:id="@+id/search_city_frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="#DDEDEF">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/weather_icon_imageView"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_cloud"
+                app:layout_constraintBottom_toBottomOf="@+id/city_humidity"
+                app:layout_constraintEnd_toEndOf="@+id/weather_description_textView"
+                app:layout_constraintStart_toStartOf="@+id/weather_description_textView"
+                app:layout_constraintTop_toTopOf="@+id/city_humidity" />
+
+            <TextView
+                android:id="@+id/temp_title_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/temp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/city_title" />
+
+            <TextView
+                android:id="@+id/humidity_title_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/humidity"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/temp_title_textView" />
+
+            <TextView
+                android:id="@+id/city_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/searched_city"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/weather_description_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/snowy"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/city_temp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/city_temp"
+                app:layout_constraintTop_toTopOf="@+id/city_temp" />
+
+            <TextView
+                android:id="@+id/city_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/no_data"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/temp_title_textView"
+                app:layout_constraintStart_toEndOf="@+id/temp_title_textView"
+                app:layout_constraintTop_toBottomOf="@+id/city_title" />
+
+            <TextView
+                android:id="@+id/city_humidity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/no_data"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/humidity_title_textView"
+                app:layout_constraintStart_toEndOf="@+id/humidity_title_textView"
+                app:layout_constraintTop_toTopOf="@+id/humidity_title_textView" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/search_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/button_second"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/previous"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="16dp"/>
+    </FrameLayout>
+
+</LinearLayout>
