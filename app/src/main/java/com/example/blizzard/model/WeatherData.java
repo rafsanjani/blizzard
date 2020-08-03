@@ -1,36 +1,130 @@
+
 package com.example.blizzard.model;
 
+import java.util.List;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by kelvi on 8/3/2020
- */
 public class WeatherData {
-    private int id;
 
+    @SerializedName("coord")
+    @Expose
+    private Coord coord;
+    @SerializedName("weather")
+    @Expose
+    private List<Weather> weather = null;
+    @SerializedName("base")
+    @Expose
+    private String base;
     @SerializedName("main")
-    private String state;
-
-    private String description;
-
-    private String icon;
-
+    @Expose
+    private Main main;
+    @SerializedName("visibility")
+    @Expose
+    private int visibility;
+    @SerializedName("wind")
+    @Expose
+    private Wind wind;
+    @SerializedName("clouds")
+    @Expose
+    private Clouds clouds;
+    @SerializedName("dt")
+    @Expose
+    private int dt;
+    @SerializedName("sys")
+    @Expose
+    private Sys sys;
+    @SerializedName("timezone")
+    @Expose
+    private int timezone;
+    @SerializedName("id")
+    @Expose
+    private int id;
     @SerializedName("name")
-    private String cityTitle;
+    @Expose
+    private String name;
+    @SerializedName("cod")
+    @Expose
+    private int cod;
 
-    private String humidity;
+    public Coord getCoord() {
+        return coord;
+    }
 
-    @SerializedName("temp")
-    private String temperature;
+    public void setCoord(Coord coord) {
+        this.coord = coord;
+    }
 
-    public WeatherData(int id, String state, String description, String icon, String cityTitle, String humidity, String temperature) {
-        this.id = id;
-        this.state = state;
-        this.description = description;
-        this.icon = icon;
-        this.cityTitle = cityTitle;
-        this.humidity = humidity;
-        this.temperature = temperature;
+    public List<Weather> getWeather() {
+        return weather;
+    }
+
+    public void setWeather(List<Weather> weather) {
+        this.weather = weather;
+    }
+
+    public String getBase() {
+        return base;
+    }
+
+    public void setBase(String base) {
+        this.base = base;
+    }
+
+    public Main getMain() {
+        return main;
+    }
+
+    public void setMain(Main main) {
+        this.main = main;
+    }
+
+    public int getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(int visibility) {
+        this.visibility = visibility;
+    }
+
+    public Wind getWind() {
+        return wind;
+    }
+
+    public void setWind(Wind wind) {
+        this.wind = wind;
+    }
+
+    public Clouds getClouds() {
+        return clouds;
+    }
+
+    public void setClouds(Clouds clouds) {
+        this.clouds = clouds;
+    }
+
+    public int getDt() {
+        return dt;
+    }
+
+    public void setDt(int dt) {
+        this.dt = dt;
+    }
+
+    public Sys getSys() {
+        return sys;
+    }
+
+    public void setSys(Sys sys) {
+        this.sys = sys;
+    }
+
+    public int getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(int timezone) {
+        this.timezone = timezone;
     }
 
     public int getId() {
@@ -41,51 +135,20 @@ public class WeatherData {
         this.id = id;
     }
 
-    public String getState() {
-        return state;
+    public String getName() {
+        return name;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public int getCod() {
+        return cod;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCod(int cod) {
+        this.cod = cod;
     }
 
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public String getCityTitle() {
-        return cityTitle;
-    }
-
-    public void setCityTitle(String cityTitle) {
-        this.cityTitle = cityTitle;
-    }
-
-    public String getHumidity() {
-        return humidity;
-    }
-
-    public void setHumidity(String humidity) {
-        this.humidity = humidity;
-    }
-
-    public String getTemperature() {
-        return temperature;
-    }
-
-    public void setTemperature(String temperature) {
-        this.temperature = temperature;
-    }
 }

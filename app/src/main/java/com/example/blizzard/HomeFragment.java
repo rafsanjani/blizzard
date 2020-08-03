@@ -7,9 +7,17 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.Navigation;
+
+
+import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
+import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
+
+    TextInputEditText searchBox;
 
     @Override
     public View onCreateView(
@@ -21,11 +29,15 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.findViewById(R.id.button_search).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(HomeFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
+        searchBox = view.findViewById(R.id.enter_city);
+
+        view.findViewById(R.id.button_search).setOnClickListener(view1 -> {
+            if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()){
+                searchBox.setError("Enter city name");
+            }else{
+                String cityName = searchBox.getText().toString();
+                ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
+                Navigation.findNavController(view1).navigate(action);
             }
         });
     }
