@@ -32,9 +32,9 @@ public class HomeFragment extends Fragment {
         searchBox = view.findViewById(R.id.enter_city);
 
         view.findViewById(R.id.button_search).setOnClickListener(view1 -> {
-            if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()){
+            if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
-            }else{
+            } else {
                 String cityName = searchBox.getText().toString();
                 ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
                 Navigation.findNavController(view1).navigate(action);

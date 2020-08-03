@@ -6,7 +6,7 @@ package com.example.blizzard.Util;
 public final class ApiKeyHolder {
     private final static String api_key = "your api key";
 
-    public static   String getApi_key() {
+    public static String getApi_key() {
         return api_key;
     }
 }

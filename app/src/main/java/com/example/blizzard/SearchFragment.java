@@ -4,15 +4,20 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+
+import java.util.Objects;
 
 import okhttp3.internal.annotations.EverythingIsNonNull;
 import retrofit2.Call;
@@ -24,6 +29,7 @@ public class SearchFragment extends Fragment {
     TextView tvCityTemp;
     TextView tvCityHumidity;
     TextView tvCityDescription;
+    ImageView IvWeatherImage;
     private OpenWeatherService mService = new OpenWeatherService();
 
     @Override
@@ -40,6 +46,7 @@ public class SearchFragment extends Fragment {
         tvCityDescription = view.findViewById(R.id.weather_description_textView);
         tvCityHumidity = view.findViewById(R.id.city_humidity);
         tvCityTemp = view.findViewById(R.id.city_temp);
+        IvWeatherImage = view.findViewById(R.id.weather_icon_imageView);
 
         // populating views with data
         populateData();
@@ -49,7 +56,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void populateData() {
-        if (getArguments() != null){
+        if (getArguments() != null) {
             String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
             Call<WeatherData> data = mService.getWeather(cityName);
 
@@ -57,7 +64,7 @@ public class SearchFragment extends Fragment {
                 @Override
                 @EverythingIsNonNull
                 public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
-                    if (response.isSuccessful()){
+                    if (response.isSuccessful()) {
                         WeatherData weatherData = response.body();
                         assert weatherData != null;
                         insertDataIntoViews(weatherData);
@@ -86,6 +93,17 @@ public class SearchFragment extends Fragment {
         Weather weather = weatherData.getWeather().get(0);
         tvCityDescription.setText(weather.getDescription());
 
+        LoadImage(weather.getIcon());
+
+    }
+
+    private void LoadImage(String iconId) {
+        String url = String.format("http://openweathermap.org/img/wn/%s@4x.png", iconId);
+
+        Glide.with(requireView())
+                .load(url)
+                .error(R.drawable.ic_cloud)
+                .into(IvWeatherImage);
     }
 
     private String conToCelsius(Double temp) {
