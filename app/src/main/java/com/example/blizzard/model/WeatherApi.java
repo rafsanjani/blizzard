@@ -13,5 +13,5 @@ public interface WeatherApi {
 
 
     @GET("weather")
-    Single<List<WeatherData>> getWeatherData(@Query("q") String city_name, @Query("appid") String api_key);
+    Single<WeatherData> getWeatherData(@Query("q") String city_name, @Query("appid") String api_key);
 }

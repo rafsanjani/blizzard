@@ -28,7 +28,7 @@ public class WeatherApiService {
                 .create(WeatherApi.class);
     }
 
-    public Single<List<WeatherData>> getWeatherData(String cityName){
+    public Single<WeatherData> getWeatherData(String cityName){
         return api.getWeatherData(cityName, mApiKey.getApi_key());
     }
 }
