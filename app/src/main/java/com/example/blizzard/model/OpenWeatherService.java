@@ -10,7 +10,7 @@ import retrofit2.http.Query;
 /**
  * Created by kelvi on 8/3/2020
  */
-public  class OpenWeatherService {
+public class OpenWeatherService {
 
     private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/";
     private OpenWeatherApi mOpenWeatherApi;
@@ -23,7 +23,7 @@ public  class OpenWeatherService {
                 .create(OpenWeatherApi.class);
     }
 
-    public Call<WeatherData> getWeather(String cityName){
+    public Call<WeatherData> getWeather(String cityName) {
 
         return mOpenWeatherApi.getWeather(cityName, ApiKeyHolder.getApi_key());
     }

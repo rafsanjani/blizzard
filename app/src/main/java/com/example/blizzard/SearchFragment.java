@@ -56,7 +56,7 @@ public class SearchFragment extends Fragment {
     }
 
     private void populateData() {
-        if (getArguments() != null){
+        if (getArguments() != null) {
             String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
             Call<WeatherData> data = mService.getWeather(cityName);
 
@@ -64,7 +64,7 @@ public class SearchFragment extends Fragment {
                 @Override
                 @EverythingIsNonNull
                 public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
-                    if (response.isSuccessful()){
+                    if (response.isSuccessful()) {
                         WeatherData weatherData = response.body();
                         assert weatherData != null;
                         insertDataIntoViews(weatherData);
@@ -104,9 +104,6 @@ public class SearchFragment extends Fragment {
                 .load(url)
                 .error(R.drawable.ic_cloud)
                 .into(IvWeatherImage);
-
-
-
     }
 
     private String conToCelsius(Double temp) {

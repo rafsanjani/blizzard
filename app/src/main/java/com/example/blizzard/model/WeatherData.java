@@ -2,6 +2,7 @@
 package com.example.blizzard.model;
 
 import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -40,8 +41,6 @@ public class WeatherData {
     private int cod;
 
 
-
-
     public List<Weather> getWeather() {
         return weather;
     }
@@ -75,7 +74,6 @@ public class WeatherData {
     }
 
 
-
     public int getDt() {
         return dt;
     }
@@ -83,7 +81,6 @@ public class WeatherData {
     public void setDt(int dt) {
         this.dt = dt;
     }
-
 
 
     public int getTimezone() {
