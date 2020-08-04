@@ -7,14 +7,18 @@
     <string name="search">Search</string>
     <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
     <string name="no_data">N/A</string>
     <string name="snowy">Snowy</string>
     <string name="searched_city">The Searched City</string>
     <string name="humidity">Humidity:</string>
     <string name="temp">Temp:</string>
-    <string name="search_hint">Search City\'s Weather</string>
+    <string name="search_hint">City</string>
     <string name="clear_sky">Clear sky</string>
-    <string name="current_city">My Current City</string>
+    <string name="current_city">Lagos, NG</string>
+    <string name="wind_title">Wind:</string>
+    <string name="date_placeholder">Monday 11:40</string>
+    <string name="humidity_placeHolder">73%</string>
+    <string name="wind_placeholder">4mph</string>
+    <string name="temp_21_u2103">21℃</string>
 </resources>
