@@ -21,4 +21,6 @@
     <string name="humidity_placeHolder">73%</string>
     <string name="wind_placeholder">4mph</string>
     <string name="temp_21_u2103">21℃</string>
+
+
 </resources>
