@@ -1,19 +1,17 @@
+
 package com.example.blizzard.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Wind {
+
     @SerializedName("speed")
     @Expose
     private double speed;
     @SerializedName("deg")
     @Expose
-    private double deg;
-
-    public double getDeg() {
-        return deg;
-    }
+    private int deg;
 
     public double getSpeed() {
         return speed;
@@ -23,7 +21,12 @@ public class Wind {
         this.speed = speed;
     }
 
-    public void setDeg(double deg) {
+    public int getDeg() {
+        return deg;
+    }
+
+    public void setDeg(int deg) {
         this.deg = deg;
     }
+
 }
