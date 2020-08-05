@@ -12,11 +12,12 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.GlideBuilder;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 import okhttp3.internal.annotations.EverythingIsNonNull;
@@ -31,6 +32,7 @@ public class SearchFragment extends Fragment {
     TextView tvCityDescription;
     ImageView IvWeatherImage;
     private OpenWeatherService mService = new OpenWeatherService();
+    TextView tvCityWind;
 
     @Override
     public View onCreateView(
@@ -47,11 +49,13 @@ public class SearchFragment extends Fragment {
         tvCityHumidity = view.findViewById(R.id.city_humidity);
         tvCityTemp = view.findViewById(R.id.city_temp);
         IvWeatherImage = view.findViewById(R.id.weather_icon_imageView);
+        tvCityWind = view.findViewById(R.id.city_wind_speed);
 
         // populating views with data
         populateData();
 
-        view.findViewById(R.id.button_second).setOnClickListener(view1 -> NavHostFragment.findNavController(SearchFragment.this)
+        view.findViewById(R.id.button_second).setOnClickListener(view1 -> NavHostFragment
+                .findNavController(SearchFragment.this)
                 .navigate(R.id.action_SecondFragment_to_FirstFragment));
     }
 
@@ -90,12 +94,16 @@ public class SearchFragment extends Fragment {
         String humidity = weatherData.getMain().getHumidity() + "%";
         tvCityHumidity.setText(humidity);
 
+        Double wind = weatherData.getWind().getSpeed();
+        tvCityWind.setText(windDirection(weatherData, wind));
+
+
         Weather weather = weatherData.getWeather().get(0);
         tvCityDescription.setText(weather.getDescription());
 
         LoadImage(weather.getIcon());
-
     }
+
 
     private void LoadImage(String iconId) {
         String url = String.format("http://openweathermap.org/img/wn/%s@4x.png", iconId);
@@ -109,5 +117,24 @@ public class SearchFragment extends Fragment {
     private String conToCelsius(Double temp) {
         int celsius = (int) Math.round(temp - 273.15);
         return celsius + "°C";
+    }
+
+    private String windDirection(WeatherData weatherData, Double wind) {
+        Double windDeg = weatherData.getWind().getDeg();
+        String direction = "";
+        if(windDeg == 0) {
+            return "N";
+        }else if (windDeg > 0 && windDeg < 90) {
+            direction = "NE";
+        }else if (windDeg == 90) {
+            direction = "E";
+        }else if (windDeg > 90 && windDeg < 270) {
+            direction = "SW";
+        }else if (windDeg == 270) {
+            direction = "W";
+        }else if (windDeg > 270 && windDeg < 360) {
+            direction = "NW";
+        }
+        return direction+ " " + wind + "mph";
     }
 }

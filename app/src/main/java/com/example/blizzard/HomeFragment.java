@@ -1,5 +1,10 @@
 package com.example.blizzard;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +23,7 @@ import java.util.Objects;
 public class HomeFragment extends Fragment {
 
     TextInputEditText searchBox;
+    private boolean mIsNetworkAvailable;
 
     @Override
     public View onCreateView(
@@ -32,8 +38,11 @@ public class HomeFragment extends Fragment {
         searchBox = view.findViewById(R.id.enter_city);
 
         view.findViewById(R.id.button_search).setOnClickListener(view1 -> {
+            checkNetworkConnection();
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
+            } else if (!mIsNetworkAvailable) {
+                searchBox.setError("Not Network Connectivity");
             } else {
                 String cityName = searchBox.getText().toString();
                 ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
@@ -41,4 +50,27 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
+    private void checkNetworkConnection() {
+        ConnectivityManager connMgr = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        mIsNetworkAvailable = false;
+        if (connMgr != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                NetworkCapabilities capabilities = connMgr.getNetworkCapabilities(connMgr.getActiveNetwork());
+                if (capabilities != null) {
+                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                        mIsNetworkAvailable = true;
+                    }
+                }
+            } else {
+                NetworkInfo activeNetworkInfo = connMgr.getActiveNetworkInfo();
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                    mIsNetworkAvailable = true;
+                }
+            }
+        }
+    }
+
 }

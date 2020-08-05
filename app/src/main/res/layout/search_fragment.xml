@@ -48,7 +48,7 @@
                 android:id="@+id/city_wind_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="8dp"
                 android:text="@string/wind_placeholder"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"

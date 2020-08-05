@@ -21,6 +21,9 @@ public class WeatherData {
     @SerializedName("visibility")
     @Expose
     private int visibility;
+    @SerializedName("wind")
+    @Expose
+    private Wind wind;
 
 
     @SerializedName("dt")
@@ -115,4 +118,11 @@ public class WeatherData {
         this.cod = cod;
     }
 
+    public Wind getWind() {
+        return wind;
+    }
+
+    public void setWind(Wind wind) {
+        this.wind = wind;
+    }
 }
