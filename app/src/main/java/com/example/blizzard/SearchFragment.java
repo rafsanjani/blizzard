@@ -12,12 +12,13 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.GlideBuilder;
+
+import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
 
-import java.util.Objects;
+
 
 import okhttp3.internal.annotations.EverythingIsNonNull;
 import retrofit2.Call;
@@ -29,8 +30,11 @@ public class SearchFragment extends Fragment {
     TextView tvCityTemp;
     TextView tvCityHumidity;
     TextView tvCityDescription;
+    TextView tvCityWindSpeed;
+    TextView tvTime;
     ImageView IvWeatherImage;
     private OpenWeatherService mService = new OpenWeatherService();
+    private TimeUtil mTimeUtil = new TimeUtil();
 
     @Override
     public View onCreateView(
@@ -46,7 +50,11 @@ public class SearchFragment extends Fragment {
         tvCityDescription = view.findViewById(R.id.weather_description_textView);
         tvCityHumidity = view.findViewById(R.id.city_humidity);
         tvCityTemp = view.findViewById(R.id.city_temp);
+        tvCityWindSpeed = view.findViewById(R.id.city_wind_speed);
+        tvTime = view.findViewById(R.id.date_time);
         IvWeatherImage = view.findViewById(R.id.weather_icon_imageView);
+
+
 
         // populating views with data
         populateData();
@@ -67,6 +75,7 @@ public class SearchFragment extends Fragment {
                     if (response.isSuccessful()) {
                         WeatherData weatherData = response.body();
                         assert weatherData != null;
+                        mTimeUtil.setTime(weatherData.getDt());
                         insertDataIntoViews(weatherData);
                     }
                 }
@@ -82,7 +91,8 @@ public class SearchFragment extends Fragment {
     }
 
     private void insertDataIntoViews(WeatherData weatherData) {
-        tvCityTitle.setText(weatherData.getName());
+        String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
+        tvCityTitle.setText(cityName);
 
         Double temp = weatherData.getMain().getTemp();
         tvCityTemp.setText(conToCelsius(temp));
@@ -94,6 +104,12 @@ public class SearchFragment extends Fragment {
         tvCityDescription.setText(weather.getDescription());
 
         LoadImage(weather.getIcon());
+
+        String windSpeed = weatherData.getWind().getSpeed() + " m/s";
+
+        tvCityWindSpeed.setText(windSpeed);
+
+        tvTime.setText(mTimeUtil.getTime());
 
     }
 
