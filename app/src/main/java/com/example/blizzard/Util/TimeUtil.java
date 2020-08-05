@@ -2,11 +2,12 @@ package com.example.blizzard.Util;
 
 import android.util.Log;
 
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 
 /**
@@ -22,15 +23,32 @@ public class TimeUtil {
     }
 
 
-    public void setTime(int timeFromApi){
+    public void setTime(int dateTimeStamp, int timeFromApi) {
+        String timeZoneString = getTimeZone(timeFromApi);
 
-        Date date = new Date(timeFromApi * 1000L);
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
+
+        Calendar calendar = Calendar.getInstance(timeZone);
+
+        DateFormat timeInstance = DateFormat.getTimeInstance(DateFormat.SHORT);
+        timeInstance.setTimeZone(calendar.getTimeZone());
+
+        Date date = new Date(dateTimeStamp * 1000L);
 
         day = new SimpleDateFormat("EEEE", Locale.getDefault()).format(date);
-        Log.i("clarkDate", day);
 
-        time = DateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+        time = timeInstance.format(calendar.getTime());
 
+    }
+
+    private String getTimeZone(int timeFromApi) {
+        int hour = timeFromApi / 3600;
+
+        if (hour < 0) {
+            return "GMT" + hour + ":00";
+        } else {
+            return "GMT+" + hour + ":00";
+        }
     }
 
     public String getTime() {

@@ -75,7 +75,7 @@ public class SearchFragment extends Fragment {
                     if (response.isSuccessful()) {
                         WeatherData weatherData = response.body();
                         assert weatherData != null;
-                        mTimeUtil.setTime(weatherData.getDt());
+                        mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
                         insertDataIntoViews(weatherData);
                     }
                 }
