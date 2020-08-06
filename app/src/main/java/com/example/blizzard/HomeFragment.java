@@ -1,12 +1,11 @@
 package com.example.blizzard;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.location.Location;
-import android.location.LocationManager;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
 
 import com.bumptech.glide.Glide;
 import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
@@ -25,8 +27,17 @@ import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -36,6 +47,7 @@ import retrofit2.internal.EverythingIsNonNull;
 
 public class HomeFragment extends Fragment {
 
+    public static final int TURN_ON_LOCATION = 3030;
     TextView tvCityTitle;
     TextView tvCityTemp;
     TextView tvCityHumidity;
@@ -47,6 +59,7 @@ public class HomeFragment extends Fragment {
     ProgressBar dataLoading;
     private OpenWeatherService mWeatherService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
+    private static final int LOCATION_REQUEST_CODE = 123;
 
     @Override
     public View onCreateView(
@@ -60,7 +73,7 @@ public class HomeFragment extends Fragment {
 
         findViews(view);
 
-        ((MainActivity) requireActivity()).checkLocationPermission();
+        checkLocationPermission();
 
         view.findViewById(R.id.search_btn).setOnClickListener(view1 -> {
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
@@ -85,20 +98,106 @@ public class HomeFragment extends Fragment {
         dataLoading = view.findViewById(R.id.data_loading);
     }
 
-    public void locationGranted(Boolean flag) {
-        if (flag) {
-            LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-            @SuppressLint("MissingPermission") Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            assert location != null;
-            getWeatherData(location);
+    public void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.permissionRationalTitle)
+                        .setMessage(R.string.permissionRationalMessage)
+                        .setNegativeButton("No", (dialogInterface, i) -> notifyFragment(false))
+                        .setPositiveButton("Ok, ask again", (dialogInterface, i) -> requestLocationPermission())
+                        .show();
+            } else {
+                requestLocationPermission();
+            }
+        } else {
+            notifyFragment(true);
+        }
+
+    }
+
+    private void requestLocationPermission() {
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+        ActivityCompat.requestPermissions(requireActivity(), permissions, LOCATION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                notifyFragment(true);
+            } else {
+                notifyFragment(false);
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    private void getWeatherData(Location location) {
-        Double latitude = location.getLatitude();
-        Double longitude = location.getLongitude();
+    private void notifyFragment(Boolean flag) {
+        if (flag) {
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setInterval(10000);
+            locationRequest.setFastestInterval(5000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-        Log.i("clarkDate",latitude + " " + longitude);
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+            builder.addLocationRequest(locationRequest);
+
+            SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
+
+
+            Task<LocationSettingsResponse> locationResponse = settingsClient.checkLocationSettings(builder.build());
+
+            locationResponse.addOnSuccessListener(locationSettingsResponse -> getUserLocation())
+            .addOnFailureListener(e -> {
+                if (e instanceof ResolvableApiException) {
+
+                    try {
+
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(requireActivity(), TURN_ON_LOCATION);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error.
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == TURN_ON_LOCATION ){
+            getUserLocation();
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getUserLocation() {
+        ArrayList<Double> lat_long = new ArrayList<>();
+        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), location -> {
+                    if (location != null){
+                        lat_long.add(location.getLatitude());
+                        lat_long.add(location.getLongitude());
+                        locationGranted(lat_long);
+                    }
+                }).addOnFailureListener(requireActivity(), Throwable::getCause);
+    }
+
+    public void locationGranted(ArrayList<Double> lat_long) {
+        if (lat_long.size() > 0){
+            getWeatherData(lat_long);
+        }
+
+    }
+
+    private void getWeatherData(ArrayList<Double> lat_long) {
+        Double latitude = lat_long.get(0);
+        Double longitude = lat_long.get(1);
+
 
         Call<WeatherData> data = mWeatherService.getWeatherByLongitudeLatitude(latitude, longitude);
 
