@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,7 +18,6 @@ import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
-
 
 
 import okhttp3.internal.annotations.EverythingIsNonNull;
@@ -33,6 +33,7 @@ public class SearchFragment extends Fragment {
     TextView tvCityWindSpeed;
     TextView tvTime;
     ImageView IvWeatherImage;
+    ProgressBar dataLoading;
     private OpenWeatherService mService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
 
@@ -46,14 +47,7 @@ public class SearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        tvCityTitle = view.findViewById(R.id.city_title);
-        tvCityDescription = view.findViewById(R.id.weather_description_textView);
-        tvCityHumidity = view.findViewById(R.id.city_humidity);
-        tvCityTemp = view.findViewById(R.id.city_temp);
-        tvCityWindSpeed = view.findViewById(R.id.city_wind_speed);
-        tvTime = view.findViewById(R.id.date_time);
-        IvWeatherImage = view.findViewById(R.id.weather_icon_imageView);
-
+        findViews(view);
 
 
         // populating views with data
@@ -63,10 +57,21 @@ public class SearchFragment extends Fragment {
                 .navigate(R.id.action_SecondFragment_to_FirstFragment));
     }
 
+    private void findViews(@NonNull View view) {
+        tvCityTitle = view.findViewById(R.id.tv_cityName);
+        tvCityDescription = view.findViewById(R.id.tv_weatherDescription);
+        tvCityHumidity = view.findViewById(R.id.tv_humidityValue);
+        tvCityTemp = view.findViewById(R.id.tv_tempValue);
+        tvCityWindSpeed = view.findViewById(R.id.tv_windSpeed);
+        tvTime = view.findViewById(R.id.tv_dayTime);
+        IvWeatherImage = view.findViewById(R.id.weather_icon);
+        dataLoading = view.findViewById(R.id.data_loading);
+    }
+
     private void populateData() {
         if (getArguments() != null) {
             String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
-            Call<WeatherData> data = mService.getWeather(cityName);
+            Call<WeatherData> data = mService.getWeatherByCityName(cityName);
 
             data.enqueue(new Callback<WeatherData>() {
                 @Override
@@ -111,6 +116,19 @@ public class SearchFragment extends Fragment {
 
         tvTime.setText(mTimeUtil.getTime());
 
+        dataLoading.setVisibility(View.INVISIBLE);
+        makeVisible();
+
+    }
+
+    private void makeVisible() {
+        tvCityTitle.setVisibility(View.VISIBLE);
+        tvCityDescription.setVisibility(View.VISIBLE);
+        tvCityHumidity.setVisibility(View.VISIBLE);
+        tvCityTemp.setVisibility(View.VISIBLE);
+        tvCityWindSpeed.setVisibility(View.VISIBLE);
+        tvTime.setVisibility(View.VISIBLE);
+        IvWeatherImage.setVisibility(View.VISIBLE);
     }
 
     private void LoadImage(String iconId) {
