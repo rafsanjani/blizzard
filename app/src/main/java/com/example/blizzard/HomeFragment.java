@@ -2,13 +2,17 @@ package com.example.blizzard;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,17 +31,18 @@ import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 import retrofit2.Call;
@@ -47,16 +52,18 @@ import retrofit2.internal.EverythingIsNonNull;
 
 public class HomeFragment extends Fragment {
 
-    public static final int TURN_ON_LOCATION = 3030;
+    private static final String TAG = "HomeFragment";
+    public static final int ENABLE_LOCATION_HARDWARE = 3030;
     TextView tvCityTitle;
     TextView tvCityTemp;
     TextView tvCityHumidity;
     TextView tvCityDescription;
     TextView tvCityWindSpeed;
     TextView tvTime;
-    ImageView IvWeatherImage;
+    ImageView ivWeatherImage;
     TextInputEditText searchBox;
     ProgressBar dataLoading;
+    Button btnSearch;
     private OpenWeatherService mWeatherService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
@@ -69,13 +76,11 @@ public class HomeFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        initializeViews(view);
 
-        findViews(view);
+        ensureLocationIsEnabled();
 
-        checkLocationPermission();
-
-        view.findViewById(R.id.search_btn).setOnClickListener(view1 -> {
+        btnSearch.setOnClickListener(view1 -> {
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
             } else {
@@ -86,14 +91,15 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void findViews(@NonNull View view) {
+    private void initializeViews(@NonNull View view) {
+        btnSearch = view.findViewById(R.id.search_btn);
         tvCityTitle = view.findViewById(R.id.tv_cityName);
         tvCityDescription = view.findViewById(R.id.tv_weatherDescription);
         tvCityHumidity = view.findViewById(R.id.tv_humidityValue);
         tvCityTemp = view.findViewById(R.id.tv_tempValue);
         tvCityWindSpeed = view.findViewById(R.id.tv_windSpeed);
         tvTime = view.findViewById(R.id.tv_dayTime);
-        IvWeatherImage = view.findViewById(R.id.weather_icon);
+        ivWeatherImage = view.findViewById(R.id.weather_icon);
         searchBox = view.findViewById(R.id.et_cityName);
         dataLoading = view.findViewById(R.id.data_loading);
     }
@@ -105,99 +111,113 @@ public class HomeFragment extends Fragment {
                 new AlertDialog.Builder(requireContext())
                         .setTitle(R.string.permissionRationalTitle)
                         .setMessage(R.string.permissionRationalMessage)
-                        .setNegativeButton("No", (dialogInterface, i) -> notifyFragment(false))
+                        .setNegativeButton("No", (dialogInterface, i) -> ensureLocationIsEnabled())
                         .setPositiveButton("Ok, ask again", (dialogInterface, i) -> requestLocationPermission())
                         .show();
             } else {
                 requestLocationPermission();
             }
         } else {
-            notifyFragment(true);
+            //location permission has been granted, we can proceed and obtain the user's location
+            getUserLocation();
         }
-
     }
 
     private void requestLocationPermission() {
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-        ActivityCompat.requestPermissions(requireActivity(), permissions, LOCATION_REQUEST_CODE);
+        requestPermissions(permissions, LOCATION_REQUEST_CODE);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                notifyFragment(true);
+                //permission granted
+                getUserLocation();
             } else {
-                notifyFragment(false);
+                //permission rejected
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    private void notifyFragment(Boolean flag) {
-        if (flag) {
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setInterval(10000);
-            locationRequest.setFastestInterval(5000);
-            locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    private void ensureLocationIsEnabled() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-            builder.addLocationRequest(locationRequest);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(locationRequest);
 
-            SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
+        SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
 
 
-            Task<LocationSettingsResponse> locationResponse = settingsClient.checkLocationSettings(builder.build());
+        Task<LocationSettingsResponse> locationResponse = settingsClient.checkLocationSettings(builder.build());
+        locationResponse.addOnCompleteListener(task -> {
+            try {
+                task.getResult(ApiException.class);
 
-            locationResponse.addOnSuccessListener(locationSettingsResponse -> getUserLocation())
-            .addOnFailureListener(e -> {
-                if (e instanceof ResolvableApiException) {
+                //ask for location request
+                checkLocationPermission();
 
-                    try {
+            } catch (ApiException exception) {
+                switch (exception.getStatusCode()) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        ResolvableApiException resolvable = (ResolvableApiException) exception;
+                        try {
+                            startIntentSenderForResult(resolvable.getResolution().getIntentSender(), ENABLE_LOCATION_HARDWARE,
+                                    null, 0, 0, 0, null);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        //settings cannot be enabled
+                        break;
 
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(requireActivity(), TURN_ON_LOCATION);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
-                    }
+                    default:
+
+                        break;
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == TURN_ON_LOCATION ){
-            getUserLocation();
+        if (requestCode == ENABLE_LOCATION_HARDWARE) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    //start location updates
+                    getUserLocation();
+                    break;
+                case Activity.RESULT_CANCELED:
+
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
     private void getUserLocation() {
-        ArrayList<Double> lat_long = new ArrayList<>();
         FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
         fusedLocationProviderClient.getLastLocation()
                 .addOnSuccessListener(requireActivity(), location -> {
-                    if (location != null){
-                        lat_long.add(location.getLatitude());
-                        lat_long.add(location.getLongitude());
-                        locationGranted(lat_long);
+                    if (location != null) {
+                        getWeatherData(location);
                     }
-                }).addOnFailureListener(requireActivity(), Throwable::getCause);
+                }).addOnFailureListener(Throwable::printStackTrace);
     }
 
-    public void locationGranted(ArrayList<Double> lat_long) {
-        if (lat_long.size() > 0){
-            getWeatherData(lat_long);
-        }
-
-    }
-
-    private void getWeatherData(ArrayList<Double> lat_long) {
-        Double latitude = lat_long.get(0);
-        Double longitude = lat_long.get(1);
-
+    private void getWeatherData(Location location) {
+        Double latitude = location.getLatitude();
+        Double longitude = location.getLongitude();
 
         Call<WeatherData> data = mWeatherService.getWeatherByLongitudeLatitude(latitude, longitude);
 
@@ -208,9 +228,12 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful()) {
                     WeatherData weatherData = response.body();
 
-                    assert weatherData != null;
-                    mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                    insertDataIntoViews(weatherData);
+                    mTimeUtil.setTime(Objects.requireNonNull(weatherData).getDt(), weatherData.getTimezone());
+
+                    resolveAppState(weatherData);
+                } else {
+                    //response failed for some reason
+                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
                 }
             }
 
@@ -218,13 +241,12 @@ public class HomeFragment extends Fragment {
             @EverythingIsNonNull
             public void onFailure(Call<WeatherData> call, Throwable t) {
                 t.printStackTrace();
+                Log.e(TAG, "onFailure: ", t);
             }
         });
     }
 
-    private void insertDataIntoViews(WeatherData weatherData) {
-
-
+    private void resolveAppState(WeatherData weatherData) {
         String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
@@ -246,17 +268,17 @@ public class HomeFragment extends Fragment {
         tvTime.setText(mTimeUtil.getTime());
 
         dataLoading.setVisibility(View.INVISIBLE);
-        makeVisible();
+        showViews();
     }
 
-    private void makeVisible() {
+    private void showViews() {
         tvCityTitle.setVisibility(View.VISIBLE);
         tvCityDescription.setVisibility(View.VISIBLE);
         tvCityHumidity.setVisibility(View.VISIBLE);
         tvCityTemp.setVisibility(View.VISIBLE);
         tvCityWindSpeed.setVisibility(View.VISIBLE);
         tvTime.setVisibility(View.VISIBLE);
-        IvWeatherImage.setVisibility(View.VISIBLE);
+        ivWeatherImage.setVisibility(View.VISIBLE);
     }
 
     private void LoadImage(String iconId) {
@@ -265,7 +287,7 @@ public class HomeFragment extends Fragment {
         Glide.with(requireView())
                 .load(url)
                 .error(R.drawable.ic_cloud)
-                .into(IvWeatherImage);
+                .into(ivWeatherImage);
     }
 
     private String conToCelsius(Double temp) {
