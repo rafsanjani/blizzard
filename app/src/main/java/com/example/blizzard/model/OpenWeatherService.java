@@ -5,7 +5,6 @@ import com.example.blizzard.Util.ApiKeyHolder;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Query;
 
 /**
  * Created by kelvi on 8/3/2020
@@ -23,8 +22,12 @@ public class OpenWeatherService {
                 .create(OpenWeatherApi.class);
     }
 
-    public Call<WeatherData> getWeather(String cityName) {
-
-        return mOpenWeatherApi.getWeather(cityName, ApiKeyHolder.getApi_key());
+    public Call<WeatherData> getWeatherByCityName(String cityName) {
+        return mOpenWeatherApi.getWeatherByCityName(cityName, ApiKeyHolder.getApi_key());
     }
+
+    public Call<WeatherData> getWeatherByLongitudeLatitude(Double latitude, Double longitude) {
+        return mOpenWeatherApi.getWeatherByLongitudeLatitude(latitude, longitude, ApiKeyHolder.getApi_key());
+    }
+
 }

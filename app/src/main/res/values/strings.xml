@@ -22,5 +22,10 @@
     <string name="wind_placeholder">4mph</string>
     <string name="temp_21_u2103">21℃</string>
 
-
+    <string name="permissionRationalTitle">Blizzard needs location access</string>
+    <string name="permissionRationalMessage">
+        Blizzard needs location access to load
+        weather information for your current
+        location.
+    </string>
 </resources>
