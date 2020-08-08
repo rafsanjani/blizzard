@@ -54,8 +54,6 @@ public class SearchFragment extends Fragment {
         tvTime = view.findViewById(R.id.date_time);
         IvWeatherImage = view.findViewById(R.id.weather_icon_imageView);
 
-
-
         // populating views with data
         populateData();
 
@@ -76,7 +74,7 @@ public class SearchFragment extends Fragment {
                         WeatherData weatherData = response.body();
                         assert weatherData != null;
                         mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                        insertDataIntoViews(weatherData);
+                        insertDataIntoViews(weatherData, mTimeUtil);
                     }
                 }
 
@@ -90,7 +88,7 @@ public class SearchFragment extends Fragment {
         }
     }
 
-    private void insertDataIntoViews(WeatherData weatherData) {
+    private void insertDataIntoViews(WeatherData weatherData, TimeUtil mTimeUtil) {
         String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
