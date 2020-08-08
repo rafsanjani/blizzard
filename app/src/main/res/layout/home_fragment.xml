@@ -8,7 +8,7 @@
 
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_search"
+        android:id="@+id/search_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/home_margin"
@@ -36,105 +36,123 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/weather_icon_imageView"
+                android:id="@+id/weather_icon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/ic_cloud"
-                app:layout_constraintEnd_toEndOf="@+id/city_temp"
-                app:layout_constraintStart_toStartOf="@+id/city_temp"
-                app:layout_constraintTop_toBottomOf="@+id/city_temp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/tv_tempValue"
+                app:layout_constraintStart_toStartOf="@+id/tv_tempValue"
+                app:layout_constraintTop_toBottomOf="@+id/tv_tempValue"
                 tools:ignore="ContentDescription" />
 
             <TextView
-                android:id="@+id/wind_title"
+                android:id="@+id/tv_windTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/home_margin"
                 android:text="@string/wind_title"
                 android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@+id/city_wind_speed"
-                app:layout_constraintEnd_toStartOf="@+id/city_wind_speed"
-                app:layout_constraintTop_toTopOf="@+id/city_wind_speed" />
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_windSpeed"
+                app:layout_constraintEnd_toStartOf="@+id/tv_windSpeed"
+                app:layout_constraintTop_toTopOf="@+id/tv_windSpeed" />
 
             <TextView
-                android:id="@+id/city_wind_speed"
+                android:id="@+id/tv_windSpeed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:text="@string/wind_placeholder"
                 android:textSize="14sp"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/date_time"
+                android:id="@+id/tv_dayTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/home_margin"
                 android:text="@string/date_placeholder"
                 android:textSize="14sp"
+                android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/weather_description_textView"
-                app:layout_constraintStart_toStartOf="@+id/weather_description_textView"
-                app:layout_constraintTop_toBottomOf="@+id/weather_description_textView" />
+                app:layout_constraintEnd_toEndOf="@+id/tv_weatherDescription"
+                app:layout_constraintStart_toStartOf="@+id/tv_weatherDescription"
+                app:layout_constraintTop_toBottomOf="@+id/tv_weatherDescription" />
 
             <TextView
-                android:id="@+id/humidity_title"
+                android:id="@+id/tv_humidityTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="@string/humidity"
                 android:textSize="14sp"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/city_title"
+                android:id="@+id/tv_cityName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/home_margin"
                 android:text="@string/current_city"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textStyle="bold"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/weather_description_textView"
+                android:id="@+id/tv_weatherDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/home_margin"
                 android:text="@string/clear_sky"
                 android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="@+id/weather_icon_imageView"
-                app:layout_constraintStart_toStartOf="@+id/weather_icon_imageView"
-                app:layout_constraintTop_toBottomOf="@+id/weather_icon_imageView" />
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/weather_icon"
+                app:layout_constraintStart_toStartOf="@+id/weather_icon"
+                app:layout_constraintTop_toBottomOf="@+id/weather_icon" />
 
             <TextView
-                android:id="@+id/city_temp"
+                android:id="@+id/tv_tempValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/temp_21_u2103"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                android:textStyle="bold"
                 android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/city_title" />
+                app:layout_constraintTop_toBottomOf="@+id/tv_cityName" />
 
             <TextView
-                android:id="@+id/city_humidity"
+                android:id="@+id/tv_humidityValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/home_margin"
                 android:text="@string/humidity_placeHolder"
                 android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@+id/humidity_title"
-                app:layout_constraintStart_toEndOf="@+id/humidity_title"
-                app:layout_constraintTop_toTopOf="@+id/humidity_title" />
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_humidityTitle"
+                app:layout_constraintStart_toEndOf="@+id/tv_humidityTitle"
+                app:layout_constraintTop_toTopOf="@+id/tv_humidityTitle" />
+
+            <ProgressBar
+                android:id="@+id/data_loading"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                app:layout_constraintBottom_toBottomOf="@+id/weather_icon"
+                app:layout_constraintStart_toStartOf="@+id/tv_tempValue" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -153,7 +171,7 @@
         app:layout_constraintTop_toBottomOf="@+id/materialCardView">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/enter_city"
+            android:id="@+id/et_cityName"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="0dp"

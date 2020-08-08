@@ -3,7 +3,11 @@
 A simple weather application for collaborative work for GADS team-aad-388. 
 
 ### Goal ✅
- Display the weather information for a given city entered by the user based on the <a href ="https://github.com/rafsanjani/blizzard/blob/master/design/Blizzard.xd"> sample design here</a>
+
+ 1. Display the weather information for a given city entered by the user
+    based on the <a href ="https://github.com/rafsanjani/blizzard/blob/master/design/Blizzard.xd">
+    sample design</a>
+ 2. Automate UI tests using Espresso
 
 ### API Details
 Weather API is from http://www.openweathermap.org.<br>
