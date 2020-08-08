@@ -86,6 +86,20 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         initializeViews(view);
 
+        mLocationUpdatesCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
+                stopLocationUpdates();
+                getWeatherData(locationResult.getLastLocation());
+            }
+
+            @Override
+            public void onLocationAvailability(LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+        };
+
         ensureLocationIsEnabled();
 
         btnSearch.setOnClickListener(view1 -> {
@@ -242,20 +256,6 @@ public class HomeFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
-        mLocationUpdatesCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
-                stopLocationUpdates();
-                getWeatherData(locationResult.getLastLocation());
-            }
-
-            @Override
-            public void onLocationAvailability(LocationAvailability locationAvailability) {
-                super.onLocationAvailability(locationAvailability);
-            }
-
-        };
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
     }
 
