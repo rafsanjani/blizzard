@@ -8,6 +8,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,12 +35,16 @@ import com.example.blizzard.model.WeatherData;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -67,6 +72,9 @@ public class HomeFragment extends Fragment {
     private OpenWeatherService mWeatherService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
+    private LocationRequest mLocationRequest;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LocationCallback mLocationUpdatesCallback;
 
     @Override
     public View onCreateView(
@@ -115,10 +123,12 @@ public class HomeFragment extends Fragment {
                         .setPositiveButton("Ok, ask again", (dialogInterface, i) -> requestLocationPermission())
                         .show();
             } else {
+                Log.d(TAG, "checkLocationPermission: " + "Requesting Location Permission Normally");
                 requestLocationPermission();
             }
         } else {
             //location permission has been granted, we can proceed and obtain the user's location
+            Log.d(TAG, "checkLocationPermission: Permission Granted: Getting User Location");
             getUserLocation();
         }
     }
@@ -133,8 +143,10 @@ public class HomeFragment extends Fragment {
         if (requestCode == LOCATION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //permission granted
+                Log.d(TAG, "onRequestPermissionsResult: Location Permission Granted, Requesting User Location");
                 getUserLocation();
             } else {
+                Log.d(TAG, "onRequestPermissionsResult: Location Permission Denied, Quitting");
                 //permission rejected
             }
         } else {
@@ -143,13 +155,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void ensureLocationIsEnabled() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(locationRequest);
+        builder.addLocationRequest(mLocationRequest);
 
         SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
 
@@ -158,6 +170,7 @@ public class HomeFragment extends Fragment {
         locationResponse.addOnCompleteListener(task -> {
             try {
                 task.getResult(ApiException.class);
+                Log.d(TAG, "ensureLocationIsEnabled: Location Hardware previously enabled: Checking for permissions");
 
                 //ask for location request
                 checkLocationPermission();
@@ -165,6 +178,7 @@ public class HomeFragment extends Fragment {
             } catch (ApiException exception) {
                 switch (exception.getStatusCode()) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        Log.d(TAG, "ensureLocationIsEnabled: Location Hardware disabled: Asking user to enable");
                         ResolvableApiException resolvable = (ResolvableApiException) exception;
                         try {
                             startIntentSenderForResult(resolvable.getResolution().getIntentSender(), ENABLE_LOCATION_HARDWARE,
@@ -174,6 +188,7 @@ public class HomeFragment extends Fragment {
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Log.d(TAG, "ensureLocationIsEnabled: Location Hardware disabled: Unable to toggle it on. Quitting");
                         //settings cannot be enabled
                         break;
 
@@ -190,14 +205,16 @@ public class HomeFragment extends Fragment {
         if (requestCode == ENABLE_LOCATION_HARDWARE) {
             switch (resultCode) {
                 case Activity.RESULT_OK:
+                    Log.d(TAG, "onActivityResult: Location Hardware now enabled, checking for permissions");
                     //start location updates
-                    getUserLocation();
+                    checkLocationPermission();
                     break;
                 case Activity.RESULT_CANCELED:
-
+                    Log.d(TAG, "onActivityResult: Request to enable locatio hardware declined. Quitting");
                     break;
 
                 default:
+                    Log.d(TAG, "onActivityResult: No Op");
                     break;
             }
         }
@@ -205,14 +222,54 @@ public class HomeFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void getUserLocation() {
-        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
-        fusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(requireActivity(), location -> {
-                    if (location != null) {
-                        getWeatherData(location);
-                    }
-                }).addOnFailureListener(Throwable::printStackTrace);
+        OnSuccessListener<Location> mLocationListener = (Location location) -> {
+            if (location != null) {
+                Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates");
+                getWeatherData(location);
+            } else {
+                Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
+                requestLocationUpdates();
+            }
+        };
+
+        mFusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), mLocationListener)
+                .addOnFailureListener(Throwable::printStackTrace);
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private void requestLocationUpdates() {
+        mLocationUpdatesCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
+                stopLocationUpdates();
+                getWeatherData(locationResult.getLastLocation());
+            }
+
+            @Override
+            public void onLocationAvailability(LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+
+        };
+        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
+    }
+
+    private void stopLocationUpdates() {
+        if (mFusedLocationProviderClient != null) {
+            mFusedLocationProviderClient.removeLocationUpdates(mLocationUpdatesCallback);
+            Log.d(TAG, "stopLocationUpdates: Location Updates Stopped");
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopLocationUpdates();
     }
 
     private void getWeatherData(Location location) {
@@ -268,6 +325,7 @@ public class HomeFragment extends Fragment {
         tvTime.setText(mTimeUtil.getTime());
 
         dataLoading.setVisibility(View.INVISIBLE);
+
         showViews();
     }
 
