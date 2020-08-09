@@ -7,7 +7,8 @@ A simple weather application for collaborative work for GADS team-aad-388.
  1. Display the weather information for a given city entered by the user
     based on the <a href ="https://github.com/rafsanjani/blizzard/blob/master/design/Blizzard.xd">
     sample design</a>
- 2. Automate UI tests using Espresso
+ 2. Give periodic notifications of weather updates when changes occur for eg, if temp changes from 20 to 25
+ 3. Automate UI tests using Espresso
 
 ### API Details
 Weather API is from http://www.openweathermap.org.<br>
