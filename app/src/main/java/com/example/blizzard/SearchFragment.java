@@ -55,8 +55,6 @@ public class SearchFragment extends Fragment {
         // populating views with data
         populateData();
 
-        view.findViewById(R.id.button_second).setOnClickListener(view1 -> NavHostFragment.findNavController(SearchFragment.this)
-                .navigate(R.id.action_SecondFragment_to_FirstFragment));
     }
 
     private void findViews(@NonNull View view) {
