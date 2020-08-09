@@ -6,6 +6,9 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
 
+/**
+ * Created by tony on 8/9/2020
+ */
 
 public class CheckNetworkUtil {
     public Context mContext;

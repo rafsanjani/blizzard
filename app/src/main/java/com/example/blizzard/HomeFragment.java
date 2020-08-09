@@ -27,6 +27,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
@@ -36,6 +38,7 @@ import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.viewmodel.BlizzardViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -80,6 +83,31 @@ public class HomeFragment extends Fragment {
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationUpdatesCallback;
     private boolean mIsNetworkAvailable;
+    private BlizzardViewModel mBlizzardViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
+        mBlizzardViewModel.init();
+
+        mLocationUpdatesCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
+                stopLocationUpdates();
+                Location location = locationResult.getLastLocation();
+                Double latitude = location.getLatitude();
+                Double longitude = location.getLongitude();
+                mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
+            }
+
+            @Override
+            public void onLocationAvailability(LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+        };
+    }
 
     @Override
     public View onCreateView(
@@ -95,19 +123,12 @@ public class HomeFragment extends Fragment {
             Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
 
-        mLocationUpdatesCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
-                stopLocationUpdates();
-                getWeatherData(locationResult.getLastLocation());
+        mBlizzardViewModel.getCurrentCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                resolveAppState(weatherData);
             }
-
-            @Override
-            public void onLocationAvailability(LocationAvailability locationAvailability) {
-                super.onLocationAvailability(locationAvailability);
-            }
-        };
+        });
 
         ensureLocationIsEnabled();
 
@@ -260,7 +281,9 @@ public class HomeFragment extends Fragment {
         OnSuccessListener<Location> mLocationListener = (Location location) -> {
             if (location != null) {
                 Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates");
-                getWeatherData(location);
+                Double latitude = location.getLatitude();
+                Double longitude = location.getLongitude();
+                mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
             } else {
                 Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
                 requestLocationUpdates();
@@ -291,7 +314,7 @@ public class HomeFragment extends Fragment {
         stopLocationUpdates();
     }
 
-    private void getWeatherData(Location location) {
+   /* private void getWeatherData(Location location) {
         Double latitude = location.getLatitude();
         Double longitude = location.getLongitude();
 
@@ -320,7 +343,7 @@ public class HomeFragment extends Fragment {
                 Log.e(TAG, "onFailure: ", t);
             }
         });
-    }
+    }*/
 
     private void resolveAppState(WeatherData weatherData) {
         String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();

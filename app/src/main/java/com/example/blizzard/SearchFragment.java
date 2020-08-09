@@ -12,6 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
@@ -20,6 +22,7 @@ import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.viewmodel.BlizzardViewModel;
 
 
 import okhttp3.internal.annotations.EverythingIsNonNull;
@@ -36,8 +39,19 @@ public class SearchFragment extends Fragment {
     TextView tvTime;
     ImageView IvWeatherImage;
     ProgressBar dataLoading;
-    private OpenWeatherService mService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
+    private BlizzardViewModel mBlizzardViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
+        mBlizzardViewModel.init();
+        if (getArguments() != null) {
+            String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
+            mBlizzardViewModel.getWeatherByCityName(cityName);
+        }
+    }
 
     @Override
     public View onCreateView(
@@ -48,12 +62,17 @@ public class SearchFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         findViews(view);
 
+        mBlizzardViewModel.getSearchedCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                insertDataIntoViews(weatherData);
+            }
+        });
 
         // populating views with data
-        populateData();
+//        populateData();
 
     }
 
@@ -68,7 +87,7 @@ public class SearchFragment extends Fragment {
         dataLoading = view.findViewById(R.id.data_loading);
     }
 
-    private void populateData() {
+   /* private void populateData() {
         if (getArguments() != null) {
             String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
             Call<WeatherData> data = mService.getWeatherByCityName(cityName);
@@ -93,7 +112,7 @@ public class SearchFragment extends Fragment {
             });
 
         }
-    }
+    }*/
 
     private void insertDataIntoViews(WeatherData weatherData) {
         String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
