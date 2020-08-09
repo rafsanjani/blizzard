@@ -144,5 +144,4 @@ public class SearchFragment extends Fragment {
         int celsius = (int) Math.round(temp - 273.15);
         return celsius + "°C";
     }
-
 }

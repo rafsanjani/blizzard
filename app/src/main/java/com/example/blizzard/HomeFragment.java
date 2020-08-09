@@ -3,6 +3,7 @@ package com.example.blizzard;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -13,10 +14,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +31,7 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
+import com.example.blizzard.Util.CheckNetworkUtil;
 import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
@@ -84,6 +88,10 @@ public class HomeFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        CheckNetworkUtil mCheckNetworkUtil = new CheckNetworkUtil(getActivity());
+        boolean isNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
+        if (!isNetworkAvailable)
+            Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
 
         mLocationUpdatesCallback = new LocationCallback() {
@@ -103,9 +111,18 @@ public class HomeFragment extends Fragment {
         ensureLocationIsEnabled();
 
         btnSearch.setOnClickListener(view1 -> {
+            //Hide the Keyboard when search button is clicked
+            InputMethodManager inputMethodManager = (InputMethodManager)
+                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputMethodManager != null) {
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+            }
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
-            } else {
+            } else if (!isNetworkAvailable){
+                searchBox.setError(getString(R.string.no_internet));
+            }else{
                 String cityName = searchBox.getText().toString();
                 ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
                 Navigation.findNavController(view1).navigate(action);
