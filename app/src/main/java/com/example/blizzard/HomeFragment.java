@@ -79,6 +79,7 @@ public class HomeFragment extends Fragment {
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationUpdatesCallback;
+    private boolean mIsNetworkAvailable;
 
     @Override
     public View onCreateView(
@@ -89,8 +90,8 @@ public class HomeFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         CheckNetworkUtil mCheckNetworkUtil = new CheckNetworkUtil(getActivity());
-        boolean isNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
-        if (!isNetworkAvailable)
+        mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
+        if (!mIsNetworkAvailable)
             Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
 
@@ -118,9 +119,10 @@ public class HomeFragment extends Fragment {
                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
             }
+            mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
-            } else if (!isNetworkAvailable){
+            } else if (!mIsNetworkAvailable){
                 searchBox.setError(getString(R.string.no_internet));
             }else{
                 String cityName = searchBox.getText().toString();
