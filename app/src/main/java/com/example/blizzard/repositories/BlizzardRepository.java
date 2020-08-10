@@ -2,7 +2,6 @@ package com.example.blizzard.repositories;
 
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.blizzard.model.OpenWeatherService;
@@ -58,7 +57,7 @@ public class BlizzardRepository {
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
                 if (response.isSuccessful()) {
                     currentCityMutableLiveData.postValue(response.body());
-                }else {
+                } else {
                     //response failed for some reason
                     Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
                 }

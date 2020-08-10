@@ -14,7 +14,7 @@ import com.example.blizzard.repositories.BlizzardRepository;
 public class BlizzardViewModel extends ViewModel {
     private BlizzardRepository mBlizzardRepository;
     private LiveData<WeatherData> mSearchedCityWeatherDataLiveData = new MutableLiveData<>();
-    private LiveData<WeatherData> mCurrentCityWeatherDataLiveData =new MutableLiveData<>();
+    private LiveData<WeatherData> mCurrentCityWeatherDataLiveData = new MutableLiveData<>();
 
 
     public void init() {

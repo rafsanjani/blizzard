@@ -137,9 +137,9 @@ public class HomeFragment extends Fragment {
             mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
-            } else if (!mIsNetworkAvailable){
+            } else if (!mIsNetworkAvailable) {
                 searchBox.setError(getString(R.string.no_internet));
-            }else{
+            } else {
                 String cityName = searchBox.getText().toString();
                 ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
                 Navigation.findNavController(view1).navigate(action);
