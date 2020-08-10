@@ -49,7 +49,7 @@
                 android:id="@+id/tv_windSpeed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
+                android:layout_marginEnd="8dp"
                 android:text="@string/wind_placeholder"
                 android:textSize="14sp"
                 android:visibility="invisible"
@@ -145,19 +145,5 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
-
-    <FrameLayout
-        android:id="@+id/search_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/button_second"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/previous"
-                android:layout_gravity="bottom|center"
-                android:layout_marginBottom="16dp"/>
-    </FrameLayout>
 
 </LinearLayout>

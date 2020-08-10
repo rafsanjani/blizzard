@@ -28,4 +28,5 @@
         weather information for your current
         location.
     </string>
+    <string name="no_internet">No internet Connection</string>
 </resources>
