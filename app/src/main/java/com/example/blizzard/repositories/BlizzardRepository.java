@@ -1,5 +1,8 @@
 package com.example.blizzard.repositories;
 
+import android.util.Log;
+
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.blizzard.model.OpenWeatherService;
@@ -15,6 +18,7 @@ import retrofit2.internal.EverythingIsNonNull;
  */
 
 public class BlizzardRepository {
+    private static final String TAG = "BlizzardRepository";
     private OpenWeatherService mOpenWeatherService;
 
 
@@ -23,44 +27,50 @@ public class BlizzardRepository {
     }
 
     public MutableLiveData<WeatherData> getWeatherByCityName(String cityName) {
-        MutableLiveData<WeatherData> SearchCityMutableLiveData = new MutableLiveData<>();
+        MutableLiveData<WeatherData> searchCityMutableLiveData = new MutableLiveData<>();
         mOpenWeatherService.getWeatherByCityName(cityName).enqueue(new Callback<WeatherData>() {
             @Override
             @EverythingIsNonNull
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
                 if (response.isSuccessful()) {
-                    SearchCityMutableLiveData.setValue(response.body());
+                    searchCityMutableLiveData.setValue(response.body());
+                } else {
+                    //response failed for some reason
+                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
                 }
             }
 
             @Override
             @EverythingIsNonNull
             public void onFailure(Call<WeatherData> call, Throwable t) {
-                SearchCityMutableLiveData.setValue(null);
+                searchCityMutableLiveData.setValue(null);
             }
         });
 
-        return SearchCityMutableLiveData;
+        return searchCityMutableLiveData;
     }
 
     public MutableLiveData<WeatherData> getWeatherByLongitudeLatitude(Double lat, Double lon) {
-        MutableLiveData<WeatherData> CurrentCityMutableLiveData = new MutableLiveData<>();
+        MutableLiveData<WeatherData> currentCityMutableLiveData = new MutableLiveData<>();
         mOpenWeatherService.getWeatherByLongitudeLatitude(lat, lon).enqueue(new Callback<WeatherData>() {
             @Override
             @EverythingIsNonNull
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
                 if (response.isSuccessful()) {
-                    CurrentCityMutableLiveData.setValue(response.body());
+                    currentCityMutableLiveData.postValue(response.body());
+                }else {
+                    //response failed for some reason
+                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
                 }
             }
 
             @Override
             @EverythingIsNonNull
             public void onFailure(Call<WeatherData> call, Throwable t) {
-                CurrentCityMutableLiveData.setValue(null);
+                currentCityMutableLiveData.setValue(null);
             }
         });
 
-        return CurrentCityMutableLiveData;
+        return currentCityMutableLiveData;
     }
 }

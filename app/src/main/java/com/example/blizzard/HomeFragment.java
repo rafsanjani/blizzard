@@ -264,7 +264,7 @@ public class HomeFragment extends Fragment {
                     checkLocationPermission();
                     break;
                 case Activity.RESULT_CANCELED:
-                    Log.d(TAG, "onActivityResult: Request to enable locatio hardware declined. Quitting");
+                    Log.d(TAG, "onActivityResult: Request to enable location hardware declined. Quitting");
                     break;
 
                 default:
@@ -284,6 +284,7 @@ public class HomeFragment extends Fragment {
                 Double latitude = location.getLatitude();
                 Double longitude = location.getLongitude();
                 mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
+                observeViewModel();
             } else {
                 Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
                 requestLocationUpdates();
@@ -295,6 +296,16 @@ public class HomeFragment extends Fragment {
                 .addOnFailureListener(Throwable::printStackTrace);
 
     }
+
+    private void observeViewModel() {
+        mBlizzardViewModel.getCurrentCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                resolveAppState(weatherData);
+            }
+        });
+    }
+
 
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {

@@ -1,5 +1,6 @@
 package com.example.blizzard.viewmodel;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -12,13 +13,12 @@ import com.example.blizzard.repositories.BlizzardRepository;
 
 public class BlizzardViewModel extends ViewModel {
     private BlizzardRepository mBlizzardRepository;
-    private MutableLiveData<WeatherData> mSearchedCityWeatherDataLiveData;
-    private MutableLiveData<WeatherData> mCurrentCityWeatherDataLiveData;
+    private LiveData<WeatherData> mSearchedCityWeatherDataLiveData = new MutableLiveData<>();
+    private LiveData<WeatherData> mCurrentCityWeatherDataLiveData =new MutableLiveData<>();
+
 
     public void init() {
         mBlizzardRepository = new BlizzardRepository();
-        mSearchedCityWeatherDataLiveData = new MutableLiveData<>();
-        mCurrentCityWeatherDataLiveData = new MutableLiveData<>();
     }
 
     public void getWeatherByCityName(String cityName) {
@@ -29,11 +29,11 @@ public class BlizzardViewModel extends ViewModel {
         mCurrentCityWeatherDataLiveData = mBlizzardRepository.getWeatherByLongitudeLatitude(lat, lon);
     }
 
-    public MutableLiveData<WeatherData> getSearchedCityWeatherDataLiveData() {
+    public LiveData<WeatherData> getSearchedCityWeatherDataLiveData() {
         return mSearchedCityWeatherDataLiveData;
     }
 
-    public MutableLiveData<WeatherData> getCurrentCityWeatherDataLiveData() {
+    public LiveData<WeatherData> getCurrentCityWeatherDataLiveData() {
         return mCurrentCityWeatherDataLiveData;
     }
 }

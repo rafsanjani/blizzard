@@ -25,10 +25,10 @@ import com.example.blizzard.model.WeatherData;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 
 
-import okhttp3.internal.annotations.EverythingIsNonNull;
+/*import okhttp3.internal.annotations.EverythingIsNonNull;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
+import retrofit2.Response;*/
 
 public class SearchFragment extends Fragment {
     TextView tvCityTitle;
@@ -46,7 +46,7 @@ public class SearchFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
-        mBlizzardViewModel.init();
+//        mBlizzardViewModel.init();
         if (getArguments() != null) {
             String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
             mBlizzardViewModel.getWeatherByCityName(cityName);
