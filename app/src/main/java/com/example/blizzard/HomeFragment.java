@@ -57,11 +57,6 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Objects;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.internal.EverythingIsNonNull;
-
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
@@ -76,7 +71,6 @@ public class HomeFragment extends Fragment {
     TextInputEditText searchBox;
     ProgressBar dataLoading;
     Button btnSearch;
-    private OpenWeatherService mWeatherService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
     private LocationRequest mLocationRequest;
@@ -324,37 +318,6 @@ public class HomeFragment extends Fragment {
         super.onPause();
         stopLocationUpdates();
     }
-
-   /* private void getWeatherData(Location location) {
-        Double latitude = location.getLatitude();
-        Double longitude = location.getLongitude();
-
-        Call<WeatherData> data = mWeatherService.getWeatherByLongitudeLatitude(latitude, longitude);
-
-        data.enqueue(new Callback<WeatherData>() {
-            @Override
-            @EverythingIsNonNull
-            public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
-                if (response.isSuccessful()) {
-                    WeatherData weatherData = response.body();
-
-                    mTimeUtil.setTime(Objects.requireNonNull(weatherData).getDt(), weatherData.getTimezone());
-
-                    resolveAppState(weatherData);
-                } else {
-                    //response failed for some reason
-                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
-                }
-            }
-
-            @Override
-            @EverythingIsNonNull
-            public void onFailure(Call<WeatherData> call, Throwable t) {
-                t.printStackTrace();
-                Log.e(TAG, "onFailure: ", t);
-            }
-        });
-    }*/
 
     private void resolveAppState(WeatherData weatherData) {
         String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();

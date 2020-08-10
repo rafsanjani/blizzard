@@ -25,10 +25,7 @@ import com.example.blizzard.model.WeatherData;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 
 
-/*import okhttp3.internal.annotations.EverythingIsNonNull;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;*/
+
 
 public class SearchFragment extends Fragment {
     TextView tvCityTitle;
@@ -71,9 +68,6 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        // populating views with data
-//        populateData();
-
     }
 
     private void findViews(@NonNull View view) {
@@ -86,33 +80,6 @@ public class SearchFragment extends Fragment {
         IvWeatherImage = view.findViewById(R.id.weather_icon);
         dataLoading = view.findViewById(R.id.data_loading);
     }
-
-   /* private void populateData() {
-        if (getArguments() != null) {
-            String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
-            Call<WeatherData> data = mService.getWeatherByCityName(cityName);
-
-            data.enqueue(new Callback<WeatherData>() {
-                @Override
-                @EverythingIsNonNull
-                public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
-                    if (response.isSuccessful()) {
-                        WeatherData weatherData = response.body();
-                        assert weatherData != null;
-                        mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                        insertDataIntoViews(weatherData);
-                    }
-                }
-
-                @Override
-                @EverythingIsNonNull
-                public void onFailure(Call<WeatherData> call, Throwable t) {
-                    t.printStackTrace();
-                }
-            });
-
-        }
-    }*/
 
     private void insertDataIntoViews(WeatherData weatherData) {
         String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
