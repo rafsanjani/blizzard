@@ -38,7 +38,7 @@ public class SearchFragment extends Fragment {
 //        mBlizzardViewModel.init();
         if (getArguments() != null) {
             String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
-            mBlizzardViewModel.getWeatherByCityName(cityName);
+            mBlizzardViewModel.getWeather(cityName);
         }
     }
 
@@ -53,7 +53,7 @@ public class SearchFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         findViews(view);
 
-        mBlizzardViewModel.getSearchedCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
                 insertDataIntoViews(weatherData);

@@ -25,7 +25,7 @@ public class BlizzardRepository {
         mOpenWeatherService = new OpenWeatherService();
     }
 
-    public MutableLiveData<WeatherData> getWeatherByCityName(String cityName) {
+    public MutableLiveData<WeatherData> getWeather(String cityName) {
         MutableLiveData<WeatherData> searchCityMutableLiveData = new MutableLiveData<>();
         mOpenWeatherService.getWeatherByCityName(cityName).enqueue(new Callback<WeatherData>() {
             @Override
@@ -49,7 +49,7 @@ public class BlizzardRepository {
         return searchCityMutableLiveData;
     }
 
-    public MutableLiveData<WeatherData> getWeatherByLongitudeLatitude(Double lat, Double lon) {
+    public MutableLiveData<WeatherData> getWeather(Double lat, Double lon) {
         MutableLiveData<WeatherData> currentCityMutableLiveData = new MutableLiveData<>();
         mOpenWeatherService.getWeatherByLongitudeLatitude(lat, lon).enqueue(new Callback<WeatherData>() {
             @Override

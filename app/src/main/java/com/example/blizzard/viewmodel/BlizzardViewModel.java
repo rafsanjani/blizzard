@@ -13,27 +13,21 @@ import com.example.blizzard.repositories.BlizzardRepository;
 
 public class BlizzardViewModel extends ViewModel {
     private BlizzardRepository mBlizzardRepository;
-    private LiveData<WeatherData> mSearchedCityWeatherDataLiveData = new MutableLiveData<>();
-    private LiveData<WeatherData> mCurrentCityWeatherDataLiveData = new MutableLiveData<>();
-
+    private LiveData<WeatherData> mWeatherLiveData = new MutableLiveData<>();
 
     public void init() {
         mBlizzardRepository = new BlizzardRepository();
     }
 
-    public void getWeatherByCityName(String cityName) {
-        mSearchedCityWeatherDataLiveData = mBlizzardRepository.getWeatherByCityName(cityName);
+    public void getWeather(String cityName) {
+        mWeatherLiveData = mBlizzardRepository.getWeather(cityName);
     }
 
-    public void getWeatherByLongitudeLatitude(Double lat, Double lon) {
-        mCurrentCityWeatherDataLiveData = mBlizzardRepository.getWeatherByLongitudeLatitude(lat, lon);
+    public void getWeather(Double lat, Double lon) {
+        mWeatherLiveData = mBlizzardRepository.getWeather(lat, lon);
     }
 
-    public LiveData<WeatherData> getSearchedCityWeatherDataLiveData() {
-        return mSearchedCityWeatherDataLiveData;
-    }
-
-    public LiveData<WeatherData> getCurrentCityWeatherDataLiveData() {
-        return mCurrentCityWeatherDataLiveData;
+    public LiveData<WeatherData> getWeatherLiveData() {
+        return mWeatherLiveData;
     }
 }
