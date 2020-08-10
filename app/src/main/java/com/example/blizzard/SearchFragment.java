@@ -1,6 +1,5 @@
 package com.example.blizzard;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,20 +11,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
-
+import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
-
 import com.example.blizzard.Util.TimeUtil;
-import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.viewmodel.BlizzardViewModel;
 
-
-import okhttp3.internal.annotations.EverythingIsNonNull;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SearchFragment extends Fragment {
     TextView tvCityTitle;
@@ -36,8 +28,19 @@ public class SearchFragment extends Fragment {
     TextView tvTime;
     ImageView IvWeatherImage;
     ProgressBar dataLoading;
-    private OpenWeatherService mService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
+    private BlizzardViewModel mBlizzardViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
+//        mBlizzardViewModel.init();
+        if (getArguments() != null) {
+            String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
+            mBlizzardViewModel.getWeatherByCityName(cityName);
+        }
+    }
 
     @Override
     public View onCreateView(
@@ -48,15 +51,15 @@ public class SearchFragment extends Fragment {
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         findViews(view);
 
+        mBlizzardViewModel.getSearchedCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                insertDataIntoViews(weatherData);
+            }
+        });
 
-        // populating views with data
-        populateData();
-
-        view.findViewById(R.id.button_second).setOnClickListener(view1 -> NavHostFragment.findNavController(SearchFragment.this)
-                .navigate(R.id.action_SecondFragment_to_FirstFragment));
     }
 
     private void findViews(@NonNull View view) {
@@ -68,33 +71,6 @@ public class SearchFragment extends Fragment {
         tvTime = view.findViewById(R.id.tv_dayTime);
         IvWeatherImage = view.findViewById(R.id.weather_icon);
         dataLoading = view.findViewById(R.id.data_loading);
-    }
-
-    private void populateData() {
-        if (getArguments() != null) {
-            String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
-            Call<WeatherData> data = mService.getWeatherByCityName(cityName);
-
-            data.enqueue(new Callback<WeatherData>() {
-                @Override
-                @EverythingIsNonNull
-                public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
-                    if (response.isSuccessful()) {
-                        WeatherData weatherData = response.body();
-                        assert weatherData != null;
-                        mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                        insertDataIntoViews(weatherData);
-                    }
-                }
-
-                @Override
-                @EverythingIsNonNull
-                public void onFailure(Call<WeatherData> call, Throwable t) {
-                    t.printStackTrace();
-                }
-            });
-
-        }
     }
 
     private void insertDataIntoViews(WeatherData weatherData) {
@@ -146,5 +122,4 @@ public class SearchFragment extends Fragment {
         int celsius = (int) Math.round(temp - 273.15);
         return celsius + "°C";
     }
-
 }

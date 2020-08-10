@@ -3,6 +3,7 @@ package com.example.blizzard;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -13,10 +14,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,14 +27,18 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
+import com.example.blizzard.Util.CheckNetworkUtil;
 import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.viewmodel.BlizzardViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -50,11 +57,6 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Objects;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.internal.EverythingIsNonNull;
-
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
@@ -69,12 +71,37 @@ public class HomeFragment extends Fragment {
     TextInputEditText searchBox;
     ProgressBar dataLoading;
     Button btnSearch;
-    private OpenWeatherService mWeatherService = new OpenWeatherService();
     private TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationUpdatesCallback;
+    private boolean mIsNetworkAvailable;
+    private BlizzardViewModel mBlizzardViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
+        mBlizzardViewModel.init();
+
+        mLocationUpdatesCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
+                stopLocationUpdates();
+                Location location = locationResult.getLastLocation();
+                Double latitude = location.getLatitude();
+                Double longitude = location.getLongitude();
+                mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
+            }
+
+            @Override
+            public void onLocationAvailability(LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+        };
+    }
 
     @Override
     public View onCreateView(
@@ -84,27 +111,34 @@ public class HomeFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        CheckNetworkUtil mCheckNetworkUtil = new CheckNetworkUtil(getActivity());
+        mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
+        if (!mIsNetworkAvailable)
+            Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
 
-        mLocationUpdatesCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
-                stopLocationUpdates();
-                getWeatherData(locationResult.getLastLocation());
+        mBlizzardViewModel.getCurrentCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                resolveAppState(weatherData);
             }
-
-            @Override
-            public void onLocationAvailability(LocationAvailability locationAvailability) {
-                super.onLocationAvailability(locationAvailability);
-            }
-        };
+        });
 
         ensureLocationIsEnabled();
 
         btnSearch.setOnClickListener(view1 -> {
+            //Hide the Keyboard when search button is clicked
+            InputMethodManager inputMethodManager = (InputMethodManager)
+                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputMethodManager != null) {
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+            mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
+            } else if (!mIsNetworkAvailable) {
+                searchBox.setError(getString(R.string.no_internet));
             } else {
                 String cityName = searchBox.getText().toString();
                 ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
@@ -224,7 +258,7 @@ public class HomeFragment extends Fragment {
                     checkLocationPermission();
                     break;
                 case Activity.RESULT_CANCELED:
-                    Log.d(TAG, "onActivityResult: Request to enable locatio hardware declined. Quitting");
+                    Log.d(TAG, "onActivityResult: Request to enable location hardware declined. Quitting");
                     break;
 
                 default:
@@ -241,7 +275,10 @@ public class HomeFragment extends Fragment {
         OnSuccessListener<Location> mLocationListener = (Location location) -> {
             if (location != null) {
                 Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates");
-                getWeatherData(location);
+                Double latitude = location.getLatitude();
+                Double longitude = location.getLongitude();
+                mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
+                observeViewModel();
             } else {
                 Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
                 requestLocationUpdates();
@@ -253,6 +290,16 @@ public class HomeFragment extends Fragment {
                 .addOnFailureListener(Throwable::printStackTrace);
 
     }
+
+    private void observeViewModel() {
+        mBlizzardViewModel.getCurrentCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                resolveAppState(weatherData);
+            }
+        });
+    }
+
 
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
@@ -270,37 +317,6 @@ public class HomeFragment extends Fragment {
     public void onPause() {
         super.onPause();
         stopLocationUpdates();
-    }
-
-    private void getWeatherData(Location location) {
-        Double latitude = location.getLatitude();
-        Double longitude = location.getLongitude();
-
-        Call<WeatherData> data = mWeatherService.getWeatherByLongitudeLatitude(latitude, longitude);
-
-        data.enqueue(new Callback<WeatherData>() {
-            @Override
-            @EverythingIsNonNull
-            public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
-                if (response.isSuccessful()) {
-                    WeatherData weatherData = response.body();
-
-                    mTimeUtil.setTime(Objects.requireNonNull(weatherData).getDt(), weatherData.getTimezone());
-
-                    resolveAppState(weatherData);
-                } else {
-                    //response failed for some reason
-                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
-                }
-            }
-
-            @Override
-            @EverythingIsNonNull
-            public void onFailure(Call<WeatherData> call, Throwable t) {
-                t.printStackTrace();
-                Log.e(TAG, "onFailure: ", t);
-            }
-        });
     }
 
     private void resolveAppState(WeatherData weatherData) {
