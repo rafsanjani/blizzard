@@ -18,7 +18,7 @@ android {
             throw new MissingPropertyException("Missing property `OWM_API_KEY`, please see README for instructions")
         }
 
-        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "API_KEY", "$apiKey")
     }
 
     buildTypes {
