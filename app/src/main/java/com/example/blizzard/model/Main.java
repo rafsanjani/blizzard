@@ -1,6 +1,10 @@
 
 package com.example.blizzard.model;
 
+import androidx.room.TypeConverter;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -73,4 +77,15 @@ public class Main {
         this.humidity = humidity;
     }
 
+    @TypeConverter
+    public String windToJson(Main main) {
+
+        return new Gson().toJson(main, Main.class);
+    }
+
+    @TypeConverter
+    public Main windToJson(String json) {
+
+        return new Gson().fromJson(json, Main.class);
+    }
 }

@@ -1,6 +1,9 @@
 
 package com.example.blizzard.model;
 
+import androidx.room.TypeConverter;
+
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -62,4 +65,15 @@ public class Sys {
         this.sunset = sunset;
     }
 
+    @TypeConverter
+    public String SysToJson(Sys sys) {
+
+        return new Gson().toJson(sys, Sys.class);
+    }
+
+    @TypeConverter
+    public Sys jsonToSys(String json) {
+
+        return new Gson().fromJson(json, Sys.class);
+    }
 }

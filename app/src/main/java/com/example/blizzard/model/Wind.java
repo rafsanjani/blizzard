@@ -1,6 +1,9 @@
 
 package com.example.blizzard.model;
 
+import androidx.room.TypeConverter;
+
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -27,6 +30,18 @@ public class Wind {
 
     public void setDeg(int deg) {
         this.deg = deg;
+    }
+
+    @TypeConverter
+    public String windToJson(Wind wind) {
+
+        return new Gson().toJson(wind, Wind.class);
+    }
+
+    @TypeConverter
+    public Wind jsonToWind(String json) {
+
+        return new Gson().fromJson(json, Wind.class);
     }
 
 }
