@@ -1,12 +1,10 @@
 package com.example.blizzard.Util;
 
+import com.example.blizzard.BuildConfig;
+
 /**
  * Created by kelvi on 8/3/2020
  */
-public final class ApiKeyHolder {
-    private final static String api_key = "your apiKey";
-
-    public static String getApi_key() {
-        return api_key;
-    }
+public  class ApiKeyHolder {
+    public final static String API_KEY = BuildConfig.API_KEY;
 }

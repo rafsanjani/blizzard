@@ -13,6 +13,12 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        def apiKey = findProperty("OWM_API_KEY")?:{
+            throw new MissingPropertyException("Missing property `OWM_API_KEY`, please see README for instructions")
+        }
+
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
     }
 
     buildTypes {
