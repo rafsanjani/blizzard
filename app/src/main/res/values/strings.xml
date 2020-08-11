@@ -29,4 +29,6 @@
         location.
     </string>
     <string name="no_internet">No internet Connection</string>
+
+    <string name="weather_update">New weather update</string>
 </resources>

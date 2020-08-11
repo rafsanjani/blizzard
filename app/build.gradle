@@ -18,7 +18,7 @@ android {
             throw new MissingPropertyException("Missing property `OWM_API_KEY`, please see README for instructions")
         }
 
-        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "API_KEY", "$apiKey")
     }
 
     buildTypes {
@@ -55,6 +55,11 @@ dependencies {
 
     // gson dependency
     implementation 'com.google.code.gson:gson:2.8.5'
+
+    // workManager dependency
+    def work_version = "2.4.0"
+    implementation "androidx.work:work-runtime:$work_version"
+
 
 
     implementation fileTree(dir: "libs", include: ["*.jar"])

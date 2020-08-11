@@ -1,5 +1,6 @@
 package com.example.blizzard;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,16 +38,35 @@ public class SearchFragment extends Fragment {
     private BlizzardViewModel mBlizzardViewModel;
     private HandlerThread handlerThread;
     private static final String TAG = "SearchFragment";
+    public static final String CITY_NAME = "com.example.blizzard.cityName";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
 //        mBlizzardViewModel.init();
-        if (getArguments() != null) {
-            String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
-            mBlizzardViewModel.getWeather(cityName);
+
+        Bundle bundle = this.getArguments();
+
+
+        if (bundle != null) {
+
+            /*
+                city_name will be empty when the
+                arg is passed from the home_fragment.
+             */
+
+            String city_name = bundle.getString(CITY_NAME);
+            if (city_name == null) {
+                assert getArguments() != null;
+                String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
+                mBlizzardViewModel.getWeather(cityName);
+            }else {
+                mBlizzardViewModel.getWeather(city_name);
+            }
         }
+
+
     }
 
     @Override
@@ -76,9 +96,12 @@ public class SearchFragment extends Fragment {
         Handler handler = new Handler(handlerThread.getLooper());
 
         handler.post(() -> {
-            if (DatabaseInjector.getDao(getContext()).getByUuid(weatherData.getUuid()) < 0) {
+            String cityName;
+            cityName = DatabaseInjector.getDao(getContext()).getByName(weatherData.getName());
+
+            if (cityName == null) {
                 DatabaseInjector.getDao(getContext()).insertWeatherData(weatherData);
-            }else {
+            } else {
                 Log.d(TAG, "query already in db updating query");
                 DatabaseInjector.getDao(getContext()).updateData(weatherData);
             }

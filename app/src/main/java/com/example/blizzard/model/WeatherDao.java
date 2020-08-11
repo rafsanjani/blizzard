@@ -16,8 +16,8 @@ public interface WeatherDao {
     @Query("SELECT * FROM WeatherData")
     List<WeatherData> getAll();
 
-    @Query("SELECT uuid FROM WeatherData WHERE uuid = :id")
-    int getByUuid(int id);
+    @Query("SELECT name FROM WeatherData WHERE name = :cityName")
+    String getByName(String cityName);
 
     @Update
     void updateData(WeatherData weatherData);
