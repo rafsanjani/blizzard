@@ -4,12 +4,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.blizzard.Util.DatabaseInjector;
-import com.example.blizzard.model.WeatherDao;
+
 import com.example.blizzard.model.WeatherData;
 import com.example.blizzard.repositories.BlizzardRepository;
 
-import java.lang.ref.WeakReference;
+
 
 /**
  * Created by tony on 8/9/2020

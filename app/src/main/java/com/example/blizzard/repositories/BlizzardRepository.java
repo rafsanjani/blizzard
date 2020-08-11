@@ -4,12 +4,12 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.blizzard.Util.DatabaseInjector;
+
 import com.example.blizzard.model.OpenWeatherService;
-import com.example.blizzard.model.WeatherDao;
+
 import com.example.blizzard.model.WeatherData;
 
-import java.lang.ref.WeakReference;
+
 
 import retrofit2.Call;
 import retrofit2.Callback;

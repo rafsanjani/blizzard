@@ -3,10 +3,8 @@ package com.example.blizzard.Util;
 import android.content.Context;
 
 import androidx.room.Room;
-import androidx.room.RoomDatabase;
 
 import com.example.blizzard.model.WeatherDao;
-import com.example.blizzard.model.WeatherData;
 import com.example.blizzard.model.WeatherDatabase;
 
 public class DatabaseInjector {

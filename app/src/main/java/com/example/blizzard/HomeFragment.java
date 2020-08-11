@@ -33,7 +33,6 @@ import androidx.navigation.Navigation;
 import com.bumptech.glide.Glide;
 import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
 import com.example.blizzard.Util.CheckNetworkUtil;
-import com.example.blizzard.Util.DatabaseInjector;
 import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
