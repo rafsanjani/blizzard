@@ -33,11 +33,11 @@ public class OpenWeatherService {
     }
 
     public Call<WeatherData> getWeatherByCityName(String cityName) {
-        return mOpenWeatherApi.getWeatherByCityName(cityName, ApiKeyHolder.getApi_key());
+        return mOpenWeatherApi.getWeatherByCityName(cityName, ApiKeyHolder.API_KEY);
     }
 
     public Call<WeatherData> getWeatherByLongitudeLatitude(Double latitude, Double longitude) {
-        return mOpenWeatherApi.getWeatherByLongitudeLatitude(latitude, longitude, ApiKeyHolder.getApi_key());
+        return mOpenWeatherApi.getWeatherByLongitudeLatitude(latitude, longitude, ApiKeyHolder.API_KEY);
     }
 
 }

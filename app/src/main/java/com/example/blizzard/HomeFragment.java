@@ -27,7 +27,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
@@ -36,7 +35,6 @@ import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFr
 import com.example.blizzard.Util.CheckNetworkUtil;
 import com.example.blizzard.Util.DatabaseInjector;
 import com.example.blizzard.Util.TimeUtil;
-import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
@@ -94,7 +92,7 @@ public class HomeFragment extends Fragment {
                 Location location = locationResult.getLastLocation();
                 Double latitude = location.getLatitude();
                 Double longitude = location.getLongitude();
-                mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
+                mBlizzardViewModel.getWeather(latitude, longitude);
             }
 
             @Override
@@ -118,7 +116,7 @@ public class HomeFragment extends Fragment {
             Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
 
-        mBlizzardViewModel.getCurrentCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
                 resolveAppState(weatherData);
@@ -278,7 +276,7 @@ public class HomeFragment extends Fragment {
                 Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates");
                 Double latitude = location.getLatitude();
                 Double longitude = location.getLongitude();
-                mBlizzardViewModel.getWeatherByLongitudeLatitude(latitude, longitude);
+                mBlizzardViewModel.getWeather(latitude, longitude);
                 observeViewModel();
             } else {
                 Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
@@ -293,7 +291,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void observeViewModel() {
-        mBlizzardViewModel.getCurrentCityWeatherDataLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
                 resolveAppState(weatherData);
