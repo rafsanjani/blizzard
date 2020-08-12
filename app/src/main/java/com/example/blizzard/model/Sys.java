@@ -24,15 +24,15 @@ public class Sys {
     }
 
 
-    @TypeConverter
-    public String SysToJson(Sys sys) {
-
-        return new Gson().toJson(sys, Sys.class);
-    }
-
-    @TypeConverter
-    public Sys jsonToSys(String json) {
-
-        return new Gson().fromJson(json, Sys.class);
-    }
+//    @TypeConverter
+//    public String SysToJson(Sys sys) {
+//
+//        return new Gson().toJson(sys, Sys.class);
+//    }
+//
+//    @TypeConverter
+//    public Sys jsonToSys(String json) {
+//
+//        return new Gson().fromJson(json, Sys.class);
+//    }
 }

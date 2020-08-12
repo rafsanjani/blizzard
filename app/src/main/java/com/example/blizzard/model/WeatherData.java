@@ -2,34 +2,29 @@
 package com.example.blizzard.model;
 
 import androidx.annotation.Nullable;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-import androidx.room.TypeConverters;
+
 
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Entity
+
 public class WeatherData {
 
 
     @SerializedName("weather")
     @Expose
-    @TypeConverters(Weather.class)
     private List<Weather> weather = null;
 
 
     @SerializedName("main")
     @Expose
-    @TypeConverters(Main.class)
     private Main main;
 
 
     @SerializedName("wind")
     @Expose
-    @TypeConverters(Wind.class)
     private Wind wind;
 
     @SerializedName("dt")
@@ -47,12 +42,7 @@ public class WeatherData {
 
     @SerializedName("sys")
     @Expose
-    @TypeConverters(Sys.class)
     private Sys sys;
-
-
-    @PrimaryKey(autoGenerate = true)
-    private int uuid;
 
 
     public List<Weather> getWeather() {
@@ -88,10 +78,6 @@ public class WeatherData {
         return sys;
     }
 
-    public int getUuid() {
-        return uuid;
-    }
-
 
     public void setWeather(List<Weather> weather) {
         this.weather = weather;
@@ -124,9 +110,6 @@ public class WeatherData {
         this.sys = sys;
     }
 
-    public void setUuid(int uuid) {
-        this.uuid = uuid;
-    }
 
     @Override
     public boolean equals(@Nullable Object obj) {

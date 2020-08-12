@@ -11,6 +11,7 @@ import com.example.blizzard.Util.DatabaseInjector;
 import com.example.blizzard.Util.NotificationHelper;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.model.WeatherDataEntity;
 
 import java.util.List;
 
@@ -31,16 +32,16 @@ public class DataUpdateWorker extends Worker {
     @Override
     public Result doWork() {
         try {
-            List<WeatherData> data = getAllDataFromDb();
+            List<WeatherDataEntity> data = getAllDataFromDb();
 
             if (data.size() > 0) {
-                for (WeatherData curData : data) {
-                    WeatherData serverData = getWeather(curData.getName());
+                for (WeatherDataEntity curData : data) {
+                    WeatherDataEntity serverData = getWeather(curData.getCityName());
                     if (serverData != null) {
                         if (curData.equals(serverData)) {
                             Log.d(TAG, "doWork: data received already exist in the db");
                         } else {
-                            NotificationHelper.getInstance(getApplicationContext(), curData.getName());
+                            NotificationHelper.getInstance(getApplicationContext(), curData.getCityName());
                         }
                     }
                 }
@@ -53,7 +54,7 @@ public class DataUpdateWorker extends Worker {
         }
     }
 
-    WeatherData getWeather(String cityName) {
+    WeatherDataEntity getWeather(String cityName) {
         Call<WeatherData> weatherDataCall = mWeatherService.getWeatherByCityName(cityName);
         final WeatherData[] data = {null};
 
@@ -74,10 +75,15 @@ public class DataUpdateWorker extends Worker {
 
         });
 
-        return data[0];
+        return new WeatherDataEntity(
+                data[0].getName(),
+                data[0].getMain().getTemp(),
+                data[0].getMain().getHumidity(),
+                data[0].getWeather().get(0).getDescription(),
+                data[0].getWind().getSpeed());
     }
 
-    List<WeatherData> getAllDataFromDb() {
+    List<WeatherDataEntity> getAllDataFromDb() {
         return DatabaseInjector.getDao(getApplicationContext()).getAll();
     }
 }

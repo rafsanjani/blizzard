@@ -21,6 +21,7 @@ import com.example.blizzard.Util.DatabaseInjector;
 import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.model.WeatherDataEntity;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 
 
@@ -96,15 +97,27 @@ public class SearchFragment extends Fragment {
 
         handler.post(() -> {
             String cityName;
-            cityName = DatabaseInjector.getDao(getContext()).getByName(weatherData.getName());
+            WeatherDataEntity entity = createDatabaseEntity(weatherData);
+
+            cityName = DatabaseInjector.getDao(getContext()).getByName(entity.getCityName());
 
             if (cityName == null) {
-                DatabaseInjector.getDao(getContext()).insertWeatherData(weatherData);
+                DatabaseInjector.getDao(getContext()).insertWeatherData(entity);
             } else {
                 Log.d(TAG, "query already in db updating query");
-                DatabaseInjector.getDao(getContext()).updateData(weatherData);
+                DatabaseInjector.getDao(getContext()).updateData(entity);
             }
         });
+    }
+
+    private WeatherDataEntity createDatabaseEntity(WeatherData weatherData) {
+        return new WeatherDataEntity(
+                weatherData.getName(),
+                weatherData.getMain().getTemp(),
+                weatherData.getMain().getHumidity(),
+                weatherData.getWeather().get(0).getDescription(),
+                weatherData.getWind().getSpeed()
+        );
     }
 
     @Override

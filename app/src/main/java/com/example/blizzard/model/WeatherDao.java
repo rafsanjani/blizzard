@@ -11,14 +11,14 @@ import java.util.List;
 public interface WeatherDao {
 
     @Insert
-    void insertWeatherData(WeatherData weatherData);
+    void insertWeatherData(WeatherDataEntity weatherDataEntity);
 
-    @Query("SELECT * FROM WeatherData")
-    List<WeatherData> getAll();
+    @Query("SELECT * FROM WeatherDataEntity")
+    List<WeatherDataEntity> getAll();
 
-    @Query("SELECT name FROM WeatherData WHERE name = :cityName")
+    @Query("SELECT cityName FROM WeatherDataEntity WHERE cityName = :cityName")
     String getByName(String cityName);
 
     @Update
-    void updateData(WeatherData weatherData);
+    void updateData(WeatherDataEntity weatherDataEntity);
 }

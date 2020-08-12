@@ -38,17 +38,17 @@ public class Weather {
         this.icon = icon;
     }
 
-    @TypeConverter
-    public static List<Weather> jsonToWeather(String json) {
-        Type listType = new TypeToken<List<Weather>>() {
-        }.getType();
-        return new Gson().fromJson(json, listType);
-    }
-
-    @TypeConverter
-    public static String WeatherToJson(List<Weather> weathers) {
-        Weather weather = weathers.get(0);
-        return new Gson().toJson(weather, Weather.class);
-    }
+//    @TypeConverter
+//    public static List<Weather> jsonToWeather(String json) {
+//        Type listType = new TypeToken<List<Weather>>() {
+//        }.getType();
+//        return new Gson().fromJson(json, listType);
+//    }
+//
+//    @TypeConverter
+//    public static String WeatherToJson(List<Weather> weathers) {
+//        Weather weather = weathers.get(0);
+//        return new Gson().toJson(weather, Weather.class);
+//    }
 
 }
