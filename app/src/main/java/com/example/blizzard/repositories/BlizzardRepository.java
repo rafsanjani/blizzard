@@ -4,12 +4,8 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
-
 import com.example.blizzard.model.OpenWeatherService;
-
 import com.example.blizzard.model.WeatherData;
-
-
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,23 +18,30 @@ import retrofit2.internal.EverythingIsNonNull;
 
 public class BlizzardRepository {
     private static final String TAG = "BlizzardRepository";
-    private OpenWeatherService mOpenWeatherService;
+    public static MutableLiveData<Boolean> isNull = new MutableLiveData<>();
 
 
-    public BlizzardRepository() {
-        mOpenWeatherService = new OpenWeatherService();
+    private BlizzardRepository() {
     }
 
-    public MutableLiveData<WeatherData> getWeather(String cityName) {
+    public static MutableLiveData<WeatherData> getWeather(String cityName) {
         MutableLiveData<WeatherData> searchCityMutableLiveData = new MutableLiveData<>();
-        mOpenWeatherService.getWeatherByCityName(cityName).enqueue(new Callback<WeatherData>() {
+        new OpenWeatherService().getWeatherByCityName(cityName).enqueue(new Callback<WeatherData>() {
             @Override
             @EverythingIsNonNull
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
                 if (response.isSuccessful()) {
+                    assert response.body() != null;
+                    if (response.body().getName().isEmpty()) {
+                        isNull.setValue(true);
+                    } else {
+                        isNull.setValue(false);
+                    }
                     searchCityMutableLiveData.setValue(response.body());
+
                 } else {
                     //response failed for some reason
+                    isNull.setValue(true);
                     Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
                 }
             }
@@ -46,6 +49,7 @@ public class BlizzardRepository {
             @Override
             @EverythingIsNonNull
             public void onFailure(Call<WeatherData> call, Throwable t) {
+                isNull.setValue(true);
                 searchCityMutableLiveData.setValue(null);
             }
         });
@@ -53,9 +57,9 @@ public class BlizzardRepository {
         return searchCityMutableLiveData;
     }
 
-    public MutableLiveData<WeatherData> getWeather(Double lat, Double lon) {
+    public static MutableLiveData<WeatherData> getWeather(Double lat, Double lon) {
         MutableLiveData<WeatherData> currentCityMutableLiveData = new MutableLiveData<>();
-        mOpenWeatherService.getWeatherByLongitudeLatitude(lat, lon).enqueue(new Callback<WeatherData>() {
+        new OpenWeatherService().getWeatherByLongitudeLatitude(lat, lon).enqueue(new Callback<WeatherData>() {
             @Override
             @EverythingIsNonNull
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
@@ -76,4 +80,5 @@ public class BlizzardRepository {
 
         return currentCityMutableLiveData;
     }
+
 }

@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.blizzard.Util.DatabaseInjector;
@@ -22,7 +23,9 @@ import com.example.blizzard.Util.TimeUtil;
 import com.example.blizzard.model.Weather;
 import com.example.blizzard.model.WeatherData;
 import com.example.blizzard.model.WeatherDataEntity;
+import com.example.blizzard.repositories.BlizzardRepository;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
+import com.google.android.material.snackbar.Snackbar;
 
 
 public class SearchFragment extends Fragment {
@@ -80,13 +83,26 @@ public class SearchFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         findViews(view);
 
-        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
-            if (weatherData != null) {
-                saveToDb(weatherData);
-                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                insertDataIntoViews(weatherData);
+        observeViewModels(view);
+    }
+
+    private void observeViewModels(View view) {
+
+        BlizzardRepository.isNull.observe(getViewLifecycleOwner(), aBoolean -> {
+            if (aBoolean) {
+                Snackbar.make(view, R.string.error_getting_data, Snackbar.LENGTH_SHORT).show();
+                Navigation.findNavController(view).navigate(R.id.action_SecondFragment_to_FirstFragment);
+            } else {
+                mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+                    if (weatherData != null) {
+                        saveToDb(weatherData);
+                        mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                        insertDataIntoViews(weatherData);
+                    }
+                });
             }
         });
+
 
     }
 
@@ -123,7 +139,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (handlerThread != null){
+        if (handlerThread != null) {
             handlerThread.quitSafely();
         }
     }

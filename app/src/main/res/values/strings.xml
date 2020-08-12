@@ -31,4 +31,6 @@
     <string name="no_internet">No internet Connection</string>
 
     <string name="weather_update">New weather update</string>
+
+    <string name="error_getting_data">Error getting weather info</string>
 </resources>

@@ -81,7 +81,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
-        mBlizzardViewModel.init();
+
 
         mLocationUpdatesCallback = new LocationCallback() {
             @Override
