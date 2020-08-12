@@ -20,18 +20,12 @@ public class WeatherData {
     @TypeConverters(Weather.class)
     private List<Weather> weather = null;
 
-    @SerializedName("base")
-    @Expose
-    private String base;
 
     @SerializedName("main")
     @Expose
     @TypeConverters(Main.class)
     private Main main;
 
-    @SerializedName("visibility")
-    @Expose
-    private int visibility;
 
     @SerializedName("wind")
     @Expose
@@ -45,15 +39,11 @@ public class WeatherData {
     @SerializedName("timezone")
     @Expose
     private int timezone;
-    @SerializedName("id")
-    @Expose
-    private int id;
+
     @SerializedName("name")
     @Expose
     private String name;
-    @SerializedName("cod")
-    @Expose
-    private int cod;
+
 
     @SerializedName("sys")
     @Expose
@@ -70,18 +60,8 @@ public class WeatherData {
     }
 
 
-    public String getBase() {
-        return base;
-    }
-
-
     public Main getMain() {
         return main;
-    }
-
-
-    public int getVisibility() {
-        return visibility;
     }
 
 
@@ -95,21 +75,8 @@ public class WeatherData {
     }
 
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-
-    public int getCod() {
-        return cod;
     }
 
 
@@ -130,17 +97,11 @@ public class WeatherData {
         this.weather = weather;
     }
 
-    public void setBase(String base) {
-        this.base = base;
-    }
 
     public void setMain(Main main) {
         this.main = main;
     }
 
-    public void setVisibility(int visibility) {
-        this.visibility = visibility;
-    }
 
     public void setWind(Wind wind) {
         this.wind = wind;
@@ -158,9 +119,6 @@ public class WeatherData {
         this.name = name;
     }
 
-    public void setCod(int cod) {
-        this.cod = cod;
-    }
 
     public void setSys(Sys sys) {
         this.sys = sys;
@@ -174,7 +132,7 @@ public class WeatherData {
     public boolean equals(@Nullable Object obj) {
         if (obj != this || obj != this.getClass()) {
             return false;
-        }else {
+        } else {
             WeatherData guestWeatherData = (WeatherData) obj;
 
 

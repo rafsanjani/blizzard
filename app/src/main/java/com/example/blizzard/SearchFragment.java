@@ -1,6 +1,5 @@
 package com.example.blizzard;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -61,7 +60,7 @@ public class SearchFragment extends Fragment {
                 assert getArguments() != null;
                 String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
                 mBlizzardViewModel.getWeather(cityName);
-            }else {
+            } else {
                 mBlizzardViewModel.getWeather(city_name);
             }
         }
@@ -111,7 +110,9 @@ public class SearchFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        handlerThread.quitSafely();
+        if (handlerThread != null){
+            handlerThread.quitSafely();
+        }
     }
 
     private void findViews(@NonNull View view) {

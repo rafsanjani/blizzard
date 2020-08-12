@@ -12,9 +12,7 @@ public class Wind {
     @SerializedName("speed")
     @Expose
     private double speed;
-    @SerializedName("deg")
-    @Expose
-    private int deg;
+
 
     public double getSpeed() {
         return speed;
@@ -24,13 +22,6 @@ public class Wind {
         this.speed = speed;
     }
 
-    public int getDeg() {
-        return deg;
-    }
-
-    public void setDeg(int deg) {
-        this.deg = deg;
-    }
 
     @TypeConverter
     public String windToJson(Wind wind) {

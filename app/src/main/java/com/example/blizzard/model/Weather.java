@@ -13,12 +13,7 @@ import java.util.List;
 
 public class Weather {
 
-    @SerializedName("id")
-    @Expose
-    private int id;
-    @SerializedName("main")
-    @Expose
-    private String main;
+
     @SerializedName("description")
     @Expose
     private String description;
@@ -26,21 +21,6 @@ public class Weather {
     @Expose
     private String icon;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getMain() {
-        return main;
-    }
-
-    public void setMain(String main) {
-        this.main = main;
-    }
 
     public String getDescription() {
         return description;
