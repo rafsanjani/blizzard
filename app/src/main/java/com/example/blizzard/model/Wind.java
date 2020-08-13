@@ -1,11 +1,10 @@
 
 package com.example.blizzard.model;
 
-import androidx.room.TypeConverter;
-
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Wind {
 
@@ -22,8 +21,15 @@ public class Wind {
         this.speed = speed;
     }
 
+    @NotNull
+    @Override
+    public String toString() {
+        return "Wind{" +
+                "speed=" + speed +
+                '}';
+    }
 
-//    @TypeConverter
+    //    @TypeConverter
 //    public String windToJson(Wind wind) {
 //
 //        return new Gson().toJson(wind, Wind.class);

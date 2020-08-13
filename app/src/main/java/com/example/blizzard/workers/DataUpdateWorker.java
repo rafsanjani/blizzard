@@ -63,6 +63,7 @@ public class DataUpdateWorker extends Worker {
             @EverythingIsNonNull
             public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
                 if (response.isSuccessful()) {
+                    Log.d(TAG, "onResponse: " + response.body());
                     data[0] = response.body();
                 }
             }
@@ -75,12 +76,12 @@ public class DataUpdateWorker extends Worker {
 
         });
 
-        return new WeatherDataEntity(
+        return data[0] != null ? new WeatherDataEntity(
                 data[0].getName(),
                 data[0].getMain().getTemp(),
                 data[0].getMain().getHumidity(),
                 data[0].getWeather().get(0).getDescription(),
-                data[0].getWind().getSpeed());
+                data[0].getWind().getSpeed()) : null;
     }
 
     List<WeatherDataEntity> getAllDataFromDb() {

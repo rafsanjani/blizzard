@@ -1,15 +1,10 @@
 
 package com.example.blizzard.model;
 
-import androidx.room.TypeConverter;
-
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 public class Weather {
 
@@ -38,7 +33,16 @@ public class Weather {
         this.icon = icon;
     }
 
-//    @TypeConverter
+    @NotNull
+    @Override
+    public String toString() {
+        return "Weather{" +
+                "description='" + description + '\'' +
+                ", icon='" + icon + '\'' +
+                '}';
+    }
+
+    //    @TypeConverter
 //    public static List<Weather> jsonToWeather(String json) {
 //        Type listType = new TypeToken<List<Weather>>() {
 //        }.getType();

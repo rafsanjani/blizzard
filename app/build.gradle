@@ -60,6 +60,10 @@ dependencies {
     def work_version = "2.4.0"
     implementation "androidx.work:work-runtime:$work_version"
 
+    // lifecycle dependency for saved state view model
+    def lifecycle_version = "2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
+
 
 
     implementation fileTree(dir: "libs", include: ["*.jar"])

@@ -9,6 +9,8 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class WeatherData {
 
@@ -110,6 +112,19 @@ public class WeatherData {
         this.sys = sys;
     }
 
+    @NotNull
+    @Override
+    public String toString() {
+        return "WeatherData{" +
+                "weather=" + weather.toString() +
+                ", main=" + main.toString() +
+                ", wind=" + wind.toString() +
+                ", dt=" + dt +
+                ", timezone=" + timezone +
+                ", name='" + name + '\'' +
+                ", sys=" + sys.toString() +
+                '}';
+    }
 
     @Override
     public boolean equals(@Nullable Object obj) {

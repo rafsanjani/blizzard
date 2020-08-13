@@ -1,11 +1,10 @@
 
 package com.example.blizzard.model;
 
-import androidx.room.TypeConverter;
-
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Sys {
 
@@ -23,8 +22,15 @@ public class Sys {
         this.country = country;
     }
 
+    @NotNull
+    @Override
+    public String toString() {
+        return "Sys{" +
+                "country='" + country + '\'' +
+                '}';
+    }
 
-//    @TypeConverter
+    //    @TypeConverter
 //    public String SysToJson(Sys sys) {
 //
 //        return new Gson().toJson(sys, Sys.class);
