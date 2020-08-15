@@ -12,10 +12,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.example.blizzard.workers.DataUpdateWorker;
 
@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    public static final String WEATHER_UPDATE_CHECKER = "Weather_Update_Checker";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +43,15 @@ public class MainActivity extends AppCompatActivity {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        WorkRequest request =
+        PeriodicWorkRequest request =
                 new PeriodicWorkRequest
-                        .Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES)
+                        .Builder(DataUpdateWorker.class, 1, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .setInitialDelay(15, TimeUnit.SECONDS)
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
-                .enqueue(request);
+                .enqueueUniquePeriodicWork(WEATHER_UPDATE_CHECKER, ExistingPeriodicWorkPolicy.KEEP, request);
     }
 
     @Override

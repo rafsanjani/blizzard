@@ -52,15 +52,23 @@ public class DataUpdateWorker extends ListenableWorker {
 
                     for (WeatherDataEntity previousWeather : data) {
                         if (previousWeather.getCityName().equals(Objects.requireNonNull(currentWeather).getName())
-                                && previousWeather.getTemperature() != currentWeather.getMain().getTemp()) {
+                                && ((previousWeather.getTemperature() - currentWeather.getMain().getTemp()) > 2)
+                                || (currentWeather.getMain().getTemp() - previousWeather.getTemperature()) > 2) {
+
                             Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
                             NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
-                                    previousWeather.getCityName());
+                                    previousWeather.getCityName(),
+                                    kelToCelsius(previousWeather.getTemperature()),
+                                    kelToCelsius(currentWeather.getMain().getTemp()));
                             notificationHelper.createNotification();
                             break;
                         }
                     }
                     completer.set(Result.success());
+                }
+
+                private int kelToCelsius(double temperature) {
+                    return (int) Math.round(temperature - 273.15);
                 }
 
                 @Override
