@@ -12,10 +12,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.example.blizzard.workers.DataUpdateWorker;
 
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        WorkRequest request =
+        PeriodicWorkRequest request =
                 new PeriodicWorkRequest
                         .Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
-                .enqueue(request);
+                .enqueueUniquePeriodicWork("work", ExistingPeriodicWorkPolicy.REPLACE, request);
     }
 
     @Override

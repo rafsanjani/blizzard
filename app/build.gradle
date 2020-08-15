@@ -14,7 +14,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        def apiKey = findProperty("OWM_API_KEY")?:{
+        def apiKey = findProperty("OWM_API_KEY") ?: {
             throw new MissingPropertyException("Missing property `OWM_API_KEY`, please see README for instructions")
         }
 
@@ -65,7 +65,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
 
 
-
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.0'
@@ -77,6 +76,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    
 
 }
