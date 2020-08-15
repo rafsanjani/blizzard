@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    public static final String WEATHER_UPDATE_CHECKER = "Weather_Update_Checker";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +45,13 @@ public class MainActivity extends AppCompatActivity {
 
         PeriodicWorkRequest request =
                 new PeriodicWorkRequest
-                        .Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES)
+                        .Builder(DataUpdateWorker.class, 1, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .setInitialDelay(15, TimeUnit.SECONDS)
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
-                .enqueueUniquePeriodicWork("work", ExistingPeriodicWorkPolicy.REPLACE, request);
+                .enqueueUniquePeriodicWork(WEATHER_UPDATE_CHECKER, ExistingPeriodicWorkPolicy.KEEP, request);
     }
 
     @Override

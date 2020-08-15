@@ -21,15 +21,20 @@ public class NotificationHelper {
     private final static String CHANNEL_ID = "Blizzard_channel";
     private final static int NOTIFICATION_ID = 1290;
     private final String cityName;
+    private final int prevTemp;
+    private final int curTemp;
 
-    private NotificationHelper(Context context, String cityName) {
+
+    private NotificationHelper(Context context, String cityName, int prevTemp, int curTemp) {
         this.context = context.getApplicationContext();
         this.cityName = cityName;
+        this.prevTemp = prevTemp;
+        this.curTemp = curTemp;
     }
 
-    public static NotificationHelper getInstance(Context context, String cityName) {
+    public static NotificationHelper getInstance(Context context, String cityName, int prevTemp, int curTemp) {
         if (instance == null) {
-            instance = new NotificationHelper(context, cityName);
+            instance = new NotificationHelper(context, cityName, prevTemp, curTemp);
         }
         return instance;
     }
@@ -48,7 +53,8 @@ public class NotificationHelper {
                         .setArguments(bundle)
                         .createPendingIntent();
 
-        String notificationText = cityName + " has experienced a weather change, click to know more.";
+        String notificationText = cityName + " has experienced a weather change, with a temperature change from " +
+                this.prevTemp + "°C to " + this.curTemp + "°C." ;
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context, CHANNEL_ID)
