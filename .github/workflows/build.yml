@@ -24,6 +24,8 @@ jobs:
       #          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
       #      run: echo $FIREBASE_CONFIG > app/google-services.json
 
+      - name: Add dummy API Key
+        run: echo $'\nOWM_API_KEY = "api key"' >> gradle.properties
 
       - name: Build
         run: ./gradlew build

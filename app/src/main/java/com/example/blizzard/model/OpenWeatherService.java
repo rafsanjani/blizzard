@@ -1,6 +1,7 @@
 package com.example.blizzard.model;
 
-import com.example.blizzard.Util.ApiKeyHolder;
+import com.example.blizzard.data.api.OpenWeatherApi;
+import com.example.blizzard.util.ApiKeyHolder;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -14,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class OpenWeatherService {
 
     private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/";
-    private OpenWeatherApi mOpenWeatherApi;
+    private final OpenWeatherApi mOpenWeatherApi;
 
     public OpenWeatherService() {
 
@@ -32,11 +33,11 @@ public class OpenWeatherService {
                 .create(OpenWeatherApi.class);
     }
 
-    public Call<WeatherData> getWeatherByCityName(String cityName) {
+    public Call<WeatherDataResponse> getWeather(String cityName) {
         return mOpenWeatherApi.getWeatherByCityName(cityName, ApiKeyHolder.API_KEY);
     }
 
-    public Call<WeatherData> getWeatherByLongitudeLatitude(Double latitude, Double longitude) {
+    public Call<WeatherDataResponse> getWeather(Double latitude, Double longitude) {
         return mOpenWeatherApi.getWeatherByLongitudeLatitude(latitude, longitude, ApiKeyHolder.API_KEY);
     }
 

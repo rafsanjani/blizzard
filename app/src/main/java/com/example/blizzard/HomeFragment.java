@@ -32,10 +32,12 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
-import com.example.blizzard.Util.CheckNetworkUtil;
-import com.example.blizzard.Util.TimeUtil;
-import com.example.blizzard.model.Weather;
-import com.example.blizzard.model.WeatherData;
+import com.example.blizzard.data.database.WeatherMapper;
+import com.example.blizzard.data.entities.Weather;
+import com.example.blizzard.data.entities.WeatherDataEntity;
+import com.example.blizzard.model.WeatherDataResponse;
+import com.example.blizzard.util.CheckNetworkUtil;
+import com.example.blizzard.util.TimeUtil;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -54,6 +56,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Objects;
+import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
 
@@ -69,7 +72,7 @@ public class HomeFragment extends Fragment {
     TextInputEditText searchBox;
     ProgressBar dataLoading;
     Button btnSearch;
-    private TimeUtil mTimeUtil = new TimeUtil();
+    private final TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -114,13 +117,6 @@ public class HomeFragment extends Fragment {
         if (!mIsNetworkAvailable)
             Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
-
-        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
-            if (weatherData != null) {
-                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                resolveAppState(weatherData);
-            }
-        });
 
         ensureLocationIsEnabled();
 
@@ -276,7 +272,7 @@ public class HomeFragment extends Fragment {
                 Double latitude = location.getLatitude();
                 Double longitude = location.getLongitude();
                 mBlizzardViewModel.getWeather(latitude, longitude);
-                observeViewModel();
+                observeWeatherChanges();
             } else {
                 Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
                 requestLocationUpdates();
@@ -289,12 +285,21 @@ public class HomeFragment extends Fragment {
 
     }
 
-    private void observeViewModel() {
+    private void observeWeatherChanges() {
         mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
+                saveToDb(weatherData);
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+
                 resolveAppState(weatherData);
             }
+        });
+    }
+
+    private void saveToDb(WeatherDataResponse weatherDataResponse) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            WeatherDataEntity entity = WeatherMapper.mapToEntity(weatherDataResponse);
+            mBlizzardViewModel.saveWeather(entity);
         });
     }
 
@@ -317,22 +322,22 @@ public class HomeFragment extends Fragment {
         stopLocationUpdates();
     }
 
-    private void resolveAppState(WeatherData weatherData) {
-        String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
+    private void resolveAppState(WeatherDataResponse weatherDataResponse) {
+        String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
-        Double temp = weatherData.getMain().getTemp();
+        Double temp = weatherDataResponse.getMain().getTemp();
         tvCityTemp.setText(conToCelsius(temp));
 
-        String humidity = weatherData.getMain().getHumidity() + "%";
+        String humidity = weatherDataResponse.getMain().getHumidity() + "%";
         tvCityHumidity.setText(humidity);
 
-        Weather weather = weatherData.getWeather().get(0);
+        Weather weather = weatherDataResponse.getWeather().get(0);
         tvCityDescription.setText(weather.getDescription());
 
         LoadImage(weather.getIcon());
 
-        String windSpeed = weatherData.getWind().getSpeed() + " m/s";
+        String windSpeed = weatherDataResponse.getWind().getSpeed() + " m/s";
 
         tvCityWindSpeed.setText(windSpeed);
 

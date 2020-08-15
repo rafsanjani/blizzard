@@ -1,4 +1,4 @@
-package com.example.blizzard.Util;
+package com.example.blizzard.util;
 
 import com.example.blizzard.BuildConfig;
 
