@@ -49,26 +49,9 @@ public class SearchFragment extends Fragment {
         mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
 //        mBlizzardViewModel.init();
 
-        Bundle bundle = this.getArguments();
-
-
-        if (bundle != null) {
-
-            /*
-                city_name will be empty when the
-                arg is passed from the home_fragment.
-             */
-
-            String city_name = bundle.getString(CITY_NAME);
-            if (city_name == null) {
-                assert getArguments() != null;
-                String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
-                mBlizzardViewModel.getWeather(cityName);
-            } else {
-                mBlizzardViewModel.getWeather(city_name);
-            }
-        }
-
+        assert getArguments() != null;
+        String cityName = SearchFragmentArgs.fromBundle(getArguments()).getCityName();
+        mBlizzardViewModel.getWeather(cityName);
 
     }
 

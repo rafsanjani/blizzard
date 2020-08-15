@@ -43,14 +43,12 @@ public class NotificationHelper {
 
         createNotificationChannel();
 
-        Bundle bundle = new Bundle();
-        bundle.putString(SearchFragment.CITY_NAME, cityName);
+
 
         PendingIntent pendingIntent =
                 new NavDeepLinkBuilder(context)
                         .setGraph(R.navigation.nav_graph)
-                        .setDestination(R.id.SecondFragment)
-                        .setArguments(bundle)
+                        .setDestination(R.id.FirstFragment)
                         .createPendingIntent();
 
         String notificationText = cityName + " has experienced a weather change, with a temperature change from " +
@@ -61,6 +59,9 @@ public class NotificationHelper {
                         .setContentTitle(context.getString(R.string.weather_update))
                         .setContentText(notificationText)
                         .setSmallIcon(R.drawable.ic_cloud)
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(context.getString(R.string.weather_update))
+                        .bigText(notificationText))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentIntent(pendingIntent)
                         .setAutoCancel(true);
