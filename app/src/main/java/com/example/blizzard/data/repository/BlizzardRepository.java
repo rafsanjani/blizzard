@@ -50,6 +50,7 @@ public class BlizzardRepository {
                 } else {
                     //response failed for some reason
                     Log.e(TAG, "onResponse: Request Failed " + response.errorBody());
+                    searchCityMutableLiveData.setValue(null);
                 }
             }
 
