@@ -44,8 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
         WorkRequest request =
                 new PeriodicWorkRequest
-                        .Builder(DataUpdateWorker.class, 1, TimeUnit.HOURS)
+                        .Builder(DataUpdateWorker.class, 15, TimeUnit.MINUTES)
                         .setConstraints(constraints)
+                        .setInitialDelay(15, TimeUnit.SECONDS)
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
@@ -73,6 +74,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
 }

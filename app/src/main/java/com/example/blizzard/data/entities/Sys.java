@@ -1,5 +1,5 @@
 
-package com.example.blizzard.model;
+package com.example.blizzard.data.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -7,8 +7,6 @@ import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 
 public class Sys {
-
-
     @SerializedName("country")
     @Expose
     private String country;
@@ -29,16 +27,4 @@ public class Sys {
                 "country='" + country + '\'' +
                 '}';
     }
-
-    //    @TypeConverter
-//    public String SysToJson(Sys sys) {
-//
-//        return new Gson().toJson(sys, Sys.class);
-//    }
-//
-//    @TypeConverter
-//    public Sys jsonToSys(String json) {
-//
-//        return new Gson().fromJson(json, Sys.class);
-//    }
 }

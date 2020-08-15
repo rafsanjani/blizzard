@@ -28,17 +28,4 @@ public class Wind {
                 "speed=" + speed +
                 '}';
     }
-
-    //    @TypeConverter
-//    public String windToJson(Wind wind) {
-//
-//        return new Gson().toJson(wind, Wind.class);
-//    }
-//
-//    @TypeConverter
-//    public Wind jsonToWind(String json) {
-//
-//        return new Gson().fromJson(json, Wind.class);
-//    }
-
 }

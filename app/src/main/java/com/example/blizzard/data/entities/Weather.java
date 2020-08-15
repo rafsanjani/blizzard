@@ -1,5 +1,5 @@
 
-package com.example.blizzard.model;
+package com.example.blizzard.data.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -41,18 +41,5 @@ public class Weather {
                 ", icon='" + icon + '\'' +
                 '}';
     }
-
-    //    @TypeConverter
-//    public static List<Weather> jsonToWeather(String json) {
-//        Type listType = new TypeToken<List<Weather>>() {
-//        }.getType();
-//        return new Gson().fromJson(json, listType);
-//    }
-//
-//    @TypeConverter
-//    public static String WeatherToJson(List<Weather> weathers) {
-//        Weather weather = weathers.get(0);
-//        return new Gson().toJson(weather, Weather.class);
-//    }
 
 }

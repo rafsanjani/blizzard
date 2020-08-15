@@ -1,4 +1,4 @@
-package com.example.blizzard.Util;
+package com.example.blizzard.util;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,10 +17,10 @@ import com.example.blizzard.SearchFragment;
 public class NotificationHelper {
 
     private static NotificationHelper instance;
-    private Context context;
+    private final Context context;
     private final static String CHANNEL_ID = "Blizzard_channel";
     private final static int NOTIFICATION_ID = 1290;
-    private String cityName;
+    private final String cityName;
 
     private NotificationHelper(Context context, String cityName) {
         this.context = context.getApplicationContext();
@@ -34,7 +34,7 @@ public class NotificationHelper {
         return instance;
     }
 
-    private void createNotification() {
+    public void createNotification() {
 
         createNotificationChannel();
 

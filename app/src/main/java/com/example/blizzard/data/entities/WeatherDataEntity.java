@@ -1,18 +1,20 @@
-package com.example.blizzard.model;
+package com.example.blizzard.data.entities;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity
+@Entity(tableName = "weather")
 public class WeatherDataEntity {
+    @NonNull
+    @PrimaryKey(autoGenerate = false)
     private String cityName;
     private double temperature;
     private int humidity;
     private String description;
     private double windSpeed;
-    @PrimaryKey(autoGenerate = true)
-    private int uuid;
+
 
     public WeatherDataEntity(String cityName, double temperature, int humidity, String description, double windSpeed) {
         this.cityName = cityName;
@@ -60,14 +62,6 @@ public class WeatherDataEntity {
 
     public void setWindSpeed(double windSpeed) {
         this.windSpeed = windSpeed;
-    }
-
-    public int getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(int uuid) {
-        this.uuid = uuid;
     }
 
     @Override

@@ -1,9 +1,6 @@
 package com.example.blizzard;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +15,16 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
-import com.example.blizzard.Util.DatabaseInjector;
-import com.example.blizzard.Util.TimeUtil;
-import com.example.blizzard.model.Weather;
-import com.example.blizzard.model.WeatherData;
-import com.example.blizzard.model.WeatherDataEntity;
-import com.example.blizzard.repositories.BlizzardRepository;
+import com.example.blizzard.data.database.WeatherMapper;
+import com.example.blizzard.data.entities.Weather;
+import com.example.blizzard.data.entities.WeatherDataEntity;
+import com.example.blizzard.model.WeatherDataResponse;
+import com.example.blizzard.util.TimeUtil;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class SearchFragment extends Fragment {
@@ -37,11 +36,12 @@ public class SearchFragment extends Fragment {
     TextView tvTime;
     ImageView IvWeatherImage;
     ProgressBar dataLoading;
-    private TimeUtil mTimeUtil = new TimeUtil();
+    private final TimeUtil mTimeUtil = new TimeUtil();
     private BlizzardViewModel mBlizzardViewModel;
-    private HandlerThread handlerThread;
     private static final String TAG = "SearchFragment";
+
     public static final String CITY_NAME = "com.example.blizzard.cityName";
+    private final Executor executor = Executors.newSingleThreadExecutor();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,62 +87,25 @@ public class SearchFragment extends Fragment {
     }
 
     private void observeViewModels(View view) {
-
-        BlizzardRepository.isNull.observe(getViewLifecycleOwner(), aBoolean -> {
-            if (aBoolean) {
+        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+            if (weatherData != null) {
+                saveToDb(weatherData);
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                insertDataIntoViews(weatherData);
+            } else {
                 Snackbar.make(view, R.string.error_getting_data, Snackbar.LENGTH_SHORT).show();
                 Navigation.findNavController(view).navigate(R.id.action_SecondFragment_to_FirstFragment);
-            } else {
-                mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
-                    if (weatherData != null) {
-                        saveToDb(weatherData);
-                        mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                        insertDataIntoViews(weatherData);
-                    }
-                });
-            }
-        });
-
-
-    }
-
-    private void saveToDb(WeatherData weatherData) {
-        handlerThread = new HandlerThread("database_worker");
-        handlerThread.start();
-        Handler handler = new Handler(handlerThread.getLooper());
-
-        handler.post(() -> {
-            String cityName;
-            WeatherDataEntity entity = createDatabaseEntity(weatherData);
-
-            cityName = DatabaseInjector.getDao(getContext()).getByName(entity.getCityName());
-
-            if (cityName == null) {
-                DatabaseInjector.getDao(getContext()).insertWeatherData(entity);
-            } else {
-                Log.d(TAG, "query already in db updating query");
-                DatabaseInjector.getDao(getContext()).updateData(entity);
             }
         });
     }
 
-    private WeatherDataEntity createDatabaseEntity(WeatherData weatherData) {
-        return new WeatherDataEntity(
-                weatherData.getName(),
-                weatherData.getMain().getTemp(),
-                weatherData.getMain().getHumidity(),
-                weatherData.getWeather().get(0).getDescription(),
-                weatherData.getWind().getSpeed()
-        );
+    private void saveToDb(WeatherDataResponse weatherDataResponse) {
+        executor.execute(() -> {
+            WeatherDataEntity entity = WeatherMapper.mapToEntity(weatherDataResponse);
+            mBlizzardViewModel.saveWeather(entity);
+        });
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (handlerThread != null) {
-            handlerThread.quitSafely();
-        }
-    }
 
     private void findViews(@NonNull View view) {
         tvCityTitle = view.findViewById(R.id.tv_cityName);
@@ -155,22 +118,22 @@ public class SearchFragment extends Fragment {
         dataLoading = view.findViewById(R.id.data_loading);
     }
 
-    private void insertDataIntoViews(WeatherData weatherData) {
-        String cityName = weatherData.getName() + ", " + weatherData.getSys().getCountry();
+    private void insertDataIntoViews(WeatherDataResponse weatherDataResponse) {
+        String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
-        Double temp = weatherData.getMain().getTemp();
+        Double temp = weatherDataResponse.getMain().getTemp();
         tvCityTemp.setText(conToCelsius(temp));
 
-        String humidity = weatherData.getMain().getHumidity() + "%";
+        String humidity = weatherDataResponse.getMain().getHumidity() + "%";
         tvCityHumidity.setText(humidity);
 
-        Weather weather = weatherData.getWeather().get(0);
+        Weather weather = weatherDataResponse.getWeather().get(0);
         tvCityDescription.setText(weather.getDescription());
 
         LoadImage(weather.getIcon());
 
-        String windSpeed = weatherData.getWind().getSpeed() + " m/s";
+        String windSpeed = weatherDataResponse.getWind().getSpeed() + " m/s";
 
         tvCityWindSpeed.setText(windSpeed);
 
