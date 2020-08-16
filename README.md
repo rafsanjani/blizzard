@@ -1,7 +1,7 @@
 
 
 # blizzard
-A simple weather application for collaborative work for GADS team-aad-388. 
+A simple weather application for collaborative work for learners of GADS 2020
 
 ### Goal ✅
 
