@@ -70,10 +70,10 @@ public class HomeFragment extends Fragment {
     TextView tvTime;
     ImageView ivWeatherImage;
     TextInputEditText searchBox;
-    ProgressBar dataLoading;
-    Button btnSearch;
+    ProgressBar progressBar;
+    Button searchBtn;
     private final TimeUtil mTimeUtil = new TimeUtil();
-    private static final int LOCATION_REQUEST_CODE = 123;
+    private static final int locationRequestCode = 123;
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationUpdatesCallback;
@@ -120,7 +120,7 @@ public class HomeFragment extends Fragment {
 
         ensureLocationIsEnabled();
 
-        btnSearch.setOnClickListener(view1 -> {
+        searchBtn.setOnClickListener(view1 -> {
             //Hide the Keyboard when search button is clicked
             InputMethodManager inputMethodManager = (InputMethodManager)
                     requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -142,7 +142,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void initializeViews(@NonNull View view) {
-        btnSearch = view.findViewById(R.id.search_btn);
+        searchBtn = view.findViewById(R.id.search_btn);
         tvCityTitle = view.findViewById(R.id.tv_cityName);
         tvCityDescription = view.findViewById(R.id.tv_weatherDescription);
         tvCityHumidity = view.findViewById(R.id.tv_humidityValue);
@@ -151,7 +151,7 @@ public class HomeFragment extends Fragment {
         tvTime = view.findViewById(R.id.tv_dayTime);
         ivWeatherImage = view.findViewById(R.id.weather_icon);
         searchBox = view.findViewById(R.id.et_cityName);
-        dataLoading = view.findViewById(R.id.data_loading);
+        progressBar = view.findViewById(R.id.data_loading);
     }
 
     public void checkLocationPermission() {
@@ -177,12 +177,12 @@ public class HomeFragment extends Fragment {
 
     private void requestLocationPermission() {
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-        requestPermissions(permissions, LOCATION_REQUEST_CODE);
+        requestPermissions(permissions, locationRequestCode);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == LOCATION_REQUEST_CODE) {
+        if (requestCode == locationRequestCode) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //permission granted
                 Log.d(TAG, "onRequestPermissionsResult: Location Permission Granted, Requesting User Location");
@@ -289,7 +289,7 @@ public class HomeFragment extends Fragment {
         mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
                 saveToDb(weatherData);
-                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimeZone());
 
                 resolveAppState(weatherData);
             }
@@ -343,7 +343,7 @@ public class HomeFragment extends Fragment {
 
         tvTime.setText(mTimeUtil.getTime());
 
-        dataLoading.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
 
         showViews();
     }

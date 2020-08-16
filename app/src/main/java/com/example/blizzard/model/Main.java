@@ -41,15 +41,4 @@ public class Main {
                 '}';
     }
 
-    //    @TypeConverter
-//    public String windToJson(Main main) {
-//
-//        return new Gson().toJson(main, Main.class);
-//    }
-//
-//    @TypeConverter
-//    public Main windToJson(String json) {
-//
-//        return new Gson().fromJson(json, Main.class);
-//    }
 }

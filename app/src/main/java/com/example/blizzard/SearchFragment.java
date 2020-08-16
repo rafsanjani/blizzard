@@ -35,12 +35,11 @@ public class SearchFragment extends Fragment {
     TextView tvCityWindSpeed;
     TextView tvTime;
     ImageView IvWeatherImage;
-    ProgressBar dataLoading;
+    ProgressBar progressBar;
     private final TimeUtil mTimeUtil = new TimeUtil();
     private BlizzardViewModel mBlizzardViewModel;
     private static final String TAG = "SearchFragment";
 
-    public static final String CITY_NAME = "com.example.blizzard.cityName";
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -73,7 +72,7 @@ public class SearchFragment extends Fragment {
         mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
                 saveToDb(weatherData);
-                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
+                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimeZone());
                 insertDataIntoViews(weatherData);
             } else {
                 Snackbar.make(view, R.string.error_getting_data, Snackbar.LENGTH_SHORT).show();
@@ -98,7 +97,7 @@ public class SearchFragment extends Fragment {
         tvCityWindSpeed = view.findViewById(R.id.tv_windSpeed);
         tvTime = view.findViewById(R.id.tv_dayTime);
         IvWeatherImage = view.findViewById(R.id.weather_icon);
-        dataLoading = view.findViewById(R.id.data_loading);
+        progressBar = view.findViewById(R.id.data_loading);
     }
 
     private void insertDataIntoViews(WeatherDataResponse weatherDataResponse) {
@@ -122,7 +121,7 @@ public class SearchFragment extends Fragment {
 
         tvTime.setText(mTimeUtil.getTime());
 
-        dataLoading.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
         makeVisible();
 
     }

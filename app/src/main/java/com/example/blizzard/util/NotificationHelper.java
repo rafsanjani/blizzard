@@ -5,21 +5,19 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Build;
-import android.os.Bundle;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 
 import com.example.blizzard.R;
-import com.example.blizzard.SearchFragment;
 
 public class NotificationHelper {
 
     private static NotificationHelper instance;
     private final Context context;
-    private final static String CHANNEL_ID = "Blizzard_channel";
-    private final static int NOTIFICATION_ID = 1290;
+    private final static String channelId = "Blizzard_channel";
+    private final static int notificationId = 1290;
     private final String cityName;
     private final int prevTemp;
     private final int curTemp;
@@ -44,7 +42,6 @@ public class NotificationHelper {
         createNotificationChannel();
 
 
-
         PendingIntent pendingIntent =
                 new NavDeepLinkBuilder(context)
                         .setGraph(R.navigation.nav_graph)
@@ -52,23 +49,23 @@ public class NotificationHelper {
                         .createPendingIntent();
 
         String notificationText = cityName + " has experienced a weather change, with a temperature change from " +
-                this.prevTemp + "°C to " + this.curTemp + "°C." ;
+                this.prevTemp + "°C to " + this.curTemp + "°C.";
 
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(context, CHANNEL_ID)
+                new NotificationCompat.Builder(context, channelId)
                         .setContentTitle(context.getString(R.string.weather_update))
                         .setContentText(notificationText)
                         .setSmallIcon(R.drawable.ic_cloud)
                         .setStyle(new NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(context.getString(R.string.weather_update))
-                        .bigText(notificationText))
+                                .setBigContentTitle(context.getString(R.string.weather_update))
+                                .bigText(notificationText))
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentIntent(pendingIntent)
                         .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+        notificationManager.notify(notificationId, notificationBuilder.build());
 
     }
 
@@ -77,7 +74,7 @@ public class NotificationHelper {
             String description = "Notification channel for blizzard";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_ID, importance);
+            NotificationChannel channel = new NotificationChannel(channelId, channelId, importance);
             channel.setDescription(description);
 
             NotificationManager notificationManager = context.getSystemService(NotificationManager.class);

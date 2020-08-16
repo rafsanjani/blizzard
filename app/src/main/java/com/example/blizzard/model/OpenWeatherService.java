@@ -14,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class OpenWeatherService {
 
-    private final static String BASE_URL = "http://api.openweathermap.org/data/2.5/";
+    private final static String baseUrl = "http://api.openweathermap.org/data/2.5/";
     private final OpenWeatherApi mOpenWeatherApi;
 
     public OpenWeatherService() {
@@ -26,7 +26,7 @@ public class OpenWeatherService {
                 .build();
 
         mOpenWeatherApi = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(baseUrl)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
@@ -34,11 +34,11 @@ public class OpenWeatherService {
     }
 
     public Call<WeatherDataResponse> getWeather(String cityName) {
-        return mOpenWeatherApi.getWeatherByCityName(cityName, ApiKeyHolder.API_KEY);
+        return mOpenWeatherApi.getWeatherByCityName(cityName, ApiKeyHolder.apiKey);
     }
 
     public Call<WeatherDataResponse> getWeather(Double latitude, Double longitude) {
-        return mOpenWeatherApi.getWeatherByLongitudeLatitude(latitude, longitude, ApiKeyHolder.API_KEY);
+        return mOpenWeatherApi.getWeatherByLongitudeLatitude(latitude, longitude, ApiKeyHolder.apiKey);
     }
 
 }

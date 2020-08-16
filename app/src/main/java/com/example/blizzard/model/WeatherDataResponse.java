@@ -36,7 +36,7 @@ public class WeatherDataResponse {
 
     @SerializedName("timezone")
     @Expose
-    private int timezone;
+    private int timeZone;
 
     @SerializedName("name")
     @Expose
@@ -62,8 +62,8 @@ public class WeatherDataResponse {
     }
 
 
-    public int getTimezone() {
-        return timezone;
+    public int getTimeZone() {
+        return timeZone;
     }
 
 
@@ -89,7 +89,7 @@ public class WeatherDataResponse {
                 ", main=" + main.toString() +
                 ", wind=" + wind.toString() +
                 ", dt=" + dt +
-                ", timezone=" + timezone +
+                ", timezone=" + timeZone +
                 ", name='" + name + '\'' +
                 ", sys=" + sys.toString() +
                 '}';
@@ -129,8 +129,8 @@ public class WeatherDataResponse {
         this.dt = dt;
     }
 
-    public void setTimezone(int timezone) {
-        this.timezone = timezone;
+    public void setTimeZone(int timeZone) {
+        this.timeZone = timeZone;
     }
 
     public void setName(String name) {

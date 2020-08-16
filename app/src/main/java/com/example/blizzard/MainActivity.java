@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    public static final String WEATHER_UPDATE_CHECKER = "Weather_Update_Checker";
+    public static final String weatherUpdateChecker = "Weather_Update_Checker";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
+        Toolbar toolBar = findViewById(R.id.toolbar);
+        NavigationUI.setupWithNavController(toolBar, navController, appBarConfiguration);
         startWorker();
     }
 
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
-                .enqueueUniquePeriodicWork(WEATHER_UPDATE_CHECKER, ExistingPeriodicWorkPolicy.KEEP, request);
+                .enqueueUniquePeriodicWork(weatherUpdateChecker, ExistingPeriodicWorkPolicy.KEEP, request);
     }
 
     @Override

@@ -45,7 +45,7 @@ public class DataUpdateWorker extends ListenableWorker {
                 completer.set(Result.success());
             }
 
-            Callback<WeatherDataResponse> callback = new Callback<WeatherDataResponse>() {
+            Callback<WeatherDataResponse> callBack = new Callback<WeatherDataResponse>() {
                 @Override
                 public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
                     WeatherDataResponse currentWeather = response.body();
@@ -58,8 +58,8 @@ public class DataUpdateWorker extends ListenableWorker {
                             Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
                             NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
                                     previousWeather.getCityName(),
-                                    kelToCelsius(previousWeather.getTemperature()),
-                                    kelToCelsius(currentWeather.getMain().getTemp()));
+                                    tempConverter(previousWeather.getTemperature()),
+                                    tempConverter(currentWeather.getMain().getTemp()));
                             notificationHelper.createNotification();
                             break;
                         }
@@ -67,7 +67,7 @@ public class DataUpdateWorker extends ListenableWorker {
                     completer.set(Result.success());
                 }
 
-                private int kelToCelsius(double temperature) {
+                private int tempConverter(double temperature) {
                     return (int) Math.round(temperature - 273.15);
                 }
 
@@ -82,16 +82,16 @@ public class DataUpdateWorker extends ListenableWorker {
             new OpenWeatherService().getWeather(data.get(0).getCityName()).enqueue(new Callback<WeatherDataResponse>() {
                 @Override
                 public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
-                    callback.onResponse(call, response);
+                    callBack.onResponse(call, response);
                 }
 
                 @Override
                 public void onFailure(@NotNull Call<WeatherDataResponse> call, @NotNull Throwable t) {
-                    callback.onFailure(call, t);
+                    callBack.onFailure(call, t);
                 }
             });
 
-            return callback;
+            return callBack;
         });
     }
 }
