@@ -38,3 +38,12 @@ If the file does not exist, you should create it and paste the following line in
 
 ##### A sample API call for the weather in London, UK would be <br>
 https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=439d4b804bc8187953eb36d2a8c26a02
+
+<h3>Screenshots</h3>
+<p float="left">
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/screenshots/1.jpg" width="300" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/screenshots/2.jpg" width="300" /> 
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/screenshots/3.jpg" width="300" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/screenshots/4.jpg" width="300" />
+</p>
+
