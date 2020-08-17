@@ -53,8 +53,7 @@ public class NotificationHelper {
                         .setArguments(bundle)
                         .createPendingIntent();
 
-        String notificationText = cityName + " has experienced a weather change, with a temperature change from " +
-                this.prevTemp + "°C to " + this.curTemp + "°C." ;
+        String notificationText = cityName + " - from " + prevTemp + "°C to " + curTemp + "°C ";
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context, CHANNEL_ID)
