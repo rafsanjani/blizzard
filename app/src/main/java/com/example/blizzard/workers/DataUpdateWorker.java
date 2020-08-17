@@ -49,12 +49,11 @@ public class DataUpdateWorker extends ListenableWorker {
                 @Override
                 public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
                     WeatherDataResponse currentWeather = response.body();
-
                     for (WeatherDataEntity previousWeather : data) {
-                        if (previousWeather.getCityName().equals(Objects.requireNonNull(currentWeather).getName())
-                                && ((previousWeather.getTemperature() - currentWeather.getMain().getTemp()) > 2)
-                                || (currentWeather.getMain().getTemp() - previousWeather.getTemperature()) > 2) {
+                        double difference = Math.abs(previousWeather.getTemperature() - Objects.requireNonNull(currentWeather).getMain().getTemp());
+                        Log.d(TAG, "onResponse: Weather difference is " + difference + "°C");
 
+                        if (difference > 1) {
                             Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
                             NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
                                     previousWeather.getCityName(),
@@ -78,18 +77,8 @@ public class DataUpdateWorker extends ListenableWorker {
                 }
             };
 
+            new OpenWeatherService().getWeather(data.get(0).getCityName()).enqueue(callback);
 
-            new OpenWeatherService().getWeather(data.get(0).getCityName()).enqueue(new Callback<WeatherDataResponse>() {
-                @Override
-                public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
-                    callback.onResponse(call, response);
-                }
-
-                @Override
-                public void onFailure(@NotNull Call<WeatherDataResponse> call, @NotNull Throwable t) {
-                    callback.onFailure(call, t);
-                }
-            });
 
             return callback;
         });
