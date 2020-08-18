@@ -30,6 +30,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.blizzard.data.database.WeatherMapper;
@@ -125,13 +126,16 @@ public class HomeFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        CheckNetworkUtil mCheckNetworkUtil = new CheckNetworkUtil(getActivity());
-        mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
-        if (!mIsNetworkAvailable)
-            Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
+        super.onViewCreated(view, savedInstanceState);
         initializeViews(view);
 
-        ensureLocationIsEnabled();
+        mIsNetworkAvailable = CheckNetworkUtil.isNetworkAvailable(requireContext());
+        if (!mIsNetworkAvailable) {
+            Navigation.findNavController(view).navigate(R.id.NetworkFragment);
+        }else {
+
+            ensureLocationIsEnabled();
+        }
 
         btnSearch.setOnClickListener(view1 -> {
             //Hide the Keyboard when search button is clicked
@@ -141,7 +145,7 @@ public class HomeFragment extends Fragment {
                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
             }
-            mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
+            mIsNetworkAvailable = CheckNetworkUtil.isNetworkAvailable(requireContext());
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
             } else if (!mIsNetworkAvailable) {

@@ -39,4 +39,14 @@
             android:name="cityName"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/NetworkFragment"
+        android:name="com.example.blizzard.NetworkFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_network" >
+        <action
+            android:id="@+id/action_NetworkFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment"
+            app:popUpTo="@id/FirstFragment" />
+    </fragment>
 </navigation>
