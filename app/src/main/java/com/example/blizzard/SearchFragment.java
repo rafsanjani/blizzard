@@ -91,7 +91,7 @@ public class SearchFragment extends Fragment {
             if (weatherData != null) {
                 saveToDb(weatherData);
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                insertDataIntoViews(weatherData);
+                resolveAppState(weatherData);
             } else {
                 Snackbar.make(view, R.string.error_getting_data, Snackbar.LENGTH_SHORT).show();
                 Navigation.findNavController(view).navigate(R.id.action_SecondFragment_to_FirstFragment);
@@ -118,7 +118,7 @@ public class SearchFragment extends Fragment {
         dataLoading = view.findViewById(R.id.data_loading);
     }
 
-    private void insertDataIntoViews(WeatherDataResponse weatherDataResponse) {
+    private void resolveAppState(WeatherDataResponse weatherDataResponse) {
         String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
@@ -140,11 +140,11 @@ public class SearchFragment extends Fragment {
         tvTime.setText(mTimeUtil.getTime());
 
         dataLoading.setVisibility(View.INVISIBLE);
-        makeVisible();
+        showViews();
 
     }
 
-    private void makeVisible() {
+    private void showViews() {
         tvCityTitle.setVisibility(View.VISIBLE);
         tvCityDescription.setVisibility(View.VISIBLE);
         tvCityHumidity.setVisibility(View.VISIBLE);

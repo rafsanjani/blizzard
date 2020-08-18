@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -28,10 +30,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
-import com.example.blizzard.HomeFragmentDirections.ActionFirstFragmentToSecondFragment;
 import com.example.blizzard.data.database.WeatherMapper;
 import com.example.blizzard.data.entities.Weather;
 import com.example.blizzard.data.entities.WeatherDataEntity;
@@ -53,7 +53,9 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -79,12 +81,22 @@ public class HomeFragment extends Fragment {
     private LocationCallback mLocationUpdatesCallback;
     private boolean mIsNetworkAvailable;
     private BlizzardViewModel mBlizzardViewModel;
+    private TextInputLayout etContainer;
+    private Button btnCurLocation;
+    private FloatingActionButton fabSearch;
+    private Boolean curLocIsVisible = true;
+    private Animation slideRight;
+    private Animation slideLeft;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
 
+
+        slideRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_right);
+        slideLeft = AnimationUtils.loadAnimation(getContext(), R.anim.slide_left);
 
         mLocationUpdatesCallback = new LocationCallback() {
             @Override
@@ -96,6 +108,7 @@ public class HomeFragment extends Fragment {
                 Double longitude = location.getLongitude();
                 mBlizzardViewModel.getWeather(latitude, longitude);
             }
+
 
             @Override
             public void onLocationAvailability(LocationAvailability locationAvailability) {
@@ -135,11 +148,72 @@ public class HomeFragment extends Fragment {
                 searchBox.setError(getString(R.string.no_internet));
             } else {
                 String cityName = searchBox.getText().toString();
-                ActionFirstFragmentToSecondFragment action = HomeFragmentDirections.actionFirstFragmentToSecondFragment(cityName);
-                Navigation.findNavController(view1).navigate(action);
+                mBlizzardViewModel.getWeather(cityName);
+                observeWeatherChanges();
+                animateViews();
             }
         });
+        btnCurLocation.setOnClickListener(view12 -> {
+            getUserLocation();
+            reverseViewAnim();
+        });
+        fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
     }
+
+    private void reverseViewAnimToInit() {
+        if (!curLocIsVisible) {
+            fabSearch.startAnimation(slideRight);
+            etContainer.startAnimation(slideLeft);
+            btnSearch.startAnimation(slideLeft);
+
+            fabSearch.setVisibility(View.INVISIBLE);
+            fabSearch.setClickable(false);
+            etContainer.setVisibility(View.VISIBLE);
+            btnSearch.setVisibility(View.VISIBLE);
+            btnSearch.setClickable(true);
+            curLocIsVisible = true;
+        } else {
+            fabSearch.startAnimation(slideRight);
+            btnCurLocation.startAnimation(slideRight);
+            etContainer.startAnimation(slideLeft);
+            btnSearch.startAnimation(slideLeft);
+
+            fabSearch.setVisibility(View.INVISIBLE);
+            fabSearch.setClickable(false);
+            btnCurLocation.setVisibility(View.INVISIBLE);
+            btnCurLocation.setClickable(false);
+            etContainer.setVisibility(View.VISIBLE);
+            btnSearch.setVisibility(View.VISIBLE);
+            btnSearch.setClickable(true);
+            curLocIsVisible = true;
+        }
+    }
+
+    private void reverseViewAnim() {
+        curLocIsVisible = false;
+        btnCurLocation.startAnimation(slideRight);
+        btnCurLocation.setVisibility(View.INVISIBLE);
+        btnCurLocation.setClickable(false);
+    }
+
+    private void animateViews() {
+        etContainer.startAnimation(slideRight);
+        btnSearch.startAnimation(slideRight);
+        btnCurLocation.startAnimation(slideLeft);
+        fabSearch.startAnimation(slideLeft);
+
+
+        etContainer.setVisibility(View.INVISIBLE);
+        btnSearch.setVisibility(View.INVISIBLE);
+        btnSearch.setClickable(false);
+        btnCurLocation.setVisibility(View.VISIBLE);
+        btnCurLocation.setClickable(true);
+        fabSearch.setVisibility(View.VISIBLE);
+        fabSearch.setClickable(true);
+
+
+    }
+
 
     private void initializeViews(@NonNull View view) {
         btnSearch = view.findViewById(R.id.search_btn);
@@ -152,6 +226,9 @@ public class HomeFragment extends Fragment {
         ivWeatherImage = view.findViewById(R.id.weather_icon);
         searchBox = view.findViewById(R.id.et_cityName);
         dataLoading = view.findViewById(R.id.data_loading);
+        etContainer = view.findViewById(R.id.etLayoutContainer);
+        btnCurLocation = view.findViewById(R.id.btn_current_location);
+        fabSearch = view.findViewById(R.id.fab_search);
     }
 
     public void checkLocationPermission() {
@@ -327,7 +404,7 @@ public class HomeFragment extends Fragment {
         tvCityTitle.setText(cityName);
 
         Double temp = weatherDataResponse.getMain().getTemp();
-        tvCityTemp.setText(conToCelsius(temp));
+        tvCityTemp.setText(tempConverter(temp));
 
         String humidity = weatherDataResponse.getMain().getHumidity() + "%";
         tvCityHumidity.setText(humidity);
@@ -367,7 +444,7 @@ public class HomeFragment extends Fragment {
                 .into(ivWeatherImage);
     }
 
-    private String conToCelsius(Double temp) {
+    private String tempConverter(Double temp) {
         int celsius = (int) Math.round(temp - 273.15);
         return celsius + "°C";
     }
