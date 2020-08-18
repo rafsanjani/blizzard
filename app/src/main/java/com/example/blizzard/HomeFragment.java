@@ -87,6 +87,7 @@ public class HomeFragment extends Fragment {
     private Boolean curLocIsVisible = true;
     private Animation slideRight;
     private Animation slideLeft;
+    public static final String CITY_NAME = "com.example.blizzard.cityName";
 
 
     @Override
@@ -131,7 +132,17 @@ public class HomeFragment extends Fragment {
             Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
 
-        ensureLocationIsEnabled();
+        Bundle bundle = this.getArguments();
+
+        if (bundle == null){
+            ensureLocationIsEnabled();
+        }else {
+            String cityName = bundle.getString(HomeFragment.CITY_NAME);
+            mBlizzardViewModel.getWeather(cityName);
+            observeWeatherChanges();
+        }
+
+
 
         btnSearch.setOnClickListener(view1 -> {
             //Hide the Keyboard when search button is clicked
@@ -154,7 +165,7 @@ public class HomeFragment extends Fragment {
             }
         });
         btnCurLocation.setOnClickListener(view12 -> {
-            getUserLocation();
+            ensureLocationIsEnabled();
             reverseViewAnim();
         });
         fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
@@ -380,10 +391,10 @@ public class HomeFragment extends Fragment {
         });
     }
 
-
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
+        getUserLocation();
     }
 
     private void stopLocationUpdates() {
