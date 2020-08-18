@@ -9,34 +9,5 @@
         android:id="@+id/FirstFragment"
         android:name="com.example.blizzard.HomeFragment"
         android:label="@string/app_name"
-        tools:layout="@layout/home_fragment">
-
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_enter_anim"
-            app:popExitAnim="@anim/nav_default_enter_anim"
-            app:popUpToInclusive="false" />
-    </fragment>
-    <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.blizzard.SearchFragment"
-        android:label="@string/app_name"
-        tools:layout="@layout/search_fragment">
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment"
-            app:enterAnim="@anim/nav_default_exit_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_exit_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim"
-            app:popUpTo="@id/FirstFragment"
-            app:popUpToInclusive="true" />
-        <argument
-            android:name="cityName"
-            app:argType="string" />
-    </fragment>
+        tools:layout="@layout/home_fragment"/>
 </navigation>

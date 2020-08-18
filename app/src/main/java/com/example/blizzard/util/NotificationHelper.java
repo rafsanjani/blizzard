@@ -11,8 +11,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 
+import com.example.blizzard.HomeFragment;
 import com.example.blizzard.R;
-import com.example.blizzard.SearchFragment;
 
 public class NotificationHelper {
 
@@ -44,12 +44,12 @@ public class NotificationHelper {
         createNotificationChannel();
 
         Bundle bundle = new Bundle();
-        bundle.putString(SearchFragment.CITY_NAME, cityName);
+        bundle.putString(HomeFragment.CITY_NAME, cityName);
 
         PendingIntent pendingIntent =
                 new NavDeepLinkBuilder(context)
                         .setGraph(R.navigation.nav_graph)
-                        .setDestination(R.id.SecondFragment)
+                        .setDestination(R.id.FirstFragment)
                         .setArguments(bundle)
                         .createPendingIntent();
 
