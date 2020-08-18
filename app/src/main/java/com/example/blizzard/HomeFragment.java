@@ -88,6 +88,7 @@ public class HomeFragment extends Fragment {
     private Boolean curLocIsVisible = true;
     private Animation slideRight;
     private Animation slideLeft;
+    public static final String CITY_NAME = "com.example.blizzard.cityName";
 
 
     @Override
@@ -134,7 +135,15 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(view).navigate(R.id.NetworkFragment);
         }else {
 
-            ensureLocationIsEnabled();
+            Bundle bundle = this.getArguments();
+
+            if (bundle == null){
+                ensureLocationIsEnabled();
+            }else {
+                String cityName = bundle.getString(HomeFragment.CITY_NAME);
+                mBlizzardViewModel.getWeather(cityName);
+                observeWeatherChanges();
+            }
         }
 
         btnSearch.setOnClickListener(view1 -> {

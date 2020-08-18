@@ -28,7 +28,7 @@
 
     <string name="exit_app">EXIT</string>
     <string name="ok_button">OK</string>
-    <string name="no_connection_title">No internet connection found</string>
+    <string name="no_connection_title">No internet connection found!</string>
     <string name="no_connection_subtitle">Turn on your Mobile data and hit OK</string>
     <string name="image_description">A network check image</string>
 </resources>
