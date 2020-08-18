@@ -391,7 +391,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
