@@ -165,7 +165,7 @@ public class HomeFragment extends Fragment {
             }
         });
         btnCurLocation.setOnClickListener(view12 -> {
-            getUserLocation();
+            ensureLocationIsEnabled();
             reverseViewAnim();
         });
         fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
@@ -395,6 +395,7 @@ public class HomeFragment extends Fragment {
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
+        getUserLocation();
     }
 
     private void stopLocationUpdates() {
