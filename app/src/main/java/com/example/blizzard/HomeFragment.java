@@ -133,13 +133,13 @@ public class HomeFragment extends Fragment {
         mIsNetworkAvailable = CheckNetworkUtil.isNetworkAvailable(requireContext());
         if (!mIsNetworkAvailable) {
             Navigation.findNavController(view).navigate(R.id.NetworkFragment);
-        }else {
+        } else {
 
             Bundle bundle = this.getArguments();
 
-            if (bundle == null){
+            if (bundle == null) {
                 ensureLocationIsEnabled();
-            }else {
+            } else {
                 String cityName = bundle.getString(HomeFragment.CITY_NAME);
                 mBlizzardViewModel.getWeather(cityName);
                 observeWeatherChanges();
@@ -167,7 +167,7 @@ public class HomeFragment extends Fragment {
             }
         });
         btnCurLocation.setOnClickListener(view12 -> {
-            getUserLocation();
+            ensureLocationIsEnabled();
             reverseViewAnim();
         });
         fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
