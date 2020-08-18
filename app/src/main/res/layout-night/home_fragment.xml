@@ -18,9 +18,9 @@
         android:text="@string/search"
         android:textColor="#FEF6F6"
         app:backgroundTint="#000000"
-        app:layout_constraintEnd_toEndOf="@id/enter_cityInputLayout"
-        app:layout_constraintStart_toStartOf="@+id/enter_cityInputLayout"
-        app:layout_constraintTop_toBottomOf="@+id/enter_cityInputLayout" />
+        app:layout_constraintEnd_toEndOf="@id/etLayoutContainer"
+        app:layout_constraintStart_toStartOf="@+id/etLayoutContainer"
+        app:layout_constraintTop_toBottomOf="@+id/etLayoutContainer" />
 
 
     <com.google.android.material.card.MaterialCardView
@@ -166,7 +166,7 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/enter_cityInputLayout"
+        android:id="@+id/etLayoutContainer"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -5,6 +5,8 @@
     android:id="@+id/home_constraint"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:foregroundTint="#FFFCFC"
+    android:visibility="visible"
     tools:context=".HomeFragment">
 
 
@@ -16,9 +18,10 @@
         android:padding="@dimen/button_dimen"
         android:paddingBottom="@dimen/home_margin"
         android:text="@string/search"
-        app:layout_constraintEnd_toEndOf="@id/enter_cityInputLayout"
-        app:layout_constraintStart_toStartOf="@+id/enter_cityInputLayout"
-        app:layout_constraintTop_toBottomOf="@+id/enter_cityInputLayout" />
+        app:layout_constraintEnd_toEndOf="@id/etLayoutContainer"
+        app:layout_constraintStart_toStartOf="@+id/etLayoutContainer"
+        app:layout_constraintTop_toBottomOf="@+id/etLayoutContainer"
+        tools:visibility="invisible" />
 
 
     <com.google.android.material.card.MaterialCardView
@@ -161,15 +164,17 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/enter_cityInputLayout"
+        android:id="@+id/etLayoutContainer"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="42dp"
         android:hint="@string/search_hint"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="@+id/materialCardView"
         app:layout_constraintStart_toStartOf="@+id/materialCardView"
-        app:layout_constraintTop_toBottomOf="@+id/materialCardView">
+        app:layout_constraintTop_toBottomOf="@+id/materialCardView"
+        tools:visibility="invisible">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_cityName"
@@ -181,5 +186,37 @@
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_current_location"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:clickable="false"
+        android:drawableLeft="@drawable/ic_place"
+        android:text="@string/current_location"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/search_btn"
+        app:layout_constraintEnd_toEndOf="@+id/etLayoutContainer"
+        app:layout_constraintTop_toBottomOf="@+id/materialCardView" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_search"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="#006200EA"
+        android:clickable="false"
+        android:focusable="true"
+        android:src="@drawable/ic_search"
+        android:visibility="invisible"
+        app:backgroundTint="#6200EA"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_current_location" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
