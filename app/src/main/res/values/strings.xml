@@ -34,4 +34,9 @@
 
     <string name="error_getting_data">Error getting weather info</string>
     <string name="current_location">Current location</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_favourites">Favourites</string>
+    <string name="description">Description</string>
+    <string name="temperature">Temperature</string>
 </resources>

@@ -9,6 +9,7 @@ public class WeatherMapper {
     public static WeatherDataEntity mapToEntity(WeatherDataResponse weatherDataResponse) {
         return new WeatherDataEntity(
                 weatherDataResponse.getName(),
+                weatherDataResponse.getSys().getCountry(),
                 weatherDataResponse.getMain().getTemp(),
                 weatherDataResponse.getMain().getHumidity(),
                 weatherDataResponse.getWeather().get(0).getDescription(),

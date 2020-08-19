@@ -46,6 +46,10 @@ https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=439d4b804b
   <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-141927.jpg" width="400" />
   <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-142147.jpg" width="400" />
   <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-142154.jpg" width="400" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-215708.jpg" width="400" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-215716.jpg" width="400" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-230334.jpg" width="400" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200819-021929.jpg" width="400" />
 </p>
 
 

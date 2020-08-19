@@ -9,6 +9,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ import com.example.blizzard.data.entities.Weather;
 import com.example.blizzard.data.entities.WeatherDataEntity;
 import com.example.blizzard.model.WeatherDataResponse;
 import com.example.blizzard.util.CheckNetworkUtil;
+import com.example.blizzard.util.TempConverter;
 import com.example.blizzard.util.TimeUtil;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 import com.google.android.gms.common.api.ApiException;
@@ -54,6 +56,7 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -88,6 +91,7 @@ public class HomeFragment extends Fragment {
     private Animation slideRight;
     private Animation slideLeft;
     public static final String CITY_NAME = "com.example.blizzard.cityName";
+    private View view;
 
 
     @Override
@@ -121,8 +125,8 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.home_fragment, container, false);
+        view = inflater.inflate(R.layout.home_fragment, container, false);
+        return view;
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -164,10 +168,12 @@ public class HomeFragment extends Fragment {
                 animateViews();
             }
         });
+
         btnCurLocation.setOnClickListener(view12 -> {
             ensureLocationIsEnabled();
             reverseViewAnim();
         });
+
         fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
     }
 
@@ -380,6 +386,10 @@ public class HomeFragment extends Fragment {
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
 
                 resolveAppState(weatherData);
+            }else {
+                Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(this::reverseViewAnimToInit, 1000L);
             }
         });
     }
@@ -415,7 +425,7 @@ public class HomeFragment extends Fragment {
         tvCityTitle.setText(cityName);
 
         Double temp = weatherDataResponse.getMain().getTemp();
-        tvCityTemp.setText(tempConverter(temp));
+        tvCityTemp.setText(TempConverter.kelToCelsius(temp));
 
         String humidity = weatherDataResponse.getMain().getHumidity() + "%";
         tvCityHumidity.setText(humidity);
@@ -454,10 +464,4 @@ public class HomeFragment extends Fragment {
                 .error(R.drawable.ic_cloud)
                 .into(ivWeatherImage);
     }
-
-    private String tempConverter(Double temp) {
-        int celsius = (int) Math.round(temp - 273.15);
-        return celsius + "°C";
-    }
-
 }
