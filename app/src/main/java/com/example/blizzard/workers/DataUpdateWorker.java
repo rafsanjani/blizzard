@@ -28,6 +28,7 @@ import retrofit2.Response;
 public class DataUpdateWorker extends ListenableWorker {
     private static final String TAG = "DataUpdateWorker";
     private final BlizzardRepository repository;
+    private Callback<WeatherDataResponse> callback;
 
     public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -46,7 +47,7 @@ public class DataUpdateWorker extends ListenableWorker {
                 completer.set(Result.success());
             }
 
-            Callback<WeatherDataResponse> callback = new Callback<WeatherDataResponse>() {
+            callback = new Callback<WeatherDataResponse>() {
                 @Override
                 public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
                     WeatherDataResponse currentWeather = response.body();
