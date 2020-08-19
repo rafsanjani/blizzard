@@ -158,6 +158,31 @@
                 app:layout_constraintBottom_toBottomOf="@+id/weather_icon"
                 app:layout_constraintStart_toStartOf="@+id/tv_tempValue" />
 
+            <ImageView
+                android:id="@+id/iv_no_internet"
+                android:layout_width="149dp"
+                android:layout_height="93dp"
+                android:src="@drawable/ic_sad_cloud_light_mode"
+                android:visibility="invisible"
+                android:contentDescription="@string/no_internet"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_no_internet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/no_internet"
+                android:textSize="18sp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/iv_no_internet"
+                app:layout_constraintStart_toStartOf="@+id/iv_no_internet"
+                app:layout_constraintTop_toTopOf="@+id/tv_weatherDescription" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

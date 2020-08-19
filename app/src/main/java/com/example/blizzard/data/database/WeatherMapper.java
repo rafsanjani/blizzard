@@ -13,7 +13,9 @@ public class WeatherMapper {
                 weatherDataResponse.getMain().getTemp(),
                 weatherDataResponse.getMain().getHumidity(),
                 weatherDataResponse.getWeather().get(0).getDescription(),
-                weatherDataResponse.getWind().getSpeed()
+                weatherDataResponse.getWind().getSpeed(),
+                weatherDataResponse.getDt(),
+                weatherDataResponse.getTimezone()
         );
     }
 

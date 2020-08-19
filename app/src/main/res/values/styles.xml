@@ -16,4 +16,25 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="weather_list_title" parent="TextAppearance.MaterialComponents.Headline2">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="fontFamily">Roboto</item>
+        <item name="android:textColor">#707070</item>
+    </style>
+
+    <style name="weather_list_temp" parent="weather_list_title">
+        <item name="android:textColor">#000000</item>
+        <item name="fontFamily">@font/copse</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="weather_list_details" parent="TextAppearance.MaterialComponents.Headline2">
+        <item name="android:textColor">#707070</item>
+        <item name="android:textSize">13sp</item>
+
+
+    </style>
+
 </resources>

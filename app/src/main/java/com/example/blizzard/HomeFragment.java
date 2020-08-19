@@ -75,7 +75,7 @@ public class HomeFragment extends Fragment {
     TextView tvTime;
     ImageView ivWeatherImage;
     TextInputEditText searchBox;
-    ProgressBar dataLoading;
+    ProgressBar progressBar;
     Button btnSearch;
     private final TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
@@ -92,6 +92,11 @@ public class HomeFragment extends Fragment {
     private Animation slideLeft;
     public static final String CITY_NAME = "com.example.blizzard.cityName";
     private View view;
+    private Boolean searchByCityName = false;
+    private ImageView ivNoInternet;
+    private TextView tvHumidityTitle;
+    private TextView tvWindTitle;
+    private TextView tvNoInternet;
 
 
     @Override
@@ -138,14 +143,13 @@ public class HomeFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
 
-        if (bundle == null){
+        if (bundle == null) {
             ensureLocationIsEnabled();
-        }else {
+        } else {
             String cityName = bundle.getString(HomeFragment.CITY_NAME);
             mBlizzardViewModel.getWeather(cityName);
             observeWeatherChanges();
         }
-
 
 
         btnSearch.setOnClickListener(view1 -> {
@@ -163,6 +167,7 @@ public class HomeFragment extends Fragment {
                 searchBox.setError(getString(R.string.no_internet));
             } else {
                 String cityName = searchBox.getText().toString();
+                searchByCityName = true;
                 mBlizzardViewModel.getWeather(cityName);
                 observeWeatherChanges();
                 animateViews();
@@ -242,10 +247,14 @@ public class HomeFragment extends Fragment {
         tvTime = view.findViewById(R.id.tv_dayTime);
         ivWeatherImage = view.findViewById(R.id.weather_icon);
         searchBox = view.findViewById(R.id.et_cityName);
-        dataLoading = view.findViewById(R.id.data_loading);
+        progressBar = view.findViewById(R.id.data_loading);
         etContainer = view.findViewById(R.id.etLayoutContainer);
         btnCurLocation = view.findViewById(R.id.btn_current_location);
         fabSearch = view.findViewById(R.id.fab_search);
+        ivNoInternet = view.findViewById(R.id.iv_no_internet);
+        tvHumidityTitle = view.findViewById(R.id.tv_humidityTitle);
+        tvWindTitle = view.findViewById(R.id.tv_windTitle);
+        tvNoInternet = view.findViewById(R.id.tv_no_internet);
     }
 
     public void checkLocationPermission() {
@@ -386,10 +395,19 @@ public class HomeFragment extends Fragment {
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
 
                 resolveAppState(weatherData);
-            }else {
+            } else {
                 Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                if (searchByCityName) {
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                }else {
+                    ivNoInternet.setVisibility(View.VISIBLE);
+                    tvNoInternet.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    tvWindTitle.setVisibility(View.INVISIBLE);
+                    tvHumidityTitle.setVisibility(View.INVISIBLE);
+                }
+
             }
         });
     }
@@ -421,6 +439,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void resolveAppState(WeatherDataResponse weatherDataResponse) {
+        ivNoInternet.setVisibility(View.INVISIBLE);
+        tvNoInternet.setVisibility(View.INVISIBLE);
+        tvWindTitle.setVisibility(View.VISIBLE);
+        tvHumidityTitle.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
         String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
@@ -441,7 +464,7 @@ public class HomeFragment extends Fragment {
 
         tvTime.setText(mTimeUtil.getTime());
 
-        dataLoading.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
 
         showViews();
     }

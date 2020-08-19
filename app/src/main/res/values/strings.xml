@@ -39,4 +39,5 @@
     <string name="nav_favourites">Favourites</string>
     <string name="description">Description</string>
     <string name="temperature">Temperature</string>
+    <string name="no_data_to_show">No data to show</string>
 </resources>

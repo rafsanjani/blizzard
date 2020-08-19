@@ -17,15 +17,19 @@ public class WeatherDataEntity {
     private String description;
     private double windSpeed;
     private String country;
+    private int dt;
+    private int timeZone;
 
 
-    public WeatherDataEntity(@NotNull String cityName, String country, double temperature, int humidity, String description, double windSpeed) {
+    public WeatherDataEntity(@NotNull String cityName, String country, double temperature, int humidity, String description, double windSpeed, int dt, int timeZone) {
         this.cityName = cityName;
         this.country = country;
         this.description = description;
         this.humidity = humidity;
         this.temperature = temperature;
         this.windSpeed = windSpeed;
+        this.dt = dt;
+        this.timeZone = timeZone;
     }
 
     @NotNull
@@ -75,6 +79,22 @@ public class WeatherDataEntity {
 
     public void setWindSpeed(double windSpeed) {
         this.windSpeed = windSpeed;
+    }
+
+    public int getDt() {
+        return dt;
+    }
+
+    public void setDt(int dt) {
+        this.dt = dt;
+    }
+
+    public int getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(int timeZone) {
+        this.timeZone = timeZone;
     }
 
     @Override

@@ -20,6 +20,7 @@ import java.util.List;
 public class FavouriteFragmentAdapter extends RecyclerView.Adapter<FavouriteFragmentAdapter.ViewHolder> {
     private List<WeatherDataEntity> weatherDataEntities;
     private Context mContext;
+    private TimeUtil timeUtil = new TimeUtil();
 
     public FavouriteFragmentAdapter(Context mContext, List<WeatherDataEntity> weatherDataEntities) {
         this.mContext = mContext;
@@ -44,12 +45,16 @@ public class FavouriteFragmentAdapter extends RecyclerView.Adapter<FavouriteFrag
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WeatherDataEntity entity = weatherDataEntities.get(position);
+        timeUtil.setTime(entity.getDt(), entity.getTimeZone());
         String cityName = entity.getCityName() + ", " + entity.getCountry();
         holder.tvCityName.setText(cityName);
         holder.tvDescription.setText(entity.getDescription());
         String humidity = entity.getHumidity() + "%";
         holder.tvHumidity.setText(humidity);
         holder.tvTemperature.setText(TempConverter.kelToCelsius(entity.getTemperature()));
+        holder.tvTime.setText(timeUtil.getTime());
+        String windSpeed = entity.getWindSpeed() + " m/s";
+        holder.tvWindSpeed.setText(windSpeed);
     }
 
     @Override
@@ -62,6 +67,8 @@ public class FavouriteFragmentAdapter extends RecyclerView.Adapter<FavouriteFrag
         TextView tvDescription;
         TextView tvTemperature;
         TextView tvHumidity;
+        TextView tvWindSpeed;
+        TextView tvTime;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -69,6 +76,8 @@ public class FavouriteFragmentAdapter extends RecyclerView.Adapter<FavouriteFrag
             tvDescription = itemView.findViewById(R.id.tv_description);
             tvHumidity = itemView.findViewById(R.id.tv_humidity);
             tvTemperature = itemView.findViewById(R.id.tv_temp);
+            tvWindSpeed = itemView.findViewById(R.id.tv_windSpeed);
+            tvTime = itemView.findViewById(R.id.tv_day_time);
         }
     }
 }
