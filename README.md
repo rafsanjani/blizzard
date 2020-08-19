@@ -40,7 +40,7 @@ If the file does not exist, you should create it and paste the following line in
 https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=439d4b804bc8187953eb36d2a8c26a02
 
 ##### Screenshots
-##### Screenshots
+
 <p float="left">
   <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200819-104313.jpg" width="200 height="auto" />
   <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-141917.jpg" width="200 height="auto" />
