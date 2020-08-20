@@ -97,6 +97,7 @@ public class HomeFragment extends Fragment {
     private TextView tvHumidityTitle;
     private TextView tvWindTitle;
     private TextView tvNoInternet;
+    private ImageView ivFavourite;
 
 
     @Override
@@ -255,7 +256,22 @@ public class HomeFragment extends Fragment {
         tvHumidityTitle = view.findViewById(R.id.tv_humidityTitle);
         tvWindTitle = view.findViewById(R.id.tv_windTitle);
         tvNoInternet = view.findViewById(R.id.tv_no_internet);
+        ivFavourite = view.findViewById(R.id.iv_favourite);
     }
+
+    public void makeViewsInvisible(){
+        tvCityTitle.setVisibility(View.INVISIBLE);
+        tvCityDescription.setVisibility(View.INVISIBLE);
+        tvCityHumidity.setVisibility(View.INVISIBLE);
+        tvCityTemp.setVisibility(View.INVISIBLE);
+        tvCityWindSpeed.setVisibility(View.INVISIBLE);
+        tvTime.setVisibility(View.INVISIBLE);
+        ivWeatherImage.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+        tvHumidityTitle.setVisibility(View.INVISIBLE);
+        tvWindTitle.setVisibility(View.INVISIBLE);
+    }
+
 
     public void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -367,6 +383,7 @@ public class HomeFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void getUserLocation() {
+        searchByCityName = false;
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         OnSuccessListener<Location> mLocationListener = (Location location) -> {
@@ -401,11 +418,9 @@ public class HomeFragment extends Fragment {
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(this::reverseViewAnimToInit, 1000L);
                 }else {
+                    makeViewsInvisible();
                     ivNoInternet.setVisibility(View.VISIBLE);
                     tvNoInternet.setVisibility(View.VISIBLE);
-                    progressBar.setVisibility(View.INVISIBLE);
-                    tvWindTitle.setVisibility(View.INVISIBLE);
-                    tvHumidityTitle.setVisibility(View.INVISIBLE);
                 }
 
             }
@@ -439,11 +454,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void resolveAppState(WeatherDataResponse weatherDataResponse) {
+        progressBar.setVisibility(View.VISIBLE);
         ivNoInternet.setVisibility(View.INVISIBLE);
         tvNoInternet.setVisibility(View.INVISIBLE);
-        tvWindTitle.setVisibility(View.VISIBLE);
-        tvHumidityTitle.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
         String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
@@ -477,6 +490,8 @@ public class HomeFragment extends Fragment {
         tvCityWindSpeed.setVisibility(View.VISIBLE);
         tvTime.setVisibility(View.VISIBLE);
         ivWeatherImage.setVisibility(View.VISIBLE);
+        tvHumidityTitle.setVisibility(View.VISIBLE);
+        tvWindTitle.setVisibility(View.VISIBLE);
     }
 
     private void LoadImage(String iconId) {
