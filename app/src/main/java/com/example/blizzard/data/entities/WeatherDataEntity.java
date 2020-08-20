@@ -19,9 +19,10 @@ public class WeatherDataEntity {
     private String country;
     private int dt;
     private int timeZone;
+    private Boolean isFavourite;
 
 
-    public WeatherDataEntity(@NotNull String cityName, String country, double temperature, int humidity, String description, double windSpeed, int dt, int timeZone) {
+    public WeatherDataEntity(@NotNull String cityName, String country, double temperature, int humidity, String description, double windSpeed, int dt, int timeZone, Boolean isFavourite) {
         this.cityName = cityName;
         this.country = country;
         this.description = description;
@@ -30,6 +31,7 @@ public class WeatherDataEntity {
         this.windSpeed = windSpeed;
         this.dt = dt;
         this.timeZone = timeZone;
+        this.isFavourite = isFavourite;
     }
 
     @NotNull
@@ -79,6 +81,14 @@ public class WeatherDataEntity {
 
     public void setWindSpeed(double windSpeed) {
         this.windSpeed = windSpeed;
+    }
+
+    public Boolean getFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(Boolean favourite) {
+        isFavourite = favourite;
     }
 
     public int getDt() {

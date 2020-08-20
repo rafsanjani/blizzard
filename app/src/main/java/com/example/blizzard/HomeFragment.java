@@ -98,6 +98,9 @@ public class HomeFragment extends Fragment {
     private TextView tvWindTitle;
     private TextView tvNoInternet;
     private ImageView ivFavourite;
+    Boolean isClicked = false;
+    String cityName;
+
 
 
     @Override
@@ -167,9 +170,9 @@ public class HomeFragment extends Fragment {
             } else if (!mIsNetworkAvailable) {
                 searchBox.setError(getString(R.string.no_internet));
             } else {
-                String cityName = searchBox.getText().toString();
+                String searchText = searchBox.getText().toString();
                 searchByCityName = true;
-                mBlizzardViewModel.getWeather(cityName);
+                mBlizzardViewModel.getWeather(searchText);
                 observeWeatherChanges();
                 animateViews();
             }
@@ -181,6 +184,29 @@ public class HomeFragment extends Fragment {
         });
 
         fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
+
+        ivFavourite.setOnClickListener(view14 -> {
+            if (isClicked) {
+                isClicked = false;
+                LoadImage(R.drawable.ic_favorite, ivFavourite);
+                updateIsFavourite(false);
+            } else {
+                isClicked = true;
+                LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
+                updateIsFavourite(true);
+            }
+        });
+    }
+
+    private void updateIsFavourite(boolean b) {
+        if (cityName != null) {
+            Executors.newSingleThreadExecutor()
+                    .execute(() -> {
+                        WeatherDataEntity weatherDataEntity = mBlizzardViewModel.getWeatherByCityName(cityName);
+                        weatherDataEntity.setFavourite(b);
+                        mBlizzardViewModel.updateWeatherData(weatherDataEntity);
+                    });
+        }
     }
 
     private void reverseViewAnimToInit() {
@@ -259,7 +285,7 @@ public class HomeFragment extends Fragment {
         ivFavourite = view.findViewById(R.id.iv_favourite);
     }
 
-    public void makeViewsInvisible(){
+    public void makeViewsInvisible() {
         tvCityTitle.setVisibility(View.INVISIBLE);
         tvCityDescription.setVisibility(View.INVISIBLE);
         tvCityHumidity.setVisibility(View.INVISIBLE);
@@ -408,16 +434,16 @@ public class HomeFragment extends Fragment {
     private void observeWeatherChanges() {
         mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
+                cityName = weatherData.getName();
                 saveToDb(weatherData);
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-
                 resolveAppState(weatherData);
             } else {
                 Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
                 if (searchByCityName) {
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(this::reverseViewAnimToInit, 1000L);
-                }else {
+                } else {
                     makeViewsInvisible();
                     ivNoInternet.setVisibility(View.VISIBLE);
                     tvNoInternet.setVisibility(View.VISIBLE);
@@ -427,10 +453,39 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void checkIfIsFavourite() {
+        try {
+            WeatherDataEntity entity = mBlizzardViewModel.getWeatherByCityName(cityName);
+            Log.d(TAG, "checkIfIsFavourite: city name is " + cityName);
+            Handler favHandler = new Handler(Looper.getMainLooper());
+            favHandler.post(() -> {
+
+                if (searchByCityName) {
+                    ivFavourite.setVisibility(View.VISIBLE);
+                } else {
+                    ivFavourite.setVisibility(View.INVISIBLE);
+                }
+
+                if (entity.getFavourite()){
+                    isClicked = true;
+                    LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
+                }else {
+                    isClicked = false;
+                    LoadImage(R.drawable.ic_favorite, ivFavourite);
+                }
+
+            });
+        }catch (NullPointerException e){
+            Log.e(TAG, "checkIfIsFavourite: Data not saved yet");
+        }
+
+    }
+
     private void saveToDb(WeatherDataResponse weatherDataResponse) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            WeatherDataEntity entity = WeatherMapper.mapToEntity(weatherDataResponse);
+            WeatherDataEntity entity = new WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse);
             mBlizzardViewModel.saveWeather(entity);
+            checkIfIsFavourite();
         });
     }
 
@@ -501,5 +556,11 @@ public class HomeFragment extends Fragment {
                 .load(url)
                 .error(R.drawable.ic_cloud)
                 .into(ivWeatherImage);
+    }
+
+    private void LoadImage(int drawable, ImageView imageView) {
+        Glide.with(requireView())
+                .load(drawable)
+                .into(imageView);
     }
 }
