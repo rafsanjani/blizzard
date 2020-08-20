@@ -5,7 +5,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +19,6 @@ import android.widget.TextView;
 import com.example.blizzard.data.entities.WeatherDataEntity;
 import com.example.blizzard.data.repository.BlizzardRepository;
 import com.example.blizzard.util.FavouriteFragmentAdapter;
-import com.example.blizzard.viewmodel.BlizzardViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,22 +68,12 @@ public class FavouritesFragment extends Fragment {
     }
 
     private void initialiseAdapter() {
-        BlizzardViewModel viewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
+        BlizzardRepository repository = new BlizzardRepository(getContext());
         AtomicReference<List<WeatherDataEntity>> entities = new AtomicReference<>();
         Executors.newSingleThreadExecutor().execute(() -> {
+                    entities.set(repository.getAllDataFromDb());
 
-                    List<WeatherDataEntity> dataEntities = viewModel.getAllDataFromDb();
-                    List<WeatherDataEntity> favWeather = new ArrayList<>();
-
-                    for (WeatherDataEntity dataEntity : dataEntities) {
-                        if (dataEntity.getFavourite()) {
-                            favWeather.add(dataEntity);
-                        }
-                    }
-
-                    entities.set(favWeather);
-
-                    makeViewsVisible(entities);
+            makeViewsVisible(entities);
                 }
         );
 
@@ -100,7 +88,7 @@ public class FavouritesFragment extends Fragment {
                 tvNoData.setVisibility(View.INVISIBLE);
             });
 
-        } else {
+        }else {
             favHandler.postDelayed(() -> {
                 ivNoData.setVisibility(View.VISIBLE);
                 tvNoData.setVisibility(View.VISIBLE);
