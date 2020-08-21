@@ -9,11 +9,23 @@
         android:id="@+id/FirstFragment"
         android:name="com.example.blizzard.HomeFragment"
         android:label="@string/app_name"
-        tools:layout="@layout/home_fragment"/>
+        tools:layout="@layout/home_fragment">
+        <action
+            android:id="@+id/action_FirstFrag_to_favouritesFrag"
+            app:destination="@id/favouritesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
     <fragment
-        android:id="@+id/NetworkFragment"
-        android:name="com.example.blizzard.NetworkFragment"
-        android:label="@string/app_name"
-        tools:layout="@layout/fragment_network" >
+        android:id="@+id/favouritesFragment"
+        android:name="com.example.blizzard.FavouritesFragment"
+        android:label="Favourites"
+        tools:layout="@layout/fragment_favourites" >
+        <action
+            android:id="@+id/action_favouritesFrag_to_FirstFrag"
+            app:destination="@id/FirstFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popUpTo="@id/FirstFragment" />
     </fragment>
 </navigation>

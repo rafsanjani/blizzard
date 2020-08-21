@@ -36,6 +36,14 @@ public class BlizzardRepository {
         mWeatherDatabase.weatherDao().saveWeather(weatherDataEntity);
     }
 
+    public WeatherDataEntity getWeatherByCityName(String cityName){
+        return  mWeatherDatabase.weatherDao().getWeatherForCity(cityName);
+    }
+
+    public void updateWeather(WeatherDataEntity entity){
+        mWeatherDatabase.weatherDao().updateWeatherData(entity);
+    }
+
     private static final String TAG = "BlizzardRepository";
 
     public MutableLiveData<WeatherDataResponse> getWeather(String cityName) {
