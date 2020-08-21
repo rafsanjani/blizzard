@@ -40,12 +40,19 @@ If the file does not exist, you should create it and paste the following line in
 https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=439d4b804bc8187953eb36d2a8c26a02
 
 ##### Screenshots
-##### Screenshots
+
 <p float="left">
-  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-141917.jpg" width="400" />
-  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-141927.jpg" width="400" />
-  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-142147.jpg" width="400" />
-  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-142154.jpg" width="400" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200819-104313.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-141917.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-141927.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-142147.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-142154.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-215708.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-215716.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200818-230334.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200819-021929.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200819-190830.jpg" width="200 height="auto" />
+  <img src="https://github.com/lokaimoma/blizzard/blob/master/Screenshots/Screenshot_20200819-190852.jpg" width="200 height="auto" />
 </p>
 
 

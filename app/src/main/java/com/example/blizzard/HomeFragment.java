@@ -9,13 +9,18 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
+import android.util.AndroidException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -37,6 +42,7 @@ import com.example.blizzard.data.entities.Weather;
 import com.example.blizzard.data.entities.WeatherDataEntity;
 import com.example.blizzard.model.WeatherDataResponse;
 import com.example.blizzard.util.CheckNetworkUtil;
+import com.example.blizzard.util.TempConverter;
 import com.example.blizzard.util.TimeUtil;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
 import com.google.android.gms.common.api.ApiException;
@@ -54,6 +60,7 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -72,7 +79,7 @@ public class HomeFragment extends Fragment {
     TextView tvTime;
     ImageView ivWeatherImage;
     TextInputEditText searchBox;
-    ProgressBar dataLoading;
+    ProgressBar progressBar;
     Button btnSearch;
     private final TimeUtil mTimeUtil = new TimeUtil();
     private static final int LOCATION_REQUEST_CODE = 123;
@@ -88,6 +95,15 @@ public class HomeFragment extends Fragment {
     private Animation slideRight;
     private Animation slideLeft;
     public static final String CITY_NAME = "com.example.blizzard.cityName";
+    private View view;
+    private Boolean searchByCityName = false;
+    private ImageView ivNoInternet;
+    private TextView tvHumidityTitle;
+    private TextView tvWindTitle;
+    private TextView tvNoInternet;
+    private ImageView ivFavourite;
+    Boolean isClicked = false;
+    String cityName;
 
 
     @Override
@@ -121,8 +137,8 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.home_fragment, container, false);
+        view = inflater.inflate(R.layout.home_fragment, container, false);
+        return view;
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -134,14 +150,13 @@ public class HomeFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
 
-        if (bundle == null){
+        if (bundle == null) {
             ensureLocationIsEnabled();
-        }else {
+        } else {
             String cityName = bundle.getString(HomeFragment.CITY_NAME);
             mBlizzardViewModel.getWeather(cityName);
             observeWeatherChanges();
         }
-
 
 
         btnSearch.setOnClickListener(view1 -> {
@@ -158,17 +173,43 @@ public class HomeFragment extends Fragment {
             } else if (!mIsNetworkAvailable) {
                 searchBox.setError(getString(R.string.no_internet));
             } else {
-                String cityName = searchBox.getText().toString();
-                mBlizzardViewModel.getWeather(cityName);
+                String searchText = searchBox.getText().toString();
+                searchByCityName = true;
+                mBlizzardViewModel.getWeather(searchText);
                 observeWeatherChanges();
                 animateViews();
             }
         });
+
         btnCurLocation.setOnClickListener(view12 -> {
             ensureLocationIsEnabled();
             reverseViewAnim();
         });
+
         fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
+
+        ivFavourite.setOnClickListener(view14 -> {
+            if (isClicked) {
+                isClicked = false;
+                LoadImage(R.drawable.ic_favorite, ivFavourite);
+                updateIsFavourite(false);
+            } else {
+                isClicked = true;
+                LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
+                updateIsFavourite(true);
+            }
+        });
+    }
+
+    private void updateIsFavourite(boolean b) {
+        if (cityName != null) {
+            Executors.newSingleThreadExecutor()
+                    .execute(() -> {
+                        WeatherDataEntity weatherDataEntity = mBlizzardViewModel.getWeatherByCityName(cityName);
+                        weatherDataEntity.setFavourite(b);
+                        mBlizzardViewModel.updateWeatherData(weatherDataEntity);
+                    });
+        }
     }
 
     private void reverseViewAnimToInit() {
@@ -236,11 +277,30 @@ public class HomeFragment extends Fragment {
         tvTime = view.findViewById(R.id.tv_dayTime);
         ivWeatherImage = view.findViewById(R.id.weather_icon);
         searchBox = view.findViewById(R.id.et_cityName);
-        dataLoading = view.findViewById(R.id.data_loading);
+        progressBar = view.findViewById(R.id.data_loading);
         etContainer = view.findViewById(R.id.etLayoutContainer);
         btnCurLocation = view.findViewById(R.id.btn_current_location);
         fabSearch = view.findViewById(R.id.fab_search);
+        ivNoInternet = view.findViewById(R.id.iv_no_internet);
+        tvHumidityTitle = view.findViewById(R.id.tv_humidityTitle);
+        tvWindTitle = view.findViewById(R.id.tv_windTitle);
+        tvNoInternet = view.findViewById(R.id.tv_no_internet);
+        ivFavourite = view.findViewById(R.id.iv_favourite);
     }
+
+    public void makeViewsInvisible() {
+        tvCityTitle.setVisibility(View.INVISIBLE);
+        tvCityDescription.setVisibility(View.INVISIBLE);
+        tvCityHumidity.setVisibility(View.INVISIBLE);
+        tvCityTemp.setVisibility(View.INVISIBLE);
+        tvCityWindSpeed.setVisibility(View.INVISIBLE);
+        tvTime.setVisibility(View.INVISIBLE);
+        ivWeatherImage.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+        tvHumidityTitle.setVisibility(View.INVISIBLE);
+        tvWindTitle.setVisibility(View.INVISIBLE);
+    }
+
 
     public void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -352,6 +412,7 @@ public class HomeFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void getUserLocation() {
+        searchByCityName = false;
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         OnSuccessListener<Location> mLocationListener = (Location location) -> {
@@ -376,18 +437,78 @@ public class HomeFragment extends Fragment {
     private void observeWeatherChanges() {
         mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
+                cityName = weatherData.getName();
                 saveToDb(weatherData);
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-
                 resolveAppState(weatherData);
+            } else {
+                Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
+                if (searchByCityName) {
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                } else {
+                    makeViewsInvisible();
+                    ivNoInternet.setVisibility(View.VISIBLE);
+                    tvNoInternet.setVisibility(View.VISIBLE);
+                }
+
             }
         });
     }
 
+    private void checkIfIsFavourite() {
+        try {
+            WeatherDataEntity entity = mBlizzardViewModel.getWeatherByCityName(cityName);
+            Log.d(TAG, "checkIfIsFavourite: city name is " + cityName);
+            Handler favHandler = new Handler(Looper.getMainLooper());
+            favHandler.post(() -> {
+
+                if (searchByCityName) {
+
+                    if (entity.getFavourite()) {
+                        isClicked = true;
+                        LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
+                    } else {
+                        isClicked = false;
+                        LoadImage(R.drawable.ic_favorite, ivFavourite);
+                    }
+
+                    ivFavourite.animate()
+                            .alpha(1)
+                            .setInterpolator(new AnticipateInterpolator())
+                            .setDuration(500)
+                            .start();
+                    ivFavourite.setVisibility(View.VISIBLE);
+
+                } else {
+                    ivFavourite.animate()
+                            .alpha(0)
+                            .setInterpolator(new AnticipateInterpolator())
+                            .setDuration(500)
+                            .start();
+
+                    // delayed handler needed for fade out animation to run
+
+                    new Handler(Looper.getMainLooper())
+                            .postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ivFavourite.setVisibility(View.INVISIBLE);
+                                }
+                            }, 2000);
+                }
+            });
+        } catch (NullPointerException e) {
+            Log.e(TAG, "checkIfIsFavourite: Data not saved yet");
+        }
+
+    }
+
     private void saveToDb(WeatherDataResponse weatherDataResponse) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            WeatherDataEntity entity = WeatherMapper.mapToEntity(weatherDataResponse);
+            WeatherDataEntity entity = new WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse);
             mBlizzardViewModel.saveWeather(entity);
+            checkIfIsFavourite();
         });
     }
 
@@ -411,11 +532,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void resolveAppState(WeatherDataResponse weatherDataResponse) {
+        progressBar.setVisibility(View.VISIBLE);
+        ivNoInternet.setVisibility(View.INVISIBLE);
+        tvNoInternet.setVisibility(View.INVISIBLE);
         String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
         tvCityTitle.setText(cityName);
 
         Double temp = weatherDataResponse.getMain().getTemp();
-        tvCityTemp.setText(tempConverter(temp));
+        tvCityTemp.setText(TempConverter.kelToCelsius(temp));
 
         String humidity = weatherDataResponse.getMain().getHumidity() + "%";
         tvCityHumidity.setText(humidity);
@@ -431,7 +555,7 @@ public class HomeFragment extends Fragment {
 
         tvTime.setText(mTimeUtil.getTime());
 
-        dataLoading.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
 
         showViews();
     }
@@ -444,6 +568,8 @@ public class HomeFragment extends Fragment {
         tvCityWindSpeed.setVisibility(View.VISIBLE);
         tvTime.setVisibility(View.VISIBLE);
         ivWeatherImage.setVisibility(View.VISIBLE);
+        tvHumidityTitle.setVisibility(View.VISIBLE);
+        tvWindTitle.setVisibility(View.VISIBLE);
     }
 
     private void LoadImage(String iconId) {
@@ -455,9 +581,9 @@ public class HomeFragment extends Fragment {
                 .into(ivWeatherImage);
     }
 
-    private String tempConverter(Double temp) {
-        int celsius = (int) Math.round(temp - 273.15);
-        return celsius + "°C";
+    private void LoadImage(int drawable, ImageView imageView) {
+        Glide.with(requireView())
+                .load(drawable)
+                .into(imageView);
     }
-
 }

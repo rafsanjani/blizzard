@@ -22,7 +22,10 @@ public interface WeatherDao {
 
 
     @Query("SELECT cityName FROM weather WHERE cityName = :cityName")
-    LiveData<String> getWeatherForCity(String cityName);
+    LiveData<String> getWeatherLiveDataForCity(String cityName);
+
+    @Query("SELECT * FROM weather WHERE cityName = :cityName")
+    WeatherDataEntity getWeatherForCity(String cityName);
 
     @Update
     void updateWeatherData(WeatherDataEntity weatherDataEntity);

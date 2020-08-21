@@ -13,6 +13,7 @@ import com.example.blizzard.data.repository.BlizzardRepository;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.WeatherDataResponse;
 import com.example.blizzard.util.NotificationHelper;
+import com.example.blizzard.util.TempConverter;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import retrofit2.Response;
 public class DataUpdateWorker extends ListenableWorker {
     private static final String TAG = "DataUpdateWorker";
     private final BlizzardRepository repository;
+    private Callback<WeatherDataResponse> callback;
 
     public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -45,7 +47,7 @@ public class DataUpdateWorker extends ListenableWorker {
                 completer.set(Result.success());
             }
 
-            Callback<WeatherDataResponse> callback = new Callback<WeatherDataResponse>() {
+            callback = new Callback<WeatherDataResponse>() {
                 @Override
                 public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
                     WeatherDataResponse currentWeather = response.body();
@@ -56,9 +58,9 @@ public class DataUpdateWorker extends ListenableWorker {
                         if (difference > 1) {
                             Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
                             NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
-                                    previousWeather.getCityName(),
-                                    kelToCelsius(previousWeather.getTemperature()),
-                                    kelToCelsius(currentWeather.getMain().getTemp()));
+                                    previousWeather.getCityName() + ", " + previousWeather.getCountry(),
+                                    TempConverter.kelToCelsius2(previousWeather.getTemperature()),
+                                    TempConverter.kelToCelsius2(currentWeather.getMain().getTemp()));
                             notificationHelper.createNotification();
                             break;
                         }
@@ -66,9 +68,7 @@ public class DataUpdateWorker extends ListenableWorker {
                     completer.set(Result.success());
                 }
 
-                private int kelToCelsius(double temperature) {
-                    return (int) Math.round(temperature - 273.15);
-                }
+
 
                 @Override
                 public void onFailure(@NotNull Call<WeatherDataResponse> call, @NotNull Throwable t) {

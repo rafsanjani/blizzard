@@ -36,7 +36,15 @@ public class BlizzardViewModel extends AndroidViewModel {
         mWeatherLiveData = mBlizzardRepository.getWeather(cityName);
     }
 
-    List<WeatherDataEntity> getAllDataFromDb() {
+    public WeatherDataEntity getWeatherByCityName(String cityName){
+        return mBlizzardRepository.getWeatherByCityName(cityName);
+    }
+
+    public void updateWeatherData(WeatherDataEntity entity){
+        mBlizzardRepository.updateWeather(entity);
+    }
+
+    public List<WeatherDataEntity> getAllDataFromDb() {
         return mBlizzardRepository.getAllDataFromDb();
     }
 
