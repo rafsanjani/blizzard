@@ -4,10 +4,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -26,6 +30,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -54,7 +59,9 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -89,6 +96,7 @@ public class HomeFragment extends Fragment {
     private Animation slideRight;
     private Animation slideLeft;
     public static final String CITY_NAME = "com.example.blizzard.cityName";
+    private CheckNetworkUtil mCheckNetworkUtil;
 
 
     @Override
@@ -111,7 +119,6 @@ public class HomeFragment extends Fragment {
                 mBlizzardViewModel.getWeather(latitude, longitude);
             }
 
-
             @Override
             public void onLocationAvailability(LocationAvailability locationAvailability) {
                 super.onLocationAvailability(locationAvailability);
@@ -130,13 +137,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initializeViews(view);
 
-        mIsNetworkAvailable = CheckNetworkUtil.isNetworkAvailable(requireContext());
-        if (!mIsNetworkAvailable) {
-            Navigation.findNavController(view).navigate(R.id.NetworkFragment);
-        } else {
-
             Bundle bundle = this.getArguments();
-
             if (bundle == null) {
                 ensureLocationIsEnabled();
             } else {
@@ -144,33 +145,32 @@ public class HomeFragment extends Fragment {
                 mBlizzardViewModel.getWeather(cityName);
                 observeWeatherChanges();
             }
-        }
 
-        btnSearch.setOnClickListener(view1 -> {
-            //Hide the Keyboard when search button is clicked
-            InputMethodManager inputMethodManager = (InputMethodManager)
-                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (inputMethodManager != null) {
-                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-            mIsNetworkAvailable = CheckNetworkUtil.isNetworkAvailable(requireContext());
-            if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
-                searchBox.setError("Enter city name");
-            } else if (!mIsNetworkAvailable) {
-                searchBox.setError(getString(R.string.no_internet));
-            } else {
-                String cityName = searchBox.getText().toString();
-                mBlizzardViewModel.getWeather(cityName);
-                observeWeatherChanges();
-                animateViews();
-            }
-        });
-        btnCurLocation.setOnClickListener(view12 -> {
-            ensureLocationIsEnabled();
-            reverseViewAnim();
-        });
-        fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
+            btnSearch.setOnClickListener(view1 -> {
+                //Hide the Keyboard when search button is clicked
+                InputMethodManager inputMethodManager = (InputMethodManager)
+                        requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (inputMethodManager != null) {
+                    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+                mIsNetworkAvailable = CheckNetworkUtil.isNetworkAvailable(requireContext());
+                if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
+                    searchBox.setError("Enter city name");
+                } else if (!mIsNetworkAvailable) {
+                    searchBox.setError(getString(R.string.no_internet));
+                } else {
+                    String cityName = searchBox.getText().toString();
+                    mBlizzardViewModel.getWeather(cityName);
+                    observeWeatherChanges();
+                    animateViews();
+                }
+            });
+            btnCurLocation.setOnClickListener(view12 -> {
+                ensureLocationIsEnabled();
+                reverseViewAnim();
+            });
+            fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
     }
 
     private void reverseViewAnimToInit() {
@@ -223,8 +223,6 @@ public class HomeFragment extends Fragment {
         btnCurLocation.setClickable(true);
         fabSearch.setVisibility(View.VISIBLE);
         fabSearch.setClickable(true);
-
-
     }
 
 
@@ -393,7 +391,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
@@ -461,5 +458,4 @@ public class HomeFragment extends Fragment {
         int celsius = (int) Math.round(temp - 273.15);
         return celsius + "°C";
     }
-
 }
