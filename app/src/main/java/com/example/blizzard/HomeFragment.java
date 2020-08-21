@@ -153,6 +153,7 @@ public class HomeFragment extends Fragment {
         if (bundle == null) {
             ensureLocationIsEnabled();
         } else {
+            searchByCityName = true;
             String cityName = bundle.getString(HomeFragment.CITY_NAME);
             mBlizzardViewModel.getWeather(cityName);
             observeWeatherChanges();
