@@ -14,6 +14,8 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -102,9 +104,21 @@ public class FavouritesFragment extends Fragment {
 
         } else {
             favHandler.postDelayed(() -> {
+                ivNoData.setAlpha(0f);
+                tvNoData.setAlpha(0f);
+                ivNoData.animate()
+                        .alpha(1)
+                        .setDuration(500)
+                        .setInterpolator(new AnticipateInterpolator())
+                        .start();
+                tvNoData.animate()
+                        .alpha(1)
+                        .setDuration(500)
+                        .setInterpolator(new AnticipateInterpolator())
+                        .start();
                 ivNoData.setVisibility(View.VISIBLE);
                 tvNoData.setVisibility(View.VISIBLE);
-            }, 5000);
+            }, 1000);
         }
     }
 

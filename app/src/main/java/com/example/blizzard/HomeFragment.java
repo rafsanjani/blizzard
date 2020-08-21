@@ -11,12 +11,16 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.AndroidException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -100,7 +104,6 @@ public class HomeFragment extends Fragment {
     private ImageView ivFavourite;
     Boolean isClicked = false;
     String cityName;
-
 
 
     @Override
@@ -461,21 +464,41 @@ public class HomeFragment extends Fragment {
             favHandler.post(() -> {
 
                 if (searchByCityName) {
+
+                    if (entity.getFavourite()) {
+                        isClicked = true;
+                        LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
+                    } else {
+                        isClicked = false;
+                        LoadImage(R.drawable.ic_favorite, ivFavourite);
+                    }
+
+                    ivFavourite.animate()
+                            .alpha(1)
+                            .setInterpolator(new AnticipateInterpolator())
+                            .setDuration(500)
+                            .start();
                     ivFavourite.setVisibility(View.VISIBLE);
+
                 } else {
-                    ivFavourite.setVisibility(View.INVISIBLE);
-                }
+                    ivFavourite.animate()
+                            .alpha(0)
+                            .setInterpolator(new AnticipateInterpolator())
+                            .setDuration(500)
+                            .start();
 
-                if (entity.getFavourite()){
-                    isClicked = true;
-                    LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
-                }else {
-                    isClicked = false;
-                    LoadImage(R.drawable.ic_favorite, ivFavourite);
-                }
+                    // delayed handler needed for fade out animation to run
 
+                    new Handler(Looper.getMainLooper())
+                            .postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ivFavourite.setVisibility(View.INVISIBLE);
+                                }
+                            }, 2000);
+                }
             });
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             Log.e(TAG, "checkIfIsFavourite: Data not saved yet");
         }
 
