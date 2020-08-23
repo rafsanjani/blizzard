@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 
 public class NetworkMonitor extends LiveData<Boolean> {
-    private  ConnectivityManager mConnectivityManager;
+    private ConnectivityManager mConnectivityManager;
     private Context mContext;
     private NetworkReceiver networkReceiver;
     private ConnectivityManager.NetworkCallback mNetworkCallback = null;
@@ -31,7 +31,7 @@ public class NetworkMonitor extends LiveData<Boolean> {
                 .getSystemService(context.CONNECTIVITY_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mNetworkCallback = new NetworkCallback(this);
-        }else {
+        } else {
             networkReceiver = new NetworkReceiver();
         }
     }
@@ -64,7 +64,7 @@ public class NetworkMonitor extends LiveData<Boolean> {
         }
     }
 
-   public class NetworkCallback extends ConnectivityManager.NetworkCallback {
+    public class NetworkCallback extends ConnectivityManager.NetworkCallback {
 
         private NetworkMonitor mNetworkMonitor;
 
@@ -95,7 +95,7 @@ public class NetworkMonitor extends LiveData<Boolean> {
                             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
                             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
                         postValue(true);
-                    }else {
+                    } else {
                         postValue(false);
                     }
                 }
@@ -103,7 +103,7 @@ public class NetworkMonitor extends LiveData<Boolean> {
                 NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
                 if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
                     postValue(true);
-                }else {
+                } else {
                     postValue(false);
                 }
             }

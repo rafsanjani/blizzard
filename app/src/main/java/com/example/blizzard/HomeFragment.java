@@ -159,10 +159,8 @@ public class HomeFragment extends Fragment {
             public void onChanged(Boolean aBoolean) {
                 mDeviceConnected = aBoolean;
                 showSnackBar(aBoolean);
-                if(aBoolean) {
-                    if (reloadOnce < 1)
-                        ensureLocationIsEnabled();
-                    reloadOnce++;
+                if (aBoolean) {
+                    ensureLocationIsEnabled();
                 }
             }
         });
@@ -466,9 +464,9 @@ public class HomeFragment extends Fragment {
                         Handler handler = new Handler(Looper.getMainLooper());
                         handler.postDelayed(this::reverseViewAnimToInit, 1000L);
                     }
-                } else if (!mDeviceConnected){
+                } else if (!mDeviceConnected) {
                     if (showDialogOnce < 1)
-                    showNetworkDialog();
+                        showNetworkDialog();
                     showDialogOnce++;
                     makeProgressBarInvisible();
                     if (!searchByCityName)
@@ -617,13 +615,13 @@ public class HomeFragment extends Fragment {
         View customTitleVeiw = View.inflate(requireContext(), R.layout.alert_dialog, null);
         materialAlertDialogBuilder
                 .setCustomTitle(customTitleVeiw)
-                .setMessage("    No internet connection found!"+ "\n" +
+                .setMessage("    No internet connection found!" + "\n" +
                         "Please, turn on your Mobile data and hit OK")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (mDeviceConnected) {
-                                ensureLocationIsEnabled();
+                            ensureLocationIsEnabled();
                         }
                     }
                 })
@@ -652,7 +650,7 @@ public class HomeFragment extends Fragment {
             textView.setTextColor(color);
             textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             snackbar.show();
-        }else {
+        } else {
             message = "You are Offline";
             color = Color.WHITE;
 
