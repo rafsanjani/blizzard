@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -32,7 +31,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -155,14 +153,11 @@ public class HomeFragment extends Fragment {
         }
 
         NetworkMonitor networkMonitor = new NetworkMonitor(requireContext());
-        networkMonitor.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                mDeviceConnected = aBoolean;
-                showSnackBar(aBoolean);
-                if (aBoolean) {
-                    ensureLocationIsEnabled();
-                }
+        networkMonitor.observe(getViewLifecycleOwner(), aBoolean -> {
+            mDeviceConnected = aBoolean;
+            showSnackBar(aBoolean);
+            if (aBoolean) {
+                ensureLocationIsEnabled();
             }
         });
 
@@ -457,7 +452,7 @@ public class HomeFragment extends Fragment {
             } else {
                 if (searchByCityName) {
                     if (!mDeviceConnected) {
-                        showSnackBar(mDeviceConnected);
+                        showSnackBar(false);
                         Handler handler = new Handler(Looper.getMainLooper());
                         handler.postDelayed(this::reverseViewAnimToInit, 1000L);
                     } else {
@@ -499,7 +494,7 @@ public class HomeFragment extends Fragment {
                     ivFavourite.animate()
                             .alpha(1)
                             .setInterpolator(new AnticipateInterpolator())
-                            .setDuration(500)
+                            .setDuration(100)
                             .start();
                     ivFavourite.setVisibility(View.VISIBLE);
 
@@ -507,18 +502,13 @@ public class HomeFragment extends Fragment {
                     ivFavourite.animate()
                             .alpha(0)
                             .setInterpolator(new AnticipateInterpolator())
-                            .setDuration(500)
+                            .setDuration(100)
                             .start();
 
                     // delayed handler needed for fade out animation to run
 
                     new Handler(Looper.getMainLooper())
-                            .postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ivFavourite.setVisibility(View.INVISIBLE);
-                                }
-                            }, 2000);
+                            .postDelayed(() -> ivFavourite.setVisibility(View.INVISIBLE), 2000);
                 }
             });
         } catch (NullPointerException e) {
@@ -618,19 +608,13 @@ public class HomeFragment extends Fragment {
                 .setCustomTitle(customTitleVeiw)
                 .setMessage("    No internet connection found!" + "\n" +
                         "Please, turn on your Mobile data and hit OK")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (mDeviceConnected) {
-                            ensureLocationIsEnabled();
-                        }
+                .setPositiveButton("OK", (dialogInterface, i) -> {
+                    if (mDeviceConnected) {
+                        ensureLocationIsEnabled();
                     }
                 })
-                .setNeutralButton("LATER", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
+                .setNeutralButton("LATER", (dialogInterface, i) -> {
 
-                    }
                 })
                 .setCancelable(false)
                 .show();

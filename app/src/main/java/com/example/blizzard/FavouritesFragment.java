@@ -108,12 +108,12 @@ public class FavouritesFragment extends Fragment {
                 tvNoData.setAlpha(0f);
                 ivNoData.animate()
                         .alpha(1)
-                        .setDuration(500)
+                        .setDuration(100)
                         .setInterpolator(new AnticipateInterpolator())
                         .start();
                 tvNoData.animate()
                         .alpha(1)
-                        .setDuration(500)
+                        .setDuration(100)
                         .setInterpolator(new AnticipateInterpolator())
                         .start();
                 ivNoData.setVisibility(View.VISIBLE);
