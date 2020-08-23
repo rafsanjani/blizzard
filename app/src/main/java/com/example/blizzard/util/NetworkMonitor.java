@@ -3,7 +3,6 @@ package com.example.blizzard.util;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -13,6 +12,8 @@ import android.os.Build;
 
 import androidx.lifecycle.LiveData;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -21,19 +22,12 @@ import java.util.Objects;
 
 public class NetworkMonitor extends LiveData<Boolean> {
     private ConnectivityManager mConnectivityManager;
-    private Context mContext;
-    private NetworkReceiver networkReceiver;
-    private ConnectivityManager.NetworkCallback mNetworkCallback = null;
+    private ConnectivityManager.NetworkCallback mNetworkCallback;
 
     public NetworkMonitor(Context context) {
-        this.mContext = context;
-        mConnectivityManager = (ConnectivityManager) mContext
-                .getSystemService(context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mNetworkCallback = new NetworkCallback(this);
-        } else {
-            networkReceiver = new NetworkReceiver();
-        }
+        mConnectivityManager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        mNetworkCallback = new NetworkCallback(this);
     }
 
     @Override
@@ -42,14 +36,12 @@ public class NetworkMonitor extends LiveData<Boolean> {
         networkUpdate();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mConnectivityManager.registerDefaultNetworkCallback(mNetworkCallback);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        } else {
             NetworkRequest networkRequest = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     .build();
             mConnectivityManager.registerNetworkCallback(networkRequest, mNetworkCallback);
-        } else {
-            mContext.registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         }
     }
 
@@ -57,14 +49,10 @@ public class NetworkMonitor extends LiveData<Boolean> {
     protected void onInactive() {
         super.onInactive();
         //unregister to avoid memory leak
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
-        } else {
-            mContext.unregisterReceiver(networkReceiver);
-        }
+        mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
     }
 
-    public class NetworkCallback extends ConnectivityManager.NetworkCallback {
+    public static class NetworkCallback extends ConnectivityManager.NetworkCallback {
 
         private NetworkMonitor mNetworkMonitor;
 
@@ -73,14 +61,12 @@ public class NetworkMonitor extends LiveData<Boolean> {
         }
 
         @Override
-        public void onAvailable(Network network) {
-            if (network != null) {
-                mNetworkMonitor.postValue(true);
-            }
+        public void onAvailable(@NotNull Network network) {
+            mNetworkMonitor.postValue(true);
         }
 
         @Override
-        public void onLost(Network network) {
+        public void onLost(@NotNull Network network) {
             mNetworkMonitor.postValue(false);
         }
     }
