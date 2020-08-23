@@ -4,14 +4,15 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.AndroidException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,14 +20,11 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,6 +32,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -41,7 +40,7 @@ import com.example.blizzard.data.database.WeatherMapper;
 import com.example.blizzard.data.entities.Weather;
 import com.example.blizzard.data.entities.WeatherDataEntity;
 import com.example.blizzard.model.WeatherDataResponse;
-import com.example.blizzard.util.CheckNetworkUtil;
+import com.example.blizzard.util.NetworkMonitor;
 import com.example.blizzard.util.TempConverter;
 import com.example.blizzard.util.TimeUtil;
 import com.example.blizzard.viewmodel.BlizzardViewModel;
@@ -59,6 +58,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -68,7 +68,6 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
-
     private static final String TAG = "HomeFragment";
     public static final int ENABLE_LOCATION_HARDWARE = 3030;
     TextView tvCityTitle;
@@ -86,7 +85,6 @@ public class HomeFragment extends Fragment {
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationCallback mLocationUpdatesCallback;
-    private boolean mIsNetworkAvailable;
     private BlizzardViewModel mBlizzardViewModel;
     private TextInputLayout etContainer;
     private Button btnCurLocation;
@@ -104,13 +102,15 @@ public class HomeFragment extends Fragment {
     private ImageView ivFavourite;
     Boolean isClicked = false;
     String cityName;
+    private int showDialogOnce = 0;
+    private int reloadOnce = 0;
+    private boolean mDeviceConnected;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
-
 
         slideRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_right);
         slideLeft = AnimationUtils.loadAnimation(getContext(), R.anim.slide_left);
@@ -125,7 +125,6 @@ public class HomeFragment extends Fragment {
                 Double longitude = location.getLongitude();
                 mBlizzardViewModel.getWeather(latitude, longitude);
             }
-
 
             @Override
             public void onLocationAvailability(LocationAvailability locationAvailability) {
@@ -142,14 +141,10 @@ public class HomeFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        CheckNetworkUtil mCheckNetworkUtil = new CheckNetworkUtil(getActivity());
-        mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
-        if (!mIsNetworkAvailable)
-            Toast.makeText(getContext(), R.string.no_internet, Toast.LENGTH_LONG).show();
         initializeViews(view);
+        makeViewsInvisible();
 
         Bundle bundle = this.getArguments();
-
         if (bundle == null) {
             ensureLocationIsEnabled();
         } else {
@@ -159,6 +154,17 @@ public class HomeFragment extends Fragment {
             observeWeatherChanges();
         }
 
+        NetworkMonitor networkMonitor = new NetworkMonitor(requireContext());
+        networkMonitor.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                mDeviceConnected = aBoolean;
+                showSnackBar(aBoolean);
+                if (aBoolean) {
+                    ensureLocationIsEnabled();
+                }
+            }
+        });
 
         btnSearch.setOnClickListener(view1 -> {
             //Hide the Keyboard when search button is clicked
@@ -168,12 +174,12 @@ public class HomeFragment extends Fragment {
                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
             }
-            mIsNetworkAvailable = mCheckNetworkUtil.isNetworkAvailable();
+
             if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
                 searchBox.setError("Enter city name");
-            } else if (!mIsNetworkAvailable) {
+            }/* else if (!mDeviceConnected) {
                 searchBox.setError(getString(R.string.no_internet));
-            } else {
+            }*/ else {
                 String searchText = searchBox.getText().toString();
                 searchByCityName = true;
                 mBlizzardViewModel.getWeather(searchText);
@@ -297,9 +303,14 @@ public class HomeFragment extends Fragment {
         tvCityWindSpeed.setVisibility(View.INVISIBLE);
         tvTime.setVisibility(View.INVISIBLE);
         ivWeatherImage.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.INVISIBLE);
+//        progressBar.setVisibility(View.INVISIBLE);
         tvHumidityTitle.setVisibility(View.INVISIBLE);
         tvWindTitle.setVisibility(View.INVISIBLE);
+    }
+
+    public void makeProgressBarInvisible() {
+        progressBar.setVisibility(View.INVISIBLE);
+        ivFavourite.setVisibility(View.INVISIBLE);
     }
 
 
@@ -442,17 +453,28 @@ public class HomeFragment extends Fragment {
                 saveToDb(weatherData);
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
                 resolveAppState(weatherData);
+                showDialogOnce++;
             } else {
-                Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
                 if (searchByCityName) {
-                    Handler handler = new Handler(Looper.getMainLooper());
-                    handler.postDelayed(this::reverseViewAnimToInit, 1000L);
-                } else {
-                    makeViewsInvisible();
+                    if (!mDeviceConnected) {
+                        showSnackBar(mDeviceConnected);
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                    } else {
+                        Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                    }
+                } else if (!mDeviceConnected) {
+                    if (showDialogOnce < 1)
+                        showNetworkDialog();
+                    showDialogOnce++;
+                    makeProgressBarInvisible();
+                    if (!searchByCityName)
+                        makeViewsInvisible();
                     ivNoInternet.setVisibility(View.VISIBLE);
                     tvNoInternet.setVisibility(View.VISIBLE);
                 }
-
             }
         });
     }
@@ -586,5 +608,59 @@ public class HomeFragment extends Fragment {
         Glide.with(requireView())
                 .load(drawable)
                 .into(imageView);
+    }
+
+    private void showNetworkDialog() {
+        final MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(requireContext(),
+                R.style.RoundShapeTheme);
+        View customTitleVeiw = View.inflate(requireContext(), R.layout.alert_dialog, null);
+        materialAlertDialogBuilder
+                .setCustomTitle(customTitleVeiw)
+                .setMessage("    No internet connection found!" + "\n" +
+                        "Please, turn on your Mobile data and hit OK")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (mDeviceConnected) {
+                            ensureLocationIsEnabled();
+                        }
+                    }
+                })
+                .setNeutralButton("LATER", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void showSnackBar(boolean isNetworkAvailable) {
+        String message;
+        int color;
+
+        if (isNetworkAvailable) {
+            message = "You are Online";
+            color = Color.WHITE;
+
+            Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+            snackbar.setBackgroundTint(getResources().getColor(R.color.snackBarOnline, null));
+            View view = snackbar.getView();
+            TextView textView = view.findViewById(com.google.android.material.R.id.snackbar_text);
+            textView.setTextColor(color);
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            snackbar.show();
+        } else {
+            message = "You are Offline";
+            color = Color.WHITE;
+
+            Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+            View view = snackbar.getView();
+            TextView textView = view.findViewById(com.google.android.material.R.id.snackbar_text);
+            textView.setTextColor(color);
+            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            snackbar.show();
+        }
     }
 }
