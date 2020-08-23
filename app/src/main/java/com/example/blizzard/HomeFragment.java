@@ -160,6 +160,7 @@ public class HomeFragment extends Fragment {
                 mDeviceConnected = aBoolean;
                 showSnackBar(aBoolean);
                 if (aBoolean) {
+                    if (bundle == null)
                     ensureLocationIsEnabled();
                 }
             }
