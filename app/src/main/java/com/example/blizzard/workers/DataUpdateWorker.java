@@ -12,6 +12,8 @@ import com.example.blizzard.data.entities.WeatherDataEntity;
 import com.example.blizzard.data.repository.BlizzardRepository;
 import com.example.blizzard.model.OpenWeatherService;
 import com.example.blizzard.model.WeatherDataResponse;
+
+import com.example.blizzard.util.BlizzardThread;
 import com.example.blizzard.util.NotificationHelper;
 import com.example.blizzard.util.TempConverter;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -20,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,6 +32,7 @@ public class DataUpdateWorker extends ListenableWorker {
     private static final String TAG = "DataUpdateWorker";
     private final BlizzardRepository repository;
     private Callback<WeatherDataResponse> callback;
+    private BlizzardThread blizzardThread = BlizzardThread.getInstance();
 
     public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -40,8 +44,9 @@ public class DataUpdateWorker extends ListenableWorker {
     public ListenableFuture<Result> startWork() {
         return CallbackToFutureAdapter.getFuture(completer -> {
 
-            List<WeatherDataEntity> data = repository.getAllDataFromDb();
+            List<WeatherDataEntity> data = getAllFromDb();
 
+            assert data != null;
             if (data.isEmpty()) {
                 Log.d(TAG, "doWork: No weather info in database");
                 completer.set(Result.success());
@@ -69,7 +74,6 @@ public class DataUpdateWorker extends ListenableWorker {
                 }
 
 
-
                 @Override
                 public void onFailure(@NotNull Call<WeatherDataResponse> call, @NotNull Throwable t) {
                     Log.e(TAG, "onFailure: Error Fetching current Weather", t);
@@ -82,5 +86,14 @@ public class DataUpdateWorker extends ListenableWorker {
 
             return callback;
         });
+    }
+
+    private List<WeatherDataEntity> getAllFromDb() {
+        AtomicReference<List<WeatherDataEntity>> weatherDataEntities = new AtomicReference<>();
+
+        blizzardThread.getDiskIO().execute(() -> weatherDataEntities.set(repository.getAllDataFromDb()));
+        Log.d(TAG, "getAllFromDb: " + weatherDataEntities.get().get(1));
+
+        return weatherDataEntities.get();
     }
 }
