@@ -101,7 +101,6 @@ public class HomeFragment extends Fragment {
     Boolean isClicked = false;
     String cityName;
     private int showDialogOnce = 0;
-    private int reloadOnce = 0;
     private boolean mDeviceConnected;
 
 

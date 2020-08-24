@@ -44,9 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
         PeriodicWorkRequest request =
                 new PeriodicWorkRequest
-                        .Builder(DataUpdateWorker.class, 1, TimeUnit.HOURS)
+                        .Builder(DataUpdateWorker.class, 1, TimeUnit.MINUTES)
                         .setConstraints(constraints)
-                        .setInitialDelay(15, TimeUnit.SECONDS)
+                        .setInitialDelay(2, TimeUnit.SECONDS)
                         .build();
 
         WorkManager.getInstance(getApplicationContext())
