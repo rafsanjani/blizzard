@@ -1,6 +1,7 @@
 package com.example.blizzard.util;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 
 import java.util.concurrent.Executor;
@@ -15,11 +16,13 @@ public final class BlizzardThread {
     private Executor networkIO;
     private Executor mainThreadIO;
     private static BlizzardThread instance;
+    private HandlerThread handlerThread;
 
     BlizzardThread(Executor diskIO, Executor networkIO, Executor mainThreadIO) {
         this.diskIO = diskIO;
         this.networkIO = networkIO;
         this.mainThreadIO = mainThreadIO;
+        handlerThread = new HandlerThread("blizzard_thread");
     }
 
 
@@ -44,6 +47,12 @@ public final class BlizzardThread {
 
     public Executor getMainThreadIO() {
         return mainThreadIO;
+    }
+
+    // for delayed background works
+    public Handler getHandler() {
+        handlerThread.start();
+        return new Handler(handlerThread.getLooper());
     }
 
     private static class MainThreadIo implements Executor {
