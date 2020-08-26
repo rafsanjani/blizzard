@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.SavedStateHandle;
 
 import com.example.blizzard.data.entities.WeatherDataEntity;
 import com.example.blizzard.data.repository.BlizzardRepository;
@@ -21,11 +22,31 @@ public class BlizzardViewModel extends AndroidViewModel {
 
     private final BlizzardRepository mBlizzardRepository;
     private LiveData<WeatherDataResponse> mWeatherLiveData = new MutableLiveData<>();
+    private SavedStateHandle savedStateHandle;
+    public static final String CITY_NAME = "com.example.blizzard.viewmodel.cityName";
+    public static final String SEARCH_BOX_TEXT = "com.example.blizzard.viewmodel.searchBoxText";
 
 
-    public BlizzardViewModel(@NonNull Application application) {
+    public BlizzardViewModel(@NonNull Application application, SavedStateHandle savedStateHandle1) {
         super(application);
         mBlizzardRepository = new BlizzardRepository(application);
+        this.savedStateHandle = savedStateHandle1;
+    }
+
+    public void saveAppState(String cityName) {
+        savedStateHandle.set(CITY_NAME, cityName);
+    }
+
+    public void saveAppState(String cityName, String searchBoxText) {
+        savedStateHandle.set(CITY_NAME, cityName);
+        savedStateHandle.set(SEARCH_BOX_TEXT, searchBoxText);
+    }
+
+    public String[] getAppState() {
+        String[] appState = new String[2];
+        appState[0] = savedStateHandle.get(CITY_NAME);
+        appState[1] = savedStateHandle.get(SEARCH_BOX_TEXT);
+        return appState;
     }
 
     public void saveWeather(WeatherDataEntity weatherDataEntity) {
@@ -36,11 +57,11 @@ public class BlizzardViewModel extends AndroidViewModel {
         mWeatherLiveData = mBlizzardRepository.getWeather(cityName);
     }
 
-    public WeatherDataEntity getWeatherByCityName(String cityName){
+    public WeatherDataEntity getWeatherByCityName(String cityName) {
         return mBlizzardRepository.getWeatherByCityName(cityName);
     }
 
-    public void updateWeatherData(WeatherDataEntity entity){
+    public void updateWeatherData(WeatherDataEntity entity) {
         mBlizzardRepository.updateWeather(entity);
     }
 
