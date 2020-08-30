@@ -101,7 +101,6 @@ public class HomeFragment extends Fragment {
     Boolean isClicked = false;
     String cityName;
     private int showDialogOnce = 0;
-    private int reloadOnce = 0;
     private boolean mDeviceConnected;
 
 
@@ -143,23 +142,31 @@ public class HomeFragment extends Fragment {
         makeViewsInvisible();
 
         Bundle bundle = this.getArguments();
-        if (bundle == null) {
-            ensureLocationIsEnabled();
-        } else {
-            searchByCityName = true;
-            String cityName = bundle.getString(HomeFragment.CITY_NAME);
-            mBlizzardViewModel.getWeather(cityName);
-            observeWeatherChanges();
-        }
 
         NetworkMonitor networkMonitor = new NetworkMonitor(requireContext());
         networkMonitor.observe(getViewLifecycleOwner(), aBoolean -> {
             mDeviceConnected = aBoolean;
             showSnackBar(aBoolean);
-            if (aBoolean) {
-                ensureLocationIsEnabled();
+            if (bundle == null){
+                String[] appState = mBlizzardViewModel.getAppState();
+                String saved_city_name = appState[0];
+                String saved_textBox_text = appState[1];
+                if (saved_city_name != null && !saved_city_name.isEmpty()){
+                    loadByCityName(saved_city_name);
+                    if (saved_textBox_text != null && !saved_textBox_text.isEmpty()){
+                        searchBox.setText(saved_textBox_text);
+                    }
+                }else {
+                    Log.d(TAG, "onViewCreated: no data saved");
+                    ensureLocationIsEnabled();
+                }
+            }else {
+                loadByCityName(bundle.getString(HomeFragment.CITY_NAME));
             }
         });
+
+
+
 
         btnSearch.setOnClickListener(view1 -> {
             //Hide the Keyboard when search button is clicked
@@ -176,9 +183,7 @@ public class HomeFragment extends Fragment {
                 searchBox.setError(getString(R.string.no_internet));
             }*/ else {
                 String searchText = searchBox.getText().toString();
-                searchByCityName = true;
-                mBlizzardViewModel.getWeather(searchText);
-                observeWeatherChanges();
+                loadByCityName(searchText);
                 animateViews();
             }
         });
@@ -201,6 +206,24 @@ public class HomeFragment extends Fragment {
                 updateIsFavourite(true);
             }
         });
+    }
+
+    private void loadByCityName(String city_name) {
+        searchByCityName = true;
+        mBlizzardViewModel.getWeather(city_name);
+        observeWeatherChanges();
+    }
+
+
+    private void saveState() {
+        String searchText = Objects.requireNonNull(searchBox.getText()).toString();
+        if (!searchText.isEmpty()){
+            Log.d(TAG, "saveState: saving state");
+            mBlizzardViewModel.saveAppState(cityName, searchText);
+        }else {
+            Log.d(TAG, "saveState: saving state");
+            mBlizzardViewModel.saveAppState(cityName);
+        }
     }
 
     private void updateIsFavourite(boolean b) {
@@ -445,6 +468,7 @@ public class HomeFragment extends Fragment {
         mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
             if (weatherData != null) {
                 cityName = weatherData.getName();
+                saveState();
                 saveToDb(weatherData);
                 mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
                 resolveAppState(weatherData);
@@ -482,7 +506,6 @@ public class HomeFragment extends Fragment {
             favHandler.post(() -> {
 
                 if (searchByCityName) {
-
                     if (entity.getFavourite()) {
                         isClicked = true;
                         LoadImage(R.drawable.ic_favorite_filed, ivFavourite);

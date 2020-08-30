@@ -65,17 +65,21 @@ public class DataUpdateWorker extends ListenableWorker {
                     public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
                         WeatherDataResponse currentWeather = response.body();
                         for (WeatherDataEntity previousWeather : data) {
-                            double difference = Math.abs(previousWeather.getTemperature() - Objects.requireNonNull(currentWeather).getMain().getTemp());
-                            Log.d(TAG, "onResponse: Weather difference is " + difference + "°C");
 
-                            if (difference > 1) {
-                                Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
-                                NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
-                                        previousWeather.getCityName() + ", " + previousWeather.getCountry(),
-                                        TempConverter.kelToCelsius2(previousWeather.getTemperature()),
-                                        TempConverter.kelToCelsius2(currentWeather.getMain().getTemp()));
-                                notificationHelper.createNotification();
-                                break;
+                            assert currentWeather != null;
+                            if (previousWeather.getCityName().equals(currentWeather.getName())) {
+                                double difference = Math.abs(previousWeather.getTemperature() - Objects.requireNonNull(currentWeather).getMain().getTemp());
+                                Log.d(TAG, "onResponse: Weather difference is " + difference + "°C");
+
+                                if (difference > 2) {
+                                    Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
+                                    NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
+                                            previousWeather.getCityName() + ", " + previousWeather.getCountry(),
+                                            TempConverter.kelToCelsius2(previousWeather.getTemperature()),
+                                            TempConverter.kelToCelsius2(currentWeather.getMain().getTemp()));
+                                    notificationHelper.createNotification();
+                                    break;
+                                }
                             }
                         }
                         completer.set(Result.success());
@@ -91,12 +95,18 @@ public class DataUpdateWorker extends ListenableWorker {
 
 
                 Log.d(TAG, "startWork: getting data from api");
-                new OpenWeatherService().getWeather(data.get(0).getCityName()).enqueue(callback);
+                makeNetworkRequest();
 
             }, 5000);
 
             return callback;
         });
+    }
+
+    private void makeNetworkRequest() {
+        for (WeatherDataEntity entity : data){
+            new OpenWeatherService().getWeather(entity.getCityName()).enqueue(callback);
+        }
     }
 
     private void getAllFromDb() {
