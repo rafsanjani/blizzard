@@ -647,4 +647,5 @@ public class HomeFragment extends Fragment {
             snackbar.show();
         }
     }
+
 }
