@@ -47,7 +47,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
     // play services location
     implementation 'com.google.android.gms:play-services-location:17.0.0'
@@ -56,7 +56,7 @@ dependencies {
     def room_version = "2.2.5"
 
     implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // gson dependency
     implementation 'com.google.code.gson:gson:2.8.6'
