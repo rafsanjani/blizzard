@@ -31,10 +31,10 @@ The file is stored within your user directory:
  
 If the file does not exist, you should create it and paste the following line inside it. 
 
-   `OWM_API_KEY="your api key"` replacing `your api key` with the API key generated from openweathermap.org. <br>
+   OWM_API_KEY="your api key" replacing `your api key` with the API key generated from openweathermap.org. <br>
    
    For example,
-   `OWM_API_KEY="439d4b804bc8187953eb36d2a8c26a02"`
+   OWM_API_KEY="439d4b804bc8187953eb36d2a8c26a02"
 
 ##### A sample API call for the weather in London, UK would be <br>
 https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=439d4b804bc8187953eb36d2a8c26a02
