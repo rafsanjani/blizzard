@@ -63,28 +63,28 @@ class FavouritesFragment : Fragment() {
 
     private fun makeViewsVisible(entities: AtomicReference<List<WeatherDataEntity>>) {
         if (entities.get().isNotEmpty()) {
-            favHandler!!.post {
-                adapter!!.insertWeatherEntities(entities.get())
-                ivNoData!!.visibility = View.INVISIBLE
+            favHandler?.post {
+                adapter?.insertWeatherEntities(entities.get())
+                ivNoData?.visibility = View.INVISIBLE
                 weatherRecyclerView.visibility = View.VISIBLE
-                tvNoData!!.visibility = View.INVISIBLE
+                tvNoData?.visibility = View.INVISIBLE
             }
         } else {
-            favHandler!!.postDelayed({
-                ivNoData!!.alpha = 0f
-                tvNoData!!.alpha = 0f
-                ivNoData!!.animate()
+            favHandler?.postDelayed({
+                ivNoData?.alpha = 0f
+                tvNoData?.alpha = 0f
+                ivNoData?.animate()
                         .alpha(1f)
                         .setDuration(100)
                         .setInterpolator(AnticipateInterpolator())
                         .start()
-                tvNoData!!.animate()
+                tvNoData?.animate()
                         .alpha(1f)
                         .setDuration(100)
                         .setInterpolator(AnticipateInterpolator())
                         .start()
-                ivNoData!!.visibility = View.VISIBLE
-                tvNoData!!.visibility = View.VISIBLE
+                ivNoData?.visibility = View.VISIBLE
+                tvNoData?.visibility = View.VISIBLE
             }, 1000)
         }
     }

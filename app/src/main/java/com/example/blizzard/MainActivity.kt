@@ -13,7 +13,7 @@ import com.example.blizzard.workers.DataUpdateWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity() {
+clasMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

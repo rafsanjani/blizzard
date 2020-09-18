@@ -73,7 +73,7 @@ class HomeFragment : Fragment() {
                 val location = locationResult.lastLocation
                 val latitude = location.latitude
                 val longitude = location.longitude
-                mBlizzardViewModel!!.getWeather(latitude, longitude)
+                mBlizzardViewModel?.getWeather(latitude, longitude)
             }
 
         }
@@ -92,7 +92,7 @@ class HomeFragment : Fragment() {
             mDeviceConnected = aBoolean
             showSnackBar(aBoolean)
             if (bundle == null) {
-                val appState = mBlizzardViewModel!!.appState
+                val appState = mBlizzardViewModel?.appState
                 val savedCityName = appState[0]
                 val savedSearchBoxTextView = appState[1]
                 if (savedCityName != null && savedCityName.isNotEmpty()) {
@@ -143,7 +143,7 @@ class HomeFragment : Fragment() {
 
     private fun loadByCityName(city_name: String?) {
         searchByCityName = true
-        mBlizzardViewModel!!.getWeather(city_name)
+        mBlizzardViewModel?.getWeather(city_name)
         observeWeatherChanges()
     }
 
@@ -151,10 +151,10 @@ class HomeFragment : Fragment() {
         val searchText = Objects.requireNonNull(et_cityName.text).toString()
         if (searchText.isNotEmpty()) {
             Log.d(TAG, "saveState: saving state")
-            mBlizzardViewModel!!.saveAppState(cityName, searchText)
+            mBlizzardViewModel?.saveAppState(cityName, searchText)
         } else {
             Log.d(TAG, "saveState: saving state")
-            mBlizzardViewModel!!.saveAppState(cityName)
+            mBlizzardViewModel?.saveAppState(cityName)
         }
     }
 
@@ -162,9 +162,9 @@ class HomeFragment : Fragment() {
         if (cityName != null) {
             Executors.newSingleThreadExecutor()
                     .execute {
-                        val weatherDataEntity = mBlizzardViewModel!!.getWeatherByCityName(cityName)
+                        val weatherDataEntity = mBlizzardViewModel?.getWeatherByCityName(cityName)
                         weatherDataEntity.favourite = b
-                        mBlizzardViewModel!!.updateWeatherData(weatherDataEntity)
+                        mBlizzardViewModel?.updateWeatherData(weatherDataEntity)
                     }
         }
     }
@@ -282,7 +282,7 @@ class HomeFragment : Fragment() {
         mLocationRequest?.fastestInterval = 5000
         mLocationRequest?.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
         val builder = LocationSettingsRequest.Builder()
-        builder.addLocationRequest(mLocationRequest!!)
+        builder.addLocationRequest(mLocationRequest?)
         val settingsClient = LocationServices.getSettingsClient(requireActivity())
         val locationResponse = settingsClient.checkLocationSettings(builder.build())
         locationResponse.addOnCompleteListener { task: Task<LocationSettingsResponse?> ->
@@ -336,7 +336,7 @@ class HomeFragment : Fragment() {
                     Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates")
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    mBlizzardViewModel!!.getWeather(latitude, longitude)
+                    mBlizzardViewModel?.getWeather(latitude, longitude)
                     observeWeatherChanges()
                 } else {
                     Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates")
@@ -349,7 +349,7 @@ class HomeFragment : Fragment() {
         }
 
     private fun observeWeatherChanges() {
-        mBlizzardViewModel!!.weatherLiveData.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
+        mBlizzardViewModel?.weatherLiveData.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
             if (weatherData != null) {
                 cityName = weatherData.name
                 saveState()
@@ -382,7 +382,7 @@ class HomeFragment : Fragment() {
 
     private fun checkIfIsFavourite() {
         try {
-            val entity = mBlizzardViewModel!!.getWeatherByCityName(cityName)
+            val entity = mBlizzardViewModel?.getWeatherByCityName(cityName)
             Log.d(TAG, "checkIfIsFavourite: city name is $cityName")
             val favHandler = Handler(Looper.getMainLooper())
             favHandler.post {
@@ -420,20 +420,20 @@ class HomeFragment : Fragment() {
     private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
         Executors.newSingleThreadExecutor().execute {
             val entity = WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse)
-            mBlizzardViewModel!!.saveWeather(entity)
+            mBlizzardViewModel?.saveWeather(entity)
             checkIfIsFavourite()
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun requestLocationUpdates() {
-        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper())
+        mFusedLocationProviderClient?.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper())
         userLocation
     }
 
     private fun stopLocationUpdates() {
         if (mFusedLocationProviderClient != null) {
-            mFusedLocationProviderClient!!.removeLocationUpdates(mLocationUpdatesCallback)
+            mFusedLocationProviderClient?.removeLocationUpdates(mLocationUpdatesCallback)
             Log.d(TAG, "stopLocationUpdates: Location Updates Stopped")
         }
     }
@@ -486,7 +486,7 @@ class HomeFragment : Fragment() {
     private fun loadImage(drawable: Int, imageView: ImageView?) {
         Glide.with(requireView())
                 .load(drawable)
-                .into(imageView!!)
+                .into(imageView?)
     }
 
     private fun showNetworkDialog() {
