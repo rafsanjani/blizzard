@@ -1,0 +1,31 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Gradle Build
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      #    # copy google-services.json into app directory
+      #    - name: Decode google-services.json
+      #      env:
+      #          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+      #      run: echo $FIREBASE_CONFIG > app/google-services.json
+
+      - name: Add dummy API Key
+        run: echo $'\nOWM_API_KEY = "api key"' >> gradle.properties
+
+      - name: Build
+        run: ./gradlew build
