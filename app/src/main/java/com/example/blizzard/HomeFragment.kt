@@ -1,674 +1,544 @@
-package com.example.blizzard;
+package com.example.blizzard
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Location;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.AnticipateInterpolator;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentSender.SendIntentException
+import android.content.pm.PackageManager
+import android.graphics.Color
+import android.location.Location
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.AnticipateInterpolator
+import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
+import com.example.blizzard.data.database.WeatherMapper
+import com.example.blizzard.model.WeatherDataResponse
+import com.example.blizzard.util.NetworkMonitor
+import com.example.blizzard.util.TempConverter
+import com.example.blizzard.util.TimeUtil
+import com.example.blizzard.viewmodel.BlizzardViewModel
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.home_fragment.*
+import java.util.*
+import java.util.concurrent.Executors
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
-import com.bumptech.glide.Glide;
-import com.example.blizzard.data.database.WeatherMapper;
-import com.example.blizzard.data.entities.Weather;
-import com.example.blizzard.data.entities.WeatherDataEntity;
-import com.example.blizzard.model.WeatherDataResponse;
-import com.example.blizzard.util.NetworkMonitor;
-import com.example.blizzard.util.TempConverter;
-import com.example.blizzard.util.TimeUtil;
-import com.example.blizzard.viewmodel.BlizzardViewModel;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
-import java.util.Objects;
-import java.util.concurrent.Executors;
-
-public class HomeFragment extends Fragment {
-    private static final String TAG = "HomeFragment";
-    public static final int ENABLE_LOCATION_HARDWARE = 3030;
-    TextView tvCityTitle;
-    TextView tvCityTemp;
-    TextView tvCityHumidity;
-    TextView tvCityDescription;
-    TextView tvCityWindSpeed;
-    TextView tvTime;
-    ImageView ivWeatherImage;
-    TextInputEditText searchBox;
-    ProgressBar progressBar;
-    Button btnSearch;
-    private final TimeUtil mTimeUtil = new TimeUtil();
-    private static final int LOCATION_REQUEST_CODE = 123;
-    private LocationRequest mLocationRequest;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationCallback mLocationUpdatesCallback;
-    private BlizzardViewModel mBlizzardViewModel;
-    private TextInputLayout etContainer;
-    private Button btnCurLocation;
-    private FloatingActionButton fabSearch;
-    private Boolean curLocIsVisible = true;
-    private Animation slideRight;
-    private Animation slideLeft;
-    public static final String CITY_NAME = "com.example.blizzard.cityName";
-    private View view;
-    private Boolean searchByCityName = false;
-    private ImageView ivNoInternet;
-    private TextView tvHumidityTitle;
-    private TextView tvWindTitle;
-    private TextView tvNoInternet;
-    private ImageView ivFavourite;
-    Boolean isClicked = false;
-    String cityName;
-    private int showDialogOnce = 0;
-    private boolean mDeviceConnected;
-
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mBlizzardViewModel = new ViewModelProvider(requireActivity()).get(BlizzardViewModel.class);
-
-        slideRight = AnimationUtils.loadAnimation(getContext(), R.anim.slide_right);
-        slideLeft = AnimationUtils.loadAnimation(getContext(), R.anim.slide_left);
-
-        mLocationUpdatesCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates");
-                stopLocationUpdates();
-                Location location = locationResult.getLastLocation();
-                Double latitude = location.getLatitude();
-                Double longitude = location.getLongitude();
-                mBlizzardViewModel.getWeather(latitude, longitude);
+class HomeFragment : Fragment() {
+    private val mTimeUtil = TimeUtil()
+    private var mLocationRequest: LocationRequest? = null
+    private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
+    private var mLocationUpdatesCallback: LocationCallback? = null
+    private var mBlizzardViewModel: BlizzardViewModel? = null
+    private var curLocIsVisible = true
+    private var slideRight: Animation? = null
+    private var slideLeft: Animation? = null
+    private var searchByCityName = false
+    private var isClicked = false
+    private var cityName: String? = null
+    private var showDialogOnce = 0
+    private var mDeviceConnected = false
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mBlizzardViewModel = ViewModelProvider(requireActivity()).get(BlizzardViewModel::class.java)
+        slideRight = AnimationUtils.loadAnimation(context, R.anim.slide_right)
+        slideLeft = AnimationUtils.loadAnimation(context, R.anim.slide_left)
+        mLocationUpdatesCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                Log.d(TAG, "onLocationResult: Periodic Location Callback Triggered. Stopping Updates")
+                stopLocationUpdates()
+                val location = locationResult.lastLocation
+                val latitude = location.latitude
+                val longitude = location.longitude
+                mBlizzardViewModel?.getWeather(latitude, longitude)
             }
 
-            @Override
-            public void onLocationAvailability(LocationAvailability locationAvailability) {
-                super.onLocationAvailability(locationAvailability);
-            }
-        };
+        }
     }
 
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.home_fragment, container, false);
-        return view;
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.home_fragment, container, false)
     }
 
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        initializeViews(view);
-        makeViewsInvisible();
-
-        Bundle bundle = this.getArguments();
-
-        NetworkMonitor networkMonitor = new NetworkMonitor(requireContext());
-        networkMonitor.observe(getViewLifecycleOwner(), aBoolean -> {
-            mDeviceConnected = aBoolean;
-            showSnackBar(aBoolean);
-            if (bundle == null){
-                String[] appState = mBlizzardViewModel.getAppState();
-                String saved_city_name = appState[0];
-                String saved_textBox_text = appState[1];
-                if (saved_city_name != null && !saved_city_name.isEmpty()){
-                    loadByCityName(saved_city_name);
-                    if (saved_textBox_text != null && !saved_textBox_text.isEmpty()){
-                        searchBox.setText(saved_textBox_text);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        makeViewsInvisible()
+        val bundle = this.arguments
+        val networkMonitor = NetworkMonitor(requireContext())
+        networkMonitor.observe(viewLifecycleOwner, Observer { aBoolean: Boolean ->
+            mDeviceConnected = aBoolean
+            showSnackBar(aBoolean)
+            if (bundle == null) {
+                val appState = mBlizzardViewModel!!.appState
+                val savedCityName = appState[0]
+                val savedSearchBoxText = appState[1]
+                if (savedCityName != null && savedCityName.isNotEmpty()) {
+                    loadByCityName(savedCityName)
+                    if (savedSearchBoxText != null && savedSearchBoxText.isNotEmpty()) {
+                        et_cityName.setText(savedSearchBoxText)
                     }
-                }else {
-                    Log.d(TAG, "onViewCreated: no data saved");
-                    ensureLocationIsEnabled();
+                } else {
+                    Log.d(TAG, "onViewCreated: no data saved")
+                    ensureLocationIsEnabled()
                 }
-            }else {
-                loadByCityName(bundle.getString(HomeFragment.CITY_NAME));
+            } else {
+                loadByCityName(bundle.getString(CITY_NAME))
             }
-        });
-
-
-
-
-        btnSearch.setOnClickListener(view1 -> {
+        })
+        search_btn?.setOnClickListener {
             //Hide the Keyboard when search button is clicked
-            InputMethodManager inputMethodManager = (InputMethodManager)
-                    requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (inputMethodManager != null) {
-                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-
-            if (Objects.requireNonNull(searchBox.getText()).toString().isEmpty()) {
-                searchBox.setError("Enter city name");
-            }/* else if (!mDeviceConnected) {
+            val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken,
+                    InputMethodManager.HIDE_NOT_ALWAYS)
+            if (Objects.requireNonNull(et_cityName.text).toString().isEmpty()) {
+                et_cityName.error = "Enter city name"
+            } /* else if (!mDeviceConnected) {
                 searchBox.setError(getString(R.string.no_internet));
             }*/ else {
-                String searchText = searchBox.getText().toString();
-                loadByCityName(searchText);
-                animateViews();
+                val searchText = et_cityName.text.toString()
+                loadByCityName(searchText)
+                animateViews()
             }
-        });
-
-        btnCurLocation.setOnClickListener(view12 -> {
-            ensureLocationIsEnabled();
-            reverseViewAnim();
-        });
-
-        fabSearch.setOnClickListener(view13 -> reverseViewAnimToInit());
-
-        ivFavourite.setOnClickListener(view14 -> {
+        }
+        btn_current_location.setOnClickListener {
+            ensureLocationIsEnabled()
+            reverseViewAnim()
+        }
+        fab_search?.setOnClickListener { reverseViewAnimToInit() }
+        iv_favourite.setOnClickListener {
             if (isClicked) {
-                isClicked = false;
-                LoadImage(R.drawable.ic_favorite, ivFavourite);
-                updateIsFavourite(false);
+                isClicked = false
+                loadImage(R.drawable.ic_favorite, iv_favourite)
+                updateIsFavourite(false)
             } else {
-                isClicked = true;
-                LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
-                updateIsFavourite(true);
+                isClicked = true
+                loadImage(R.drawable.ic_favorite_filed, iv_favourite)
+                updateIsFavourite(true)
             }
-        });
-    }
-
-    private void loadByCityName(String city_name) {
-        searchByCityName = true;
-        mBlizzardViewModel.getWeather(city_name);
-        observeWeatherChanges();
-    }
-
-
-    private void saveState() {
-        String searchText = Objects.requireNonNull(searchBox.getText()).toString();
-        if (!searchText.isEmpty()){
-            Log.d(TAG, "saveState: saving state");
-            mBlizzardViewModel.saveAppState(cityName, searchText);
-        }else {
-            Log.d(TAG, "saveState: saving state");
-            mBlizzardViewModel.saveAppState(cityName);
         }
     }
 
-    private void updateIsFavourite(boolean b) {
+    private fun loadByCityName(city_name: String?) {
+        searchByCityName = true
+        mBlizzardViewModel?.getWeather(city_name)
+        observeWeatherChanges()
+    }
+
+    private fun saveState() {
+        val searchText = Objects.requireNonNull(et_cityName.text).toString()
+        if (searchText.isNotEmpty()) {
+            Log.d(TAG, "saveState: saving state")
+            mBlizzardViewModel?.saveAppState(cityName, searchText)
+        } else {
+            Log.d(TAG, "saveState: saving state")
+            mBlizzardViewModel?.saveAppState(cityName)
+        }
+    }
+
+    private fun updateIsFavourite(b: Boolean) {
         if (cityName != null) {
             Executors.newSingleThreadExecutor()
-                    .execute(() -> {
-                        WeatherDataEntity weatherDataEntity = mBlizzardViewModel.getWeatherByCityName(cityName);
-                        weatherDataEntity.setFavourite(b);
-                        mBlizzardViewModel.updateWeatherData(weatherDataEntity);
-                    });
+                    .execute {
+                        val weatherDataEntity = mBlizzardViewModel?.getWeatherByCityName(cityName)
+                        weatherDataEntity?.favourite = b
+                        mBlizzardViewModel?.updateWeatherData(weatherDataEntity)
+                    }
         }
     }
 
-    private void reverseViewAnimToInit() {
+    private fun reverseViewAnimToInit() {
         if (!curLocIsVisible) {
-            fabSearch.startAnimation(slideRight);
-            etContainer.startAnimation(slideLeft);
-            btnSearch.startAnimation(slideLeft);
-
-            fabSearch.setVisibility(View.INVISIBLE);
-            fabSearch.setClickable(false);
-            etContainer.setVisibility(View.VISIBLE);
-            btnSearch.setVisibility(View.VISIBLE);
-            btnSearch.setClickable(true);
-            curLocIsVisible = true;
+            fab_search.startAnimation(slideRight)
+            etLayoutContainer.startAnimation(slideLeft)
+            search_btn.startAnimation(slideLeft)
+            fab_search.visibility = View.INVISIBLE
+            fab_search.isClickable = false
+            etLayoutContainer.visibility = View.VISIBLE
+            search_btn.visibility = View.VISIBLE
+            search_btn.isClickable = true
+            curLocIsVisible = true
         } else {
-            fabSearch.startAnimation(slideRight);
-            btnCurLocation.startAnimation(slideRight);
-            etContainer.startAnimation(slideLeft);
-            btnSearch.startAnimation(slideLeft);
-
-            fabSearch.setVisibility(View.INVISIBLE);
-            fabSearch.setClickable(false);
-            btnCurLocation.setVisibility(View.INVISIBLE);
-            btnCurLocation.setClickable(false);
-            etContainer.setVisibility(View.VISIBLE);
-            btnSearch.setVisibility(View.VISIBLE);
-            btnSearch.setClickable(true);
-            curLocIsVisible = true;
+            fab_search.startAnimation(slideRight)
+            btn_current_location.startAnimation(slideRight)
+            etLayoutContainer.startAnimation(slideLeft)
+            search_btn.startAnimation(slideLeft)
+            fab_search.visibility = View.INVISIBLE
+            fab_search.isClickable = false
+            etLayoutContainer.visibility = View.INVISIBLE
+            etLayoutContainer.isClickable = false
+            etLayoutContainer.visibility = View.VISIBLE
+            search_btn.visibility = View.VISIBLE
+            search_btn.isClickable = true
+            curLocIsVisible = true
         }
     }
 
-    private void reverseViewAnim() {
-        curLocIsVisible = false;
-        btnCurLocation.startAnimation(slideRight);
-        btnCurLocation.setVisibility(View.INVISIBLE);
-        btnCurLocation.setClickable(false);
+    private fun reverseViewAnim() {
+        curLocIsVisible = false
+        btn_current_location.startAnimation(slideRight)
+        btn_current_location.visibility = View.INVISIBLE
+        btn_current_location.isClickable = false
     }
 
-    private void animateViews() {
-        etContainer.startAnimation(slideRight);
-        btnSearch.startAnimation(slideRight);
-        btnCurLocation.startAnimation(slideLeft);
-        fabSearch.startAnimation(slideLeft);
-
-
-        etContainer.setVisibility(View.INVISIBLE);
-        btnSearch.setVisibility(View.INVISIBLE);
-        btnSearch.setClickable(false);
-        btnCurLocation.setVisibility(View.VISIBLE);
-        btnCurLocation.setClickable(true);
-        fabSearch.setVisibility(View.VISIBLE);
-        fabSearch.setClickable(true);
-
-
+    private fun animateViews() {
+        etLayoutContainer.startAnimation(slideRight)
+        search_btn.startAnimation(slideRight)
+        btn_current_location.startAnimation(slideLeft)
+        fab_search.startAnimation(slideLeft)
+        etLayoutContainer.visibility = View.INVISIBLE
+        search_btn.visibility = View.INVISIBLE
+        search_btn.isClickable = false
+        btn_current_location.visibility = View.VISIBLE
+        btn_current_location.isClickable = true
+        fab_search.visibility = View.VISIBLE
+        fab_search.isClickable = true
     }
 
-
-    private void initializeViews(@NonNull View view) {
-        btnSearch = view.findViewById(R.id.search_btn);
-        tvCityTitle = view.findViewById(R.id.tv_cityName);
-        tvCityDescription = view.findViewById(R.id.tv_weatherDescription);
-        tvCityHumidity = view.findViewById(R.id.tv_humidityValue);
-        tvCityTemp = view.findViewById(R.id.tv_tempValue);
-        tvCityWindSpeed = view.findViewById(R.id.tv_windSpeed);
-        tvTime = view.findViewById(R.id.tv_dayTime);
-        ivWeatherImage = view.findViewById(R.id.weather_icon);
-        searchBox = view.findViewById(R.id.et_cityName);
-        progressBar = view.findViewById(R.id.data_loading);
-        etContainer = view.findViewById(R.id.etLayoutContainer);
-        btnCurLocation = view.findViewById(R.id.btn_current_location);
-        fabSearch = view.findViewById(R.id.fab_search);
-        ivNoInternet = view.findViewById(R.id.iv_no_internet);
-        tvHumidityTitle = view.findViewById(R.id.tv_humidityTitle);
-        tvWindTitle = view.findViewById(R.id.tv_windTitle);
-        tvNoInternet = view.findViewById(R.id.tv_no_internet);
-        ivFavourite = view.findViewById(R.id.iv_favourite);
+    private fun makeViewsInvisible() {
+        tv_cityName.visibility = View.INVISIBLE
+        tv_weatherDescription.visibility = View.INVISIBLE
+        tv_humidityValue.visibility = View.INVISIBLE
+        tv_tempValue.visibility = View.INVISIBLE
+        tv_windSpeed.visibility = View.INVISIBLE
+        tv_dayTime.visibility = View.INVISIBLE
+        weather_icon.visibility = View.INVISIBLE
+        //        progressBar.setVisibility(View.INVISIBLE);
+        tv_humidityTitle.visibility = View.INVISIBLE
+        tv_windTitle.visibility = View.INVISIBLE
     }
 
-    public void makeViewsInvisible() {
-        tvCityTitle.setVisibility(View.INVISIBLE);
-        tvCityDescription.setVisibility(View.INVISIBLE);
-        tvCityHumidity.setVisibility(View.INVISIBLE);
-        tvCityTemp.setVisibility(View.INVISIBLE);
-        tvCityWindSpeed.setVisibility(View.INVISIBLE);
-        tvTime.setVisibility(View.INVISIBLE);
-        ivWeatherImage.setVisibility(View.INVISIBLE);
-//        progressBar.setVisibility(View.INVISIBLE);
-        tvHumidityTitle.setVisibility(View.INVISIBLE);
-        tvWindTitle.setVisibility(View.INVISIBLE);
+    private fun makeProgressBarInvisible() {
+        data_loading.visibility = View.INVISIBLE
+        iv_favourite.visibility = View.INVISIBLE
     }
 
-    public void makeProgressBarInvisible() {
-        progressBar.setVisibility(View.INVISIBLE);
-        ivFavourite.setVisibility(View.INVISIBLE);
-    }
-
-
-    public void checkLocationPermission() {
+    private fun checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                new AlertDialog.Builder(requireContext())
+                AlertDialog.Builder(requireContext())
                         .setTitle(R.string.permissionRationalTitle)
                         .setMessage(R.string.permissionRationalMessage)
-                        .setNegativeButton("No", (dialogInterface, i) -> ensureLocationIsEnabled())
-                        .setPositiveButton("Ok, ask again", (dialogInterface, i) -> requestLocationPermission())
-                        .show();
+                        .setNegativeButton("No") { _: DialogInterface?, _: Int -> ensureLocationIsEnabled() }
+                        .setPositiveButton("Ok, ask again") { _: DialogInterface?, _: Int -> requestLocationPermission() }
+                        .show()
             } else {
-                Log.d(TAG, "checkLocationPermission: " + "Requesting Location Permission Normally");
-                requestLocationPermission();
+                Log.d(TAG, "checkLocationPermission: " + "Requesting Location Permission Normally")
+                requestLocationPermission()
             }
         } else {
             //location permission has been granted, we can proceed and obtain the user's location
-            Log.d(TAG, "checkLocationPermission: Permission Granted: Getting User Location");
-            getUserLocation();
+            Log.d(TAG, "checkLocationPermission: Permission Granted: Getting User Location")
+            userLocation
         }
     }
 
-    private void requestLocationPermission() {
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-        requestPermissions(permissions, LOCATION_REQUEST_CODE);
+    private fun requestLocationPermission() {
+        val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        requestPermissions(permissions, LOCATION_REQUEST_CODE)
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == LOCATION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //permission granted
-                Log.d(TAG, "onRequestPermissionsResult: Location Permission Granted, Requesting User Location");
-                getUserLocation();
+                Log.d(TAG, "onRequestPermissionsResult: Location Permission Granted, Requesting User Location")
+                userLocation
             } else {
-                Log.d(TAG, "onRequestPermissionsResult: Location Permission Denied, Quitting");
+                Log.d(TAG, "onRequestPermissionsResult: Location Permission Denied, Quitting")
                 //permission rejected
             }
         } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
-    private void ensureLocationIsEnabled() {
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-
-        SettingsClient settingsClient = LocationServices.getSettingsClient(requireActivity());
-
-
-        Task<LocationSettingsResponse> locationResponse = settingsClient.checkLocationSettings(builder.build());
-        locationResponse.addOnCompleteListener(task -> {
+    private fun ensureLocationIsEnabled() {
+        mLocationRequest = LocationRequest.create()
+        mLocationRequest?.interval = 10000
+        mLocationRequest?.fastestInterval = 5000
+        mLocationRequest?.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        val builder = LocationSettingsRequest.Builder()
+        builder.addLocationRequest(mLocationRequest!!)
+        val settingsClient = LocationServices.getSettingsClient(requireActivity())
+        val locationResponse = settingsClient.checkLocationSettings(builder.build())
+        locationResponse.addOnCompleteListener { task: Task<LocationSettingsResponse?> ->
             try {
-                task.getResult(ApiException.class);
-                Log.d(TAG, "ensureLocationIsEnabled: Location Hardware previously enabled: Checking for permissions");
+                task.getResult(ApiException::class.java)
+                Log.d(TAG, "ensureLocationIsEnabled: Location Hardware previously enabled: Checking for permissions")
 
                 //ask for location request
-                checkLocationPermission();
-
-            } catch (ApiException exception) {
-                switch (exception.getStatusCode()) {
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        Log.d(TAG, "ensureLocationIsEnabled: Location Hardware disabled: Asking user to enable");
-                        ResolvableApiException resolvable = (ResolvableApiException) exception;
+                checkLocationPermission()
+            } catch (exception: ApiException) {
+                when (exception.statusCode) {
+                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
+                        Log.d(TAG, "ensureLocationIsEnabled: Location Hardware disabled: Asking user to enable")
+                        val resolvable = exception as ResolvableApiException
                         try {
-                            startIntentSenderForResult(resolvable.getResolution().getIntentSender(), ENABLE_LOCATION_HARDWARE,
-                                    null, 0, 0, 0, null);
-                        } catch (IntentSender.SendIntentException e) {
-                            e.printStackTrace();
+                            startIntentSenderForResult(resolvable.resolution.intentSender, ENABLE_LOCATION_HARDWARE,
+                                    null, 0, 0, 0, null)
+                        } catch (e: SendIntentException) {
+                            e.printStackTrace()
                         }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.d(TAG, "ensureLocationIsEnabled: Location Hardware disabled: Unable to toggle it on. Quitting");
-                        //settings cannot be enabled
-                        break;
-
-                    default:
-
-                        break;
+                    }
+                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> Log.d(TAG, "ensureLocationIsEnabled: Location Hardware disabled: Unable to toggle it on. Quitting")
+                    else -> {
+                    }
                 }
-            }
-        });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == ENABLE_LOCATION_HARDWARE) {
-            switch (resultCode) {
-                case Activity.RESULT_OK:
-                    Log.d(TAG, "onActivityResult: Location Hardware now enabled, checking for permissions");
-                    //start location updates
-                    checkLocationPermission();
-                    break;
-                case Activity.RESULT_CANCELED:
-                    Log.d(TAG, "onActivityResult: Request to enable location hardware declined. Quitting");
-                    break;
-
-                default:
-                    Log.d(TAG, "onActivityResult: No Op");
-                    break;
             }
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private void getUserLocation() {
-        searchByCityName = false;
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-
-        OnSuccessListener<Location> mLocationListener = (Location location) -> {
-            if (location != null) {
-                Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates");
-                Double latitude = location.getLatitude();
-                Double longitude = location.getLongitude();
-                mBlizzardViewModel.getWeather(latitude, longitude);
-                observeWeatherChanges();
-            } else {
-                Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates");
-                requestLocationUpdates();
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == ENABLE_LOCATION_HARDWARE) {
+            when (resultCode) {
+                Activity.RESULT_OK -> {
+                    Log.d(TAG, "onActivityResult: Location Hardware now enabled, checking for permissions")
+                    //start location updates
+                    checkLocationPermission()
+                }
+                Activity.RESULT_CANCELED -> Log.d(TAG, "onActivityResult: Request to enable location hardware declined. Quitting")
+                else -> Log.d(TAG, "onActivityResult: No Op")
             }
-        };
-
-        mFusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(requireActivity(), mLocationListener)
-                .addOnFailureListener(Throwable::printStackTrace);
-
+        }
     }
 
-    private void observeWeatherChanges() {
-        mBlizzardViewModel.getWeatherLiveData().observe(getViewLifecycleOwner(), weatherData -> {
+    @get:SuppressLint("MissingPermission")
+    private val userLocation: Unit
+        get() {
+            searchByCityName = false
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+            val mLocationListener = OnSuccessListener<Location> { location: Location? ->
+                if (location != null) {
+                    Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates")
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    mBlizzardViewModel?.getWeather(latitude, longitude)
+                    observeWeatherChanges()
+                } else {
+                    Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates")
+                    requestLocationUpdates()
+                }
+            }
+            mFusedLocationProviderClient?.lastLocation
+                    ?.addOnSuccessListener(requireActivity(), mLocationListener)
+                    ?.addOnFailureListener { obj: Exception -> obj.printStackTrace() }
+        }
+
+    private fun observeWeatherChanges() {
+        mBlizzardViewModel?.weatherLiveData?.observe(viewLifecycleOwner, Observer { weatherData: WeatherDataResponse? ->
             if (weatherData != null) {
-                cityName = weatherData.getName();
-                saveState();
-                saveToDb(weatherData);
-                mTimeUtil.setTime(weatherData.getDt(), weatherData.getTimezone());
-                resolveAppState(weatherData);
-                showDialogOnce++;
+                cityName = weatherData.name
+                saveState()
+                saveToDb(weatherData)
+                mTimeUtil.setTime(weatherData.dt, weatherData.timezone)
+                resolveAppState(weatherData)
+                showDialogOnce++
             } else {
                 if (searchByCityName) {
                     if (!mDeviceConnected) {
-                        showSnackBar(false);
-                        Handler handler = new Handler(Looper.getMainLooper());
-                        handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                        showSnackBar(false)
+                        val handler = Handler(Looper.getMainLooper())
+                        handler.postDelayed({ reverseViewAnimToInit() }, 1000L)
                     } else {
-                        Snackbar.make(view, "Error getting Location", Snackbar.LENGTH_SHORT).show();
-                        Handler handler = new Handler(Looper.getMainLooper());
-                        handler.postDelayed(this::reverseViewAnimToInit, 1000L);
+                        Snackbar.make(requireView(), "Error getting Location", Snackbar.LENGTH_SHORT).show()
+                        val handler = Handler(Looper.getMainLooper())
+                        handler.postDelayed({ reverseViewAnimToInit() }, 1000L)
                     }
                 } else if (!mDeviceConnected) {
-                    if (showDialogOnce < 1)
-                        showNetworkDialog();
-                    showDialogOnce++;
-                    makeProgressBarInvisible();
-                    if (!searchByCityName)
-                        makeViewsInvisible();
-                    ivNoInternet.setVisibility(View.VISIBLE);
-                    tvNoInternet.setVisibility(View.VISIBLE);
+                    if (showDialogOnce < 1) showNetworkDialog()
+                    showDialogOnce++
+                    makeProgressBarInvisible()
+                    if (!searchByCityName) makeViewsInvisible()
+                    iv_no_internet.visibility = View.VISIBLE
+                    tv_no_internet.visibility = View.VISIBLE
                 }
             }
-        });
+        })
     }
 
-    private void checkIfIsFavourite() {
+    private fun checkIfIsFavourite() {
         try {
-            WeatherDataEntity entity = mBlizzardViewModel.getWeatherByCityName(cityName);
-            Log.d(TAG, "checkIfIsFavourite: city name is " + cityName);
-            Handler favHandler = new Handler(Looper.getMainLooper());
-            favHandler.post(() -> {
-
+            val entity = mBlizzardViewModel?.getWeatherByCityName(cityName)
+            Log.d(TAG, "checkIfIsFavourite: city name is $cityName")
+            val favHandler = Handler(Looper.getMainLooper())
+            favHandler.post {
                 if (searchByCityName) {
-                    if (entity.getFavourite()) {
-                        isClicked = true;
-                        LoadImage(R.drawable.ic_favorite_filed, ivFavourite);
-                    } else {
-                        isClicked = false;
-                        LoadImage(R.drawable.ic_favorite, ivFavourite);
+                    if (entity != null) {
+                        if (entity.favourite) {
+                            isClicked = true
+                            loadImage(R.drawable.ic_favorite_filed, iv_favourite)
+                        } else {
+                            isClicked = false
+                            loadImage(R.drawable.ic_favorite, iv_favourite)
+                        }
                     }
-
-                    ivFavourite.animate()
-                            .alpha(1)
-                            .setInterpolator(new AnticipateInterpolator())
+                    iv_favourite.animate()
+                            .alpha(1f)
+                            .setInterpolator(AnticipateInterpolator())
                             .setDuration(100)
-                            .start();
-                    ivFavourite.setVisibility(View.VISIBLE);
-
+                            .start()
+                    iv_favourite.visibility = View.VISIBLE
                 } else {
-                    ivFavourite.animate()
-                            .alpha(0)
-                            .setInterpolator(new AnticipateInterpolator())
+                    iv_favourite.animate()
+                            .alpha(0f)
+                            .setInterpolator(AnticipateInterpolator())
                             .setDuration(100)
-                            .start();
+                            .start()
 
                     // delayed handler needed for fade out animation to run
-
-                    new Handler(Looper.getMainLooper())
-                            .postDelayed(() -> ivFavourite.setVisibility(View.INVISIBLE), 2000);
+                    Handler(Looper.getMainLooper())
+                            .postDelayed({ iv_favourite.visibility = View.INVISIBLE }, 2000)
                 }
-            });
-        } catch (NullPointerException e) {
-            Log.e(TAG, "checkIfIsFavourite: Data not saved yet");
+            }
+        } catch (e: NullPointerException) {
+            Log.e(TAG, "checkIfIsFavourite: Data not saved yet")
         }
-
     }
 
-    private void saveToDb(WeatherDataResponse weatherDataResponse) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            WeatherDataEntity entity = new WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse);
-            mBlizzardViewModel.saveWeather(entity);
-            checkIfIsFavourite();
-        });
+    private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
+        Executors.newSingleThreadExecutor().execute {
+            val entity = WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse)
+            mBlizzardViewModel?.saveWeather(entity)
+            checkIfIsFavourite()
+        }
     }
 
     @SuppressLint("MissingPermission")
-    private void requestLocationUpdates() {
-        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper());
-        getUserLocation();
+    private fun requestLocationUpdates() {
+        mFusedLocationProviderClient?.requestLocationUpdates(mLocationRequest, mLocationUpdatesCallback, Looper.getMainLooper())
+        userLocation
     }
 
-    private void stopLocationUpdates() {
+    private fun stopLocationUpdates() {
         if (mFusedLocationProviderClient != null) {
-            mFusedLocationProviderClient.removeLocationUpdates(mLocationUpdatesCallback);
-            Log.d(TAG, "stopLocationUpdates: Location Updates Stopped");
+            mFusedLocationProviderClient?.removeLocationUpdates(mLocationUpdatesCallback)
+            Log.d(TAG, "stopLocationUpdates: Location Updates Stopped")
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        stopLocationUpdates();
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
     }
 
-    private void resolveAppState(WeatherDataResponse weatherDataResponse) {
-        progressBar.setVisibility(View.VISIBLE);
-        ivNoInternet.setVisibility(View.INVISIBLE);
-        tvNoInternet.setVisibility(View.INVISIBLE);
-        String cityName = weatherDataResponse.getName() + ", " + weatherDataResponse.getSys().getCountry();
-        tvCityTitle.setText(cityName);
-
-        Double temp = weatherDataResponse.getMain().getTemp();
-        tvCityTemp.setText(TempConverter.kelToCelsius(temp));
-
-        String humidity = weatherDataResponse.getMain().getHumidity() + "%";
-        tvCityHumidity.setText(humidity);
-
-        Weather weather = weatherDataResponse.getWeather().get(0);
-        tvCityDescription.setText(weather.getDescription());
-
-        LoadImage(weather.getIcon());
-
-        String windSpeed = weatherDataResponse.getWind().getSpeed() + " m/s";
-
-        tvCityWindSpeed.setText(windSpeed);
-
-        tvTime.setText(mTimeUtil.getTime());
-
-        progressBar.setVisibility(View.INVISIBLE);
-
-        showViews();
+    private fun resolveAppState(weatherDataResponse: WeatherDataResponse) {
+        data_loading.visibility = View.VISIBLE
+        iv_no_internet.visibility = View.INVISIBLE
+        tv_no_internet.visibility = View.INVISIBLE
+        val cityName = weatherDataResponse.name + ", " + weatherDataResponse.sys.country
+        tv_cityName?.text = cityName
+        val temp = weatherDataResponse.main.temp
+        tv_tempValue?.text = TempConverter.kelToCelsius(temp)
+        val humidity = weatherDataResponse.main.humidity.toString() + "%"
+        tv_humidityValue?.text = humidity
+        val weather = weatherDataResponse.weather[0]
+        tv_weatherDescription?.text = weather.description
+        loadImage(weather.icon)
+        val windSpeed = weatherDataResponse.wind.speed.toString() + " m/s"
+        tv_windSpeed?.text = windSpeed
+        tv_dayTime?.text = mTimeUtil.time
+        data_loading.visibility = View.INVISIBLE
+        showViews()
     }
 
-    private void showViews() {
-        tvCityTitle.setVisibility(View.VISIBLE);
-        tvCityDescription.setVisibility(View.VISIBLE);
-        tvCityHumidity.setVisibility(View.VISIBLE);
-        tvCityTemp.setVisibility(View.VISIBLE);
-        tvCityWindSpeed.setVisibility(View.VISIBLE);
-        tvTime.setVisibility(View.VISIBLE);
-        ivWeatherImage.setVisibility(View.VISIBLE);
-        tvHumidityTitle.setVisibility(View.VISIBLE);
-        tvWindTitle.setVisibility(View.VISIBLE);
+    private fun showViews() {
+        tv_cityName?.visibility = View.VISIBLE
+        tv_weatherDescription!!.visibility = View.VISIBLE
+        tv_humidityValue?.visibility = View.VISIBLE
+        tv_tempValue?.visibility = View.VISIBLE
+        tv_windSpeed?.visibility = View.VISIBLE
+        tv_dayTime?.visibility = View.VISIBLE
+        weather_icon?.visibility = View.VISIBLE
+        tv_humidityTitle.visibility = View.VISIBLE
+        tv_windTitle.visibility = View.VISIBLE
     }
 
-    private void LoadImage(String iconId) {
-        String url = String.format("http://openweathermap.org/img/wn/%s@4x.png", iconId);
-
-        Glide.with(requireView())
-                .load(url)
-                .error(R.drawable.ic_cloud)
-                .into(ivWeatherImage);
+    private fun loadImage(iconId: String) {
+        val url = String.format("http://openweathermap.org/img/wn/%s@4x.png", iconId)
+        weather_icon?.let {
+            Glide.with(requireView())
+                    .load(url)
+                    .error(R.drawable.ic_cloud)
+                    .into(it)
+        }
     }
 
-    private void LoadImage(int drawable, ImageView imageView) {
+    private fun loadImage(drawable: Int, imageView: ImageView?) {
         Glide.with(requireView())
                 .load(drawable)
-                .into(imageView);
+                .into(imageView!!)
     }
 
-    private void showNetworkDialog() {
-        final MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(requireContext(),
-                R.style.RoundShapeTheme);
-        View customTitleVeiw = View.inflate(requireContext(), R.layout.alert_dialog, null);
+    private fun showNetworkDialog() {
+        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext(),
+                R.style.RoundShapeTheme)
+        val customTitleView = View.inflate(requireContext(), R.layout.alert_dialog, null)
         materialAlertDialogBuilder
-                .setCustomTitle(customTitleVeiw)
-                .setMessage("    No internet connection found!" + "\n" +
-                        "Please, turn on your Mobile data and hit OK")
-                .setPositiveButton("OK", (dialogInterface, i) -> {
+                .setCustomTitle(customTitleView)
+                .setMessage("""    No internet connection found!
+                            Please, turn on your Mobile data and hit OK""")
+                .setPositiveButton("OK") { _: DialogInterface?, _: Int ->
                     if (mDeviceConnected) {
-                        ensureLocationIsEnabled();
+                        ensureLocationIsEnabled()
                     }
-                })
-                .setNeutralButton("LATER", (dialogInterface, i) -> {
-
-                })
+                }
+                .setNeutralButton("LATER") { _: DialogInterface?, _: Int -> }
                 .setCancelable(false)
-                .show();
+                .show()
     }
 
-    private void showSnackBar(boolean isNetworkAvailable) {
-        String message;
-        int color;
-
+    private fun showSnackBar(isNetworkAvailable: Boolean) {
+        val message: String
+        val color: Int
         if (isNetworkAvailable) {
-            message = "You are Online";
-            color = Color.WHITE;
-
-            Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-            snackbar.setBackgroundTint(getResources().getColor(R.color.snackBarOnline, null));
-            View view = snackbar.getView();
-            TextView textView = view.findViewById(com.google.android.material.R.id.snackbar_text);
-            textView.setTextColor(color);
-            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            snackbar.show();
+            message = "You are Online"
+            color = Color.WHITE
+            val snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+            snackbar.setBackgroundTint(resources.getColor(R.color.snackBarOnline, null))
+            val view = snackbar.view
+            val textView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+            textView.setTextColor(color)
+            textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            snackbar.show()
         } else {
-            message = "You are Offline";
-            color = Color.WHITE;
-
-            Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-            View view = snackbar.getView();
-            TextView textView = view.findViewById(com.google.android.material.R.id.snackbar_text);
-            textView.setTextColor(color);
-            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            snackbar.show();
+            message = "You are Offline"
+            color = Color.WHITE
+            val snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+            val view = snackbar.view
+            val textView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+            textView.setTextColor(color)
+            textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            snackbar.show()
         }
     }
 
+    companion object {
+        private const val TAG = "HomeFragment"
+        const val ENABLE_LOCATION_HARDWARE = 3030
+        private const val LOCATION_REQUEST_CODE = 123
+        const val CITY_NAME = "com.example.blizzard.cityName"
+    }
 }
