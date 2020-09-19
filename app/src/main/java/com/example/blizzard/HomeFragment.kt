@@ -192,6 +192,8 @@ class HomeFragment : Fragment() {
             search_btn.visibility = View.VISIBLE
             search_btn.isClickable = true
             curLocIsVisible = true
+            btn_current_location.visibility = View.INVISIBLE
+            btn_current_location.isClickable = false
         }
     }
 
