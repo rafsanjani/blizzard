@@ -422,7 +422,7 @@ class HomeFragment : Fragment() {
 
     private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
         Executors.newSingleThreadExecutor().execute {
-            val entity = WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse)
+            val entity = mBlizzardViewModel?.let { WeatherMapper(it).mapToEntity(weatherDataResponse) }
             mBlizzardViewModel?.saveWeather(entity)
             checkIfIsFavourite()
         }
@@ -458,7 +458,7 @@ class HomeFragment : Fragment() {
         tv_humidityValue?.text = humidity
         val weather = weatherDataResponse.weather[0]
         tv_weatherDescription?.text = weather.description
-        loadImage(weather.icon)
+        weather.icon?.let { loadImage(it) }
         val windSpeed = weatherDataResponse.wind.speed.toString() + " m/s"
         tv_windSpeed?.text = windSpeed
         tv_dayTime?.text = mTimeUtil.time
