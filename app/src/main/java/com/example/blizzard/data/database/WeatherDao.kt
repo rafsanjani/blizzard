@@ -1,32 +1,23 @@
-package com.example.blizzard.data.database;
+package com.example.blizzard.data.database
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-import androidx.room.Update;
-
-import com.example.blizzard.data.entities.WeatherDataEntity;
-
-import java.util.List;
+import androidx.lifecycle.LiveData
+import androidx.room.*
+import com.example.blizzard.data.entities.WeatherDataEntity
 
 @Dao
-public interface WeatherDao {
-
+interface WeatherDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void saveWeather(WeatherDataEntity weatherDataEntity);
+    fun saveWeather(weatherDataEntity: WeatherDataEntity?)
 
-    @Query("SELECT * FROM weather")
-    List<WeatherDataEntity> getAllWeather();
-
+    @get:Query("SELECT * FROM weather")
+    val allWeather: List<WeatherDataEntity?>?
 
     @Query("SELECT cityName FROM weather WHERE cityName = :cityName")
-    LiveData<String> getWeatherLiveDataForCity(String cityName);
+    fun getWeatherLiveDataForCity(cityName: String?): LiveData<String?>?
 
     @Query("SELECT * FROM weather WHERE cityName = :cityName")
-    WeatherDataEntity getWeatherForCity(String cityName);
+    fun getWeatherForCity(cityName: String?): WeatherDataEntity?
 
     @Update
-    void updateWeatherData(WeatherDataEntity weatherDataEntity);
+    fun updateWeatherData(weatherDataEntity: WeatherDataEntity?)
 }

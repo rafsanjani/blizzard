@@ -1,51 +1,38 @@
-package com.example.blizzard.data.database;
+package com.example.blizzard.data.database
+
+import android.util.Log
+import com.example.blizzard.data.entities.WeatherDataEntity
+import com.example.blizzard.model.WeatherDataResponse
+import com.example.blizzard.viewmodel.BlizzardViewModel
 
 /* Created by Rafsanjani on 15/08/2020. */
-
-import android.util.Log;
-
-import com.example.blizzard.data.entities.WeatherDataEntity;
-import com.example.blizzard.data.repository.BlizzardRepository;
-import com.example.blizzard.model.WeatherDataResponse;
-import com.example.blizzard.viewmodel.BlizzardViewModel;
-
-public class WeatherMapper {
-    BlizzardViewModel viewModel;
-    private static final String TAG = "WeatherMapper";
-
-    public WeatherMapper(BlizzardViewModel viewModel) {
-        this.viewModel = viewModel;
+class WeatherMapper(private var viewModel: BlizzardViewModel) {
+    fun mapToEntity(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
+        return checkIfAlreadyExists(weatherDataResponse)
     }
 
-    public WeatherDataEntity mapToEntity(WeatherDataResponse weatherDataResponse) {
-
-        return checkIfAlreadyExists(weatherDataResponse);
-    }
-
-    private WeatherDataEntity checkIfAlreadyExists(WeatherDataResponse weatherDataResponse) {
-        Boolean exists = false;
+    private fun checkIfAlreadyExists(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
+        var exists = false
         try {
-            WeatherDataEntity entity = viewModel.getWeatherByCityName(weatherDataResponse.getName());
-            exists = entity.getFavourite();
-        } catch (NullPointerException e) {
-            Log.e(TAG, "checkIfAlreadyExists: Data not saved yet");
+            val entity = viewModel.getWeatherByCityName(weatherDataResponse.name)
+            exists = entity.favourite
+        } catch (e: NullPointerException) {
+            Log.e(TAG, "checkIfAlreadyExists: Data not saved yet")
         }
-
-        return new WeatherDataEntity(
-                weatherDataResponse.getName(),
-                weatherDataResponse.getSys().getCountry(),
-                weatherDataResponse.getMain().getTemp(),
-                weatherDataResponse.getMain().getHumidity(),
-                weatherDataResponse.getWeather().get(0).getDescription(),
-                weatherDataResponse.getWind().getSpeed(),
-                weatherDataResponse.getDt(),
-                weatherDataResponse.getTimezone(),
+        return WeatherDataEntity(
+                weatherDataResponse.name,
+                weatherDataResponse.sys.country!!,
+                weatherDataResponse.main.temp,
+                weatherDataResponse.main.humidity,
+                weatherDataResponse.weather[0].description!!,
+                weatherDataResponse.wind.speed,
+                weatherDataResponse.dt,
+                weatherDataResponse.timezone,
                 exists
-        );
+        )
     }
 
-    public static WeatherDataResponse mapToResponse(WeatherDataEntity weatherDataEntity) {
-        //todo: do actual conversion
-        return new WeatherDataResponse();
+    companion object {
+        private const val TAG = "WeatherMapper"
     }
 }

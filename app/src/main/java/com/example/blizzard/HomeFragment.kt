@@ -422,7 +422,7 @@ class HomeFragment : Fragment() {
 
     private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
         Executors.newSingleThreadExecutor().execute {
-            val entity = WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse)
+            val entity = mBlizzardViewModel?.let { WeatherMapper(it).mapToEntity(weatherDataResponse) }
             mBlizzardViewModel?.saveWeather(entity)
             checkIfIsFavourite()
         }
