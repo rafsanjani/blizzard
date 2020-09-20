@@ -458,7 +458,7 @@ class HomeFragment : Fragment() {
         tv_humidityValue?.text = humidity
         val weather = weatherDataResponse.weather[0]
         tv_weatherDescription?.text = weather.description
-        loadImage(weather.icon)
+        weather.icon?.let { loadImage(it) }
         val windSpeed = weatherDataResponse.wind.speed.toString() + " m/s"
         tv_windSpeed?.text = windSpeed
         tv_dayTime?.text = mTimeUtil.time

@@ -1,30 +1,15 @@
+package com.example.blizzard.data.entities
 
-package com.example.blizzard.data.entities;
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import org.jetbrains.annotations.NotNull;
-
-public class Sys {
+class Sys {
     @SerializedName("country")
     @Expose
-    private String country;
-
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    @NotNull
-    @Override
-    public String toString() {
+    var country: String? = null
+    override fun toString(): String {
         return "Sys{" +
                 "country='" + country + '\'' +
-                '}';
+                '}'
     }
 }
