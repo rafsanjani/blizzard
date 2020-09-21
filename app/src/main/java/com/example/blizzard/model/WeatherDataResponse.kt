@@ -1,89 +1,39 @@
+package com.example.blizzard.model
 
-package com.example.blizzard.model;
+import com.example.blizzard.data.entities.Sys
+import com.example.blizzard.data.entities.Weather
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
 
-import androidx.annotation.Nullable;
-
-import com.example.blizzard.data.entities.Sys;
-import com.example.blizzard.data.entities.Weather;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-
-
-public class WeatherDataResponse {
-
-
+class WeatherDataResponse {
     @SerializedName("weather")
     @Expose
-    private List<Weather> weather = null;
-
+    val weather: List<Weather>? = null
 
     @SerializedName("main")
     @Expose
-    private Main main;
-
+    val main: Main? = null
 
     @SerializedName("wind")
     @Expose
-    private Wind wind;
+    var wind: Wind? = null
 
     @SerializedName("dt")
     @Expose
-    private int dt;
+    var dt = 0
 
     @SerializedName("timezone")
     @Expose
-    private int timezone;
+    var timezone = 0
 
     @SerializedName("name")
     @Expose
-    private String name;
-
+    var name: String? = null
 
     @SerializedName("sys")
     @Expose
-    private Sys sys;
-
-    public List<Weather> getWeather() {
-        return weather;
-    }
-
-
-    public Main getMain() {
-        return main;
-    }
-
-
-    public int getDt() {
-        return dt;
-    }
-
-
-    public int getTimezone() {
-        return timezone;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-
-    public Wind getWind() {
-        return wind;
-    }
-
-    public Sys getSys() {
-        return sys;
-    }
-
-
-    @NotNull
-    @Override
-    public String toString() {
+    var sys: Sys? = null
+    override fun toString(): String {
         return "WeatherData{" +
                 "weather=" + weather.toString() +
                 ", main=" + main.toString() +
@@ -92,52 +42,36 @@ public class WeatherDataResponse {
                 ", timezone=" + timezone +
                 ", name='" + name + '\'' +
                 ", sys=" + sys.toString() +
-                '}';
+                '}'
     }
 
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (obj != this || obj != this.getClass()) {
-            return false;
+    override fun equals(other: Any?): Boolean {
+        return if (other !== this || other !== this.javaClass) {
+            false
         } else {
-            WeatherDataResponse guestWeatherDataResponse = (WeatherDataResponse) obj;
-
-
-            Weather guestWeather = guestWeatherDataResponse.getWeather().get(0);
-            Weather dbWeatherData = getWeather().get(0);
-
-            Wind guestWind = guestWeatherDataResponse.getWind();
-            Wind dbWind = getWind();
-
-            Main guestMain = guestWeatherDataResponse.getMain();
-            Main dbMain = getMain();
-
-            return
-                    (guestWeather.getDescription().equals(dbWeatherData.getDescription()))
-                            && (guestWeather.getIcon().equals(dbWeatherData.getIcon()))
-                            && (guestWind.getSpeed() == dbWind.getSpeed())
-                            && (guestMain.getHumidity() == dbMain.getHumidity())
-                            && (guestMain.getTemp() == dbMain.getTemp());
+            val guestWeatherDataResponse = other as WeatherDataResponse
+            val guestWeather = guestWeatherDataResponse.weather!![0]
+            val dbWeatherData = weather!![0]
+            val guestWind = guestWeatherDataResponse.wind
+            val dbWind = wind
+            val guestMain = guestWeatherDataResponse.main
+            val dbMain = main
+            (guestWeather.description == dbWeatherData.description
+                    && guestWeather.icon == dbWeatherData.icon
+                    && guestWind!!.speed == dbWind!!.speed
+                    && guestMain!!.humidity == dbMain!!.humidity
+                    && guestMain.temp == dbMain.temp)
         }
     }
 
-    public void setWind(Wind wind) {
-        this.wind = wind;
-    }
-
-    public void setDt(int dt) {
-        this.dt = dt;
-    }
-
-    public void setTimezone(int timezone) {
-        this.timezone = timezone;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSys(Sys sys) {
-        this.sys = sys;
+    override fun hashCode(): Int {
+        var result = weather?.hashCode() ?: 0
+        result = 31 * result + (main?.hashCode() ?: 0)
+        result = 31 * result + (wind?.hashCode() ?: 0)
+        result = 31 * result + dt
+        result = 31 * result + timezone
+        result = 31 * result + (name?.hashCode() ?: 0)
+        result = 31 * result + (sys?.hashCode() ?: 0)
+        return result
     }
 }

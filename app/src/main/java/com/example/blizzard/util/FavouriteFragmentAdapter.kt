@@ -1,83 +1,63 @@
-package com.example.blizzard.util;
+package com.example.blizzard.util
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.blizzard.R;
-import com.example.blizzard.data.entities.WeatherDataEntity;
-
-import java.util.List;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.blizzard.R
+import com.example.blizzard.data.entities.WeatherDataEntity
 
 /**
  * Created by kelvin_clark on 8/19/2020
  */
-public class FavouriteFragmentAdapter extends RecyclerView.Adapter<FavouriteFragmentAdapter.ViewHolder> {
-    private List<WeatherDataEntity> weatherDataEntities;
-    private Context mContext;
-    private TimeUtil timeUtil = new TimeUtil();
-
-    public FavouriteFragmentAdapter(Context mContext, List<WeatherDataEntity> weatherDataEntities) {
-        this.mContext = mContext;
-        this.weatherDataEntities = weatherDataEntities;
+class FavouriteFragmentAdapter(private val mContext: Context, private val weatherDataEntities: MutableList<WeatherDataEntity>) : RecyclerView.Adapter<FavouriteFragmentAdapter.ViewHolder>() {
+    private val timeUtil = TimeUtil()
+    fun insertWeatherEntities(entities: List<WeatherDataEntity>) {
+        weatherDataEntities.clear()
+        weatherDataEntities.addAll(entities)
+        notifyDataSetChanged()
     }
 
-    public void insertWeatherEntities(List<WeatherDataEntity> entities) {
-
-        weatherDataEntities.clear();
-        weatherDataEntities.addAll(entities);
-        notifyDataSetChanged();
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(mContext).inflate(R.layout.weather_list_item, parent, false)
+        return ViewHolder(view)
     }
 
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.weather_list_item, parent, false);
-        return new ViewHolder(view);
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val entity = weatherDataEntities[position]
+        timeUtil.setTime(entity.dt!!, entity.timeZone!!)
+        val cityName = entity.cityName + ", " + entity.country
+        holder.tvCityName.text = cityName
+        holder.tvDescription.text = entity.description
+        val humidity = entity.humidity.toString() + "%"
+        holder.tvHumidity.text = humidity
+        holder.tvTemperature.text = entity.temperature?.let { TempConverter.kelToCelsius(it) }
+        holder.tvTime.text = timeUtil.getTime()
+        val windSpeed = entity.windSpeed.toString() + " m/s"
+        holder.tvWindSpeed.text = windSpeed
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        WeatherDataEntity entity = weatherDataEntities.get(position);
-        timeUtil.setTime(entity.getDt(), entity.getTimeZone());
-        String cityName = entity.getCityName() + ", " + entity.getCountry();
-        holder.tvCityName.setText(cityName);
-        holder.tvDescription.setText(entity.getDescription());
-        String humidity = entity.getHumidity() + "%";
-        holder.tvHumidity.setText(humidity);
-        holder.tvTemperature.setText(TempConverter.kelToCelsius(entity.getTemperature()));
-        holder.tvTime.setText(timeUtil.getTime());
-        String windSpeed = entity.getWindSpeed() + " m/s";
-        holder.tvWindSpeed.setText(windSpeed);
+    override fun getItemCount(): Int {
+        return weatherDataEntities.size
     }
 
-    @Override
-    public int getItemCount() {
-        return weatherDataEntities.size();
-    }
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var tvCityName: TextView
+        var tvDescription: TextView
+        var tvTemperature: TextView
+        var tvHumidity: TextView
+        var tvWindSpeed: TextView
+        var tvTime: TextView
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCityName;
-        TextView tvDescription;
-        TextView tvTemperature;
-        TextView tvHumidity;
-        TextView tvWindSpeed;
-        TextView tvTime;
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvCityName = itemView.findViewById(R.id.tv_cityName);
-            tvDescription = itemView.findViewById(R.id.tv_description);
-            tvHumidity = itemView.findViewById(R.id.tv_humidity);
-            tvTemperature = itemView.findViewById(R.id.tv_temp);
-            tvWindSpeed = itemView.findViewById(R.id.tv_windSpeed);
-            tvTime = itemView.findViewById(R.id.tv_day_time);
+        init {
+            tvCityName = itemView.findViewById(R.id.tv_cityName)
+            tvDescription = itemView.findViewById(R.id.tv_description)
+            tvHumidity = itemView.findViewById(R.id.tv_humidity)
+            tvTemperature = itemView.findViewById(R.id.tv_temp)
+            tvWindSpeed = itemView.findViewById(R.id.tv_windSpeed)
+            tvTime = itemView.findViewById(R.id.tv_day_time)
         }
     }
 }

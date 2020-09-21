@@ -1,76 +1,69 @@
-package com.example.blizzard.util;
+package com.example.blizzard.util
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 
 /**
  * Created by tony on 8/9/2020
  */
-
-public class CheckNetworkUtil extends BroadcastReceiver {
-    public static ConnectivityListener sConnectivityListener;
-
-
-    public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        boolean isNetworkAvailable = false;
-        if (connMgr != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                NetworkCapabilities capabilities = connMgr.getNetworkCapabilities(connMgr.getActiveNetwork());
-                if (capabilities != null) {
-                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                        isNetworkAvailable = true;
-                    }
-                }
-            } else {
-                NetworkInfo activeNetworkInfo = connMgr.getActiveNetworkInfo();
-                if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
-                    isNetworkAvailable = true;
+class CheckNetworkUtil : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        var isNetworkAvailable = false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val capabilities = connMgr.getNetworkCapabilities(connMgr.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    isNetworkAvailable = true
                 }
             }
-        }
-        return isNetworkAvailable;
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        boolean isNetworkAvailable = false;
-        if (connMgr != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                NetworkCapabilities capabilities = connMgr.getNetworkCapabilities(connMgr.getActiveNetwork());
-                if (capabilities != null) {
-                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                        isNetworkAvailable = true;
-                    }
-                }
-            } else {
-                NetworkInfo activeNetworkInfo = connMgr.getActiveNetworkInfo();
-                if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
-                    isNetworkAvailable= true;
-                }
+        } else {
+            val activeNetworkInfo = connMgr.activeNetworkInfo
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting) {
+                isNetworkAvailable = true
             }
         }
         if (sConnectivityListener != null) {
-            sConnectivityListener.onNetworkConnectionChanged(isNetworkAvailable);
+            sConnectivityListener!!.onNetworkConnectionChanged(isNetworkAvailable)
         }
     }
 
-    public void setConnectivityListener(CheckNetworkUtil.ConnectivityListener listener) {
-        sConnectivityListener = listener;
+    fun setConnectivityListener(listener: ConnectivityListener?) {
+        sConnectivityListener = listener
     }
 
     //Listener interface
-    public interface ConnectivityListener {
-        void onNetworkConnectionChanged(boolean isNetworkAvailable);
+    interface ConnectivityListener {
+        fun onNetworkConnectionChanged(isNetworkAvailable: Boolean)
+    }
+
+    companion object {
+        var sConnectivityListener: ConnectivityListener? = null
+        fun isNetworkAvailable(context: Context): Boolean {
+            val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            var isNetworkAvailable = false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val capabilities = connMgr.getNetworkCapabilities(connMgr.activeNetwork)
+                if (capabilities != null) {
+                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                        isNetworkAvailable = true
+                    }
+                }
+            } else {
+                val activeNetworkInfo = connMgr.activeNetworkInfo
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting) {
+                    isNetworkAvailable = true
+                }
+            }
+            return isNetworkAvailable
+        }
     }
 }

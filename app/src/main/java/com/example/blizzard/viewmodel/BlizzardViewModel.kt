@@ -1,84 +1,65 @@
-package com.example.blizzard.viewmodel;
+package com.example.blizzard.viewmodel
 
-import android.app.Application;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.SavedStateHandle;
-
-import com.example.blizzard.data.entities.WeatherDataEntity;
-import com.example.blizzard.data.repository.BlizzardRepository;
-import com.example.blizzard.model.WeatherDataResponse;
-
-import java.util.List;
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import com.example.blizzard.data.entities.WeatherDataEntity
+import com.example.blizzard.data.repository.BlizzardRepository
+import com.example.blizzard.model.WeatherDataResponse
 
 /**
  * Created by tony on 8/9/2020
  */
+class BlizzardViewModel(application: Application, private val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
+    private val mBlizzardRepository: BlizzardRepository = BlizzardRepository(application)
+    var weatherLiveData: LiveData<WeatherDataResponse?> = MutableLiveData()
+        private set
 
-public class BlizzardViewModel extends AndroidViewModel {
-
-    private final BlizzardRepository mBlizzardRepository;
-    private LiveData<WeatherDataResponse> mWeatherLiveData = new MutableLiveData<>();
-    private SavedStateHandle savedStateHandle;
-    public static final String CITY_NAME = "com.example.blizzard.viewmodel.cityName";
-    public static final String SEARCH_BOX_TEXT = "com.example.blizzard.viewmodel.searchBoxText";
-
-
-    public BlizzardViewModel(@NonNull Application application, SavedStateHandle savedStateHandle1) {
-        super(application);
-        mBlizzardRepository = new BlizzardRepository(application);
-        this.savedStateHandle = savedStateHandle1;
+    fun saveAppState(cityName: String?) {
+        savedStateHandle.set(CITY_NAME, cityName)
     }
 
-    public void saveAppState(String cityName) {
-        savedStateHandle.set(CITY_NAME, cityName);
+    fun saveAppState(cityName: String?, searchBoxText: String?) {
+        savedStateHandle.set(CITY_NAME, cityName)
+        savedStateHandle.set(SEARCH_BOX_TEXT, searchBoxText)
     }
 
-    public void saveAppState(String cityName, String searchBoxText) {
-        savedStateHandle.set(CITY_NAME, cityName);
-        savedStateHandle.set(SEARCH_BOX_TEXT, searchBoxText);
+    val appState: Array<String?>
+        get() {
+            val appState = arrayOfNulls<String>(2)
+            appState[0] = savedStateHandle.get<String>(CITY_NAME)
+            appState[1] = savedStateHandle.get<String>(SEARCH_BOX_TEXT)
+            return appState
+        }
+
+    fun saveWeather(weatherDataEntity: WeatherDataEntity?) {
+        mBlizzardRepository.saveWeatherData(weatherDataEntity)
     }
 
-    public String[] getAppState() {
-        String[] appState = new String[2];
-        appState[0] = savedStateHandle.get(CITY_NAME);
-        appState[1] = savedStateHandle.get(SEARCH_BOX_TEXT);
-        return appState;
+    fun getWeather(cityName: String?) {
+        weatherLiveData = mBlizzardRepository.getWeather(cityName)
     }
 
-    public void saveWeather(WeatherDataEntity weatherDataEntity) {
-        mBlizzardRepository.saveWeatherData(weatherDataEntity);
+    fun getWeatherByCityName(cityName: String?): WeatherDataEntity? {
+        return mBlizzardRepository.getWeatherByCityName(cityName)
     }
 
-    public void getWeather(String cityName) {
-        mWeatherLiveData = mBlizzardRepository.getWeather(cityName);
+    fun updateWeatherData(entity: WeatherDataEntity?) {
+        mBlizzardRepository.updateWeather(entity)
     }
 
-    public WeatherDataEntity getWeatherByCityName(String cityName) {
-        return mBlizzardRepository.getWeatherByCityName(cityName);
+    val allDataFromDb: List<WeatherDataEntity?>?
+        get() = mBlizzardRepository.allDataFromDb
+
+    fun getWeather(lat: Double?, lon: Double?) {
+        weatherLiveData = mBlizzardRepository.getWeather(lat, lon)
     }
 
-    public void updateWeatherData(WeatherDataEntity entity) {
-        mBlizzardRepository.updateWeather(entity);
-    }
-
-    public List<WeatherDataEntity> getAllDataFromDb() {
-        return mBlizzardRepository.getAllDataFromDb();
-    }
-
-    public void getWeather(Double lat, Double lon) {
-        mWeatherLiveData = mBlizzardRepository.getWeather(lat, lon);
-    }
-
-    public LiveData<WeatherDataResponse> getWeatherLiveData() {
-        return mWeatherLiveData;
-    }
-
-    public LiveData<WeatherDataResponse> getWeatherByCity(String city) {
-        return mBlizzardRepository.getWeather(city);
+    companion object {
+        const val CITY_NAME = "com.example.blizzard.viewmodel.cityName"
+        const val SEARCH_BOX_TEXT = "com.example.blizzard.viewmodel.searchBoxText"
     }
 
 }

@@ -15,17 +15,17 @@ class WeatherMapper(private var viewModel: BlizzardViewModel) {
         var exists = false
         try {
             val entity = viewModel.getWeatherByCityName(weatherDataResponse.name)
-            exists = entity.favourite
+            exists = entity?.favourite!!
         } catch (e: NullPointerException) {
             Log.e(TAG, "checkIfAlreadyExists: Data not saved yet")
         }
         return WeatherDataEntity(
-                weatherDataResponse.name,
-                weatherDataResponse.sys.country!!,
-                weatherDataResponse.main.temp,
-                weatherDataResponse.main.humidity,
-                weatherDataResponse.weather[0].description!!,
-                weatherDataResponse.wind.speed,
+                weatherDataResponse.name!!,
+                weatherDataResponse.sys?.country,
+                weatherDataResponse.main?.temp,
+                weatherDataResponse.main?.humidity,
+                weatherDataResponse.weather?.get(0)?.description!!,
+                weatherDataResponse.wind?.speed,
                 weatherDataResponse.dt,
                 weatherDataResponse.timezone,
                 exists

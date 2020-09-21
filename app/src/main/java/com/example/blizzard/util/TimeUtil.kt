@@ -1,58 +1,36 @@
-package com.example.blizzard.util;
+package com.example.blizzard.util
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Created by kelvi on 8/4/2020
  */
-public class TimeUtil {
-    String day;
-    String time;
-
-
-    public TimeUtil() {
-
+class TimeUtil {
+    var day: String? = null
+    var timeAmPm: String? = null
+    fun setTime(dateTimeStamp: Int, timeFromApi: Int) {
+        val timeZoneString = getTimeZone(timeFromApi)
+        val timeZone = TimeZone.getTimeZone(timeZoneString)
+        val calendar = Calendar.getInstance(timeZone)
+        val timeInstance = DateFormat.getTimeInstance(DateFormat.SHORT)
+        timeInstance.timeZone = calendar.timeZone
+        val date = Date(dateTimeStamp * 1000L)
+        day = SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
+        timeAmPm = timeInstance.format(calendar.time)
     }
 
-
-    public void setTime(int dateTimeStamp, int timeFromApi) {
-        String timeZoneString = getTimeZone(timeFromApi);
-
-        TimeZone timeZone = TimeZone.getTimeZone(timeZoneString);
-
-        Calendar calendar = Calendar.getInstance(timeZone);
-
-        DateFormat timeInstance = DateFormat.getTimeInstance(DateFormat.SHORT);
-        timeInstance.setTimeZone(calendar.getTimeZone());
-
-        Date date = new Date(dateTimeStamp * 1000L);
-
-        day = new SimpleDateFormat("EEEE", Locale.getDefault()).format(date);
-
-        time = timeInstance.format(calendar.getTime());
-
-    }
-
-    private String getTimeZone(int timeFromApi) {
-        int hour = timeFromApi / 3600;
-
-        if (hour < 0) {
-            return "GMT" + hour + ":00";
+    private fun getTimeZone(timeFromApi: Int): String {
+        val hour = timeFromApi / 3600
+        return if (hour < 0) {
+            "GMT$hour:00"
         } else {
-            return "GMT+" + hour + ":00";
+            "GMT+$hour:00"
         }
     }
 
-    public String getTime() {
-
-        return day + ", " + time;
+    fun getTime(): String {
+        return "$day, $timeAmPm"
     }
-
-
 }

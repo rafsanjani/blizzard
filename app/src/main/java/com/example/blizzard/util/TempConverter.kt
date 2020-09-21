@@ -1,16 +1,18 @@
-package com.example.blizzard.util;
+package com.example.blizzard.util
+
+import kotlin.math.roundToInt
 
 /**
  * Created by kelvin_clark on 8/19/2020
  */
-public  class TempConverter {
-    public static String kelToCelsius(Double temp) {
-        int celsius = (int) Math.round(temp - 273.15);
-        return celsius + "°C";
+object TempConverter {
+    fun kelToCelsius(temp: Double): String {
+        val celsius = (temp - 273.15).roundToInt()
+        return "$celsius°C"
     }
 
-
-    public static int kelToCelsius2(Double temp){
-        return (int) Math.round(temp - 273.15);
+    @JvmStatic
+    fun kelToCelsius2(temp: Double): Int {
+        return (temp - 273.15).roundToInt()
     }
 }

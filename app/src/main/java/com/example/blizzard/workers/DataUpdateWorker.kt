@@ -1,127 +1,95 @@
-package com.example.blizzard.workers;
+package com.example.blizzard.workers
 
-import android.content.Context;
+import android.content.Context
+import android.util.Log
+import androidx.concurrent.futures.CallbackToFutureAdapter
+import androidx.work.ListenableWorker
+import androidx.work.WorkerParameters
+import com.example.blizzard.data.entities.WeatherDataEntity
+import com.example.blizzard.data.repository.BlizzardRepository
+import com.example.blizzard.model.OpenWeatherService
+import com.example.blizzard.model.WeatherDataResponse
+import com.example.blizzard.util.BlizzardThread.Companion.instance
+import com.example.blizzard.util.NotificationHelper.Companion.getInstance
+import com.example.blizzard.util.TempConverter.kelToCelsius2
+import com.google.common.util.concurrent.ListenableFuture
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.abs
 
-
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.concurrent.futures.CallbackToFutureAdapter;
-import androidx.work.ListenableWorker;
-import androidx.work.WorkerParameters;
-
-import com.example.blizzard.data.entities.WeatherDataEntity;
-import com.example.blizzard.data.repository.BlizzardRepository;
-import com.example.blizzard.model.OpenWeatherService;
-import com.example.blizzard.model.WeatherDataResponse;
-
-import com.example.blizzard.util.BlizzardThread;
-import com.example.blizzard.util.NotificationHelper;
-import com.example.blizzard.util.TempConverter;
-import com.google.common.util.concurrent.ListenableFuture;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class DataUpdateWorker extends ListenableWorker {
-    private static final String TAG = "DataUpdateWorker";
-    private final BlizzardRepository repository;
-    private Callback<WeatherDataResponse> callback;
-    private BlizzardThread blizzardThread = BlizzardThread.getInstance();
-    private List<WeatherDataEntity> data = new ArrayList<>();
-
-
-    public DataUpdateWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
-        repository = new BlizzardRepository(context);
-
-    }
-
-
-    @NonNull
-    @Override
-    public ListenableFuture<Result> startWork() {
-        return CallbackToFutureAdapter.getFuture(completer -> {
-
-            getAllFromDb();
-
-            blizzardThread.getHandler().postDelayed(() -> {
+class DataUpdateWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
+    private val repository: BlizzardRepository = BlizzardRepository(context)
+    private var callback: Callback<WeatherDataResponse?>? = null
+    private val blizzardThread = instance
+    private val data: MutableList<WeatherDataEntity> = ArrayList()
+    override fun startWork(): ListenableFuture<Result> {
+        return CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<Result> ->
+            allFromDb
+            blizzardThread?.handler?.postDelayed({
                 if (data.isEmpty()) {
-                    Log.d(TAG, "doWork: No weather info in database");
-                    completer.set(Result.success());
+                    Log.d(TAG, "doWork: No weather info in database")
+                    completer.set(Result.success())
                 }
-
-
-                callback = new Callback<WeatherDataResponse>() {
-                    @Override
-                    public void onResponse(@NotNull Call<WeatherDataResponse> call, @NotNull Response<WeatherDataResponse> response) {
-                        WeatherDataResponse currentWeather = response.body();
-                        for (WeatherDataEntity previousWeather : data) {
-
-                            assert currentWeather != null;
-                            if (previousWeather.getCityName().equals(currentWeather.getName())) {
-                                double difference = Math.abs(previousWeather.getTemperature() - Objects.requireNonNull(currentWeather).getMain().getTemp());
-                                Log.d(TAG, "onResponse: Weather difference is " + difference + "°C");
-
+                callback = object : Callback<WeatherDataResponse?> {
+                    override fun onResponse(call: Call<WeatherDataResponse?>, response: Response<WeatherDataResponse?>) {
+                        val currentWeather = response.body()
+                        for (previousWeather in data) {
+                            if (previousWeather.cityName == currentWeather?.name) {
+                                val difference = abs(previousWeather.temperature!! - currentWeather.main!!.temp)
+                                Log.d(TAG, "onResponse: Weather difference is $difference°C")
                                 if (difference > 2) {
-                                    Log.d(TAG, "onResponse: Weather Changes detected: Notifying");
-                                    NotificationHelper notificationHelper = NotificationHelper.getInstance(getApplicationContext(),
-                                            previousWeather.getCityName() + ", " + previousWeather.getCountry(),
-                                            TempConverter.kelToCelsius2(previousWeather.getTemperature()),
-                                            TempConverter.kelToCelsius2(currentWeather.getMain().getTemp()));
-                                    notificationHelper.createNotification();
-                                    break;
+                                    Log.d(TAG, "onResponse: Weather Changes detected: Notifying")
+                                    val notificationHelper = getInstance(applicationContext,
+                                            previousWeather.cityName + ", " + previousWeather.country,
+                                            kelToCelsius2(previousWeather.temperature!!),
+                                            kelToCelsius2(currentWeather.main.temp))
+                                    notificationHelper!!.createNotification()
+                                    break
                                 }
                             }
                         }
-                        completer.set(Result.success());
+                        completer.set(Result.success())
                     }
 
-
-                    @Override
-                    public void onFailure(@NotNull Call<WeatherDataResponse> call, @NotNull Throwable t) {
-                        Log.e(TAG, "onFailure: Error Fetching current Weather", t);
-                        completer.set(Result.failure());
+                    override fun onFailure(call: Call<WeatherDataResponse?>, t: Throwable) {
+                        Log.e(TAG, "onFailure: Error Fetching current Weather", t)
+                        completer.set(Result.failure())
                     }
-                };
-
-
-                Log.d(TAG, "startWork: getting data from api");
-                makeNetworkRequest();
-
-            }, 5000);
-
-            return callback;
-        });
-    }
-
-    private void makeNetworkRequest() {
-        for (WeatherDataEntity entity : data){
-            new OpenWeatherService().getWeather(entity.getCityName()).enqueue(callback);
+                }
+                Log.d(TAG, "startWork: getting data from api")
+                makeNetworkRequest()
+            }, 5000)
+            callback
         }
     }
 
-    private void getAllFromDb() {
-        AtomicReference<List<WeatherDataEntity>> weatherDataEntities = new AtomicReference<>();
-
-        blizzardThread.getDiskIO().execute(() -> {
-            weatherDataEntities.set(repository.getAllDataFromDb());
-            Log.d(TAG, "getAllFromDb: done fetching");
-            populate(weatherDataEntities.get());
-
-        });
+    private fun makeNetworkRequest() {
+        for (entity in data) {
+            OpenWeatherService().getWeather(entity.cityName)!!.enqueue(callback!!)
+        }
     }
 
-    private void populate(List<WeatherDataEntity> weatherDataEntities) {
-        data.addAll(weatherDataEntities);
+    private val allFromDb: Unit
+        get() {
+            val weatherDataEntities = AtomicReference<List<WeatherDataEntity?>?>()
+            blizzardThread!!.diskIO.execute {
+                weatherDataEntities.set(repository.allDataFromDb)
+                Log.d(TAG, "getAllFromDb: done fetching")
+                populate(weatherDataEntities.get())
+            }
+        }
 
+    private fun populate(weatherDataEntities: List<WeatherDataEntity?>?) {
+        data.addAll(weatherDataEntities as List<WeatherDataEntity>)
     }
+
+    companion object {
+        private const val TAG = "DataUpdateWorker"
+    }
+
 }
+
+

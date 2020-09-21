@@ -32,7 +32,7 @@ class FavouritesFragment : Fragment() {
         favHandler = Handler(Looper.getMainLooper())
         val layoutManager = LinearLayoutManager(context)
         rv_fav.layoutManager = layoutManager
-        adapter = FavouriteFragmentAdapter(context, ArrayList())
+        adapter = FavouriteFragmentAdapter(requireContext(), ArrayList())
         rv_fav.adapter = adapter
         initialiseAdapter()
     }
@@ -43,9 +43,13 @@ class FavouritesFragment : Fragment() {
         Executors.newSingleThreadExecutor().execute {
             val dataEntities = viewModel.allDataFromDb
             val favWeather: MutableList<WeatherDataEntity> = ArrayList()
-            for (dataEntity in dataEntities) {
-                if (dataEntity.favourite) {
-                    favWeather.add(dataEntity)
+            if (dataEntities != null) {
+                for (dataEntity in dataEntities) {
+                    if (dataEntity != null) {
+                        if (dataEntity.favourite!!) {
+                            favWeather.add(dataEntity)
+                        }
+                    }
                 }
             }
             entities.set(favWeather)

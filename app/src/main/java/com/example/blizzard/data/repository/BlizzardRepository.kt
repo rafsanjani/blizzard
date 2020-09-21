@@ -34,7 +34,7 @@ class BlizzardRepository(context: Context?) {
 
     fun getWeather(cityName: String?): MutableLiveData<WeatherDataResponse?> {
         val searchCityMutableLiveData = MutableLiveData<WeatherDataResponse?>()
-        OpenWeatherService().getWeather(cityName).enqueue(object : Callback<WeatherDataResponse?> {
+        OpenWeatherService().getWeather(cityName)?.enqueue(object : Callback<WeatherDataResponse?> {
             @EverythingIsNonNull
             override fun onResponse(call: Call<WeatherDataResponse?>, response: Response<WeatherDataResponse?>) {
                 if (response.isSuccessful) {
@@ -56,7 +56,7 @@ class BlizzardRepository(context: Context?) {
 
     fun getWeather(lat: Double?, lon: Double?): MutableLiveData<WeatherDataResponse?> {
         val currentCityMutableLiveData = MutableLiveData<WeatherDataResponse?>()
-        OpenWeatherService().getWeather(lat, lon).enqueue(object : Callback<WeatherDataResponse?> {
+        OpenWeatherService().getWeather(lat, lon)?.enqueue(object : Callback<WeatherDataResponse?> {
             @EverythingIsNonNull
             override fun onResponse(call: Call<WeatherDataResponse?>, response: Response<WeatherDataResponse?>) {
                 if (response.isSuccessful) {
