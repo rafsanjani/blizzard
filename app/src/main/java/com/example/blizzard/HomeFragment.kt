@@ -86,27 +86,24 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         makeViewsInvisible()
         val bundle = this.arguments
-        val networkMonitor = NetworkMonitor(requireContext())
-        networkMonitor.observe(viewLifecycleOwner, Observer { aBoolean: Boolean ->
-            mDeviceConnected = aBoolean
-            showSnackBar(aBoolean)
-            if (bundle == null) {
-                val appState = mBlizzardViewModel!!.appState
-                val savedCityName = appState[0]
-                val savedSearchBoxText = appState[1]
-                if (savedCityName != null && savedCityName.isNotEmpty()) {
-                    loadByCityName(savedCityName)
-                    if (savedSearchBoxText != null && savedSearchBoxText.isNotEmpty()) {
-                        et_cityName.setText(savedSearchBoxText)
-                    }
-                } else {
-                    Log.d(TAG, "onViewCreated: no data saved")
-                    ensureLocationIsEnabled()
+
+        if (bundle == null) {
+            val appState = mBlizzardViewModel!!.appState
+            val savedCityName = appState[0]
+            val savedSearchBoxText = appState[1]
+            if (savedCityName != null && savedCityName.isNotEmpty()) {
+                loadByCityName(savedCityName)
+                if (savedSearchBoxText != null && savedSearchBoxText.isNotEmpty()) {
+                    et_cityName.setText(savedSearchBoxText)
                 }
             } else {
-                loadByCityName(bundle.getString(CITY_NAME))
+                Log.d(TAG, "onViewCreated: no data saved")
+                ensureLocationIsEnabled()
             }
-        })
+        } else {
+            loadByCityName(bundle.getString(CITY_NAME))
+        }
+
         search_btn?.setOnClickListener {
             //Hide the Keyboard when search button is clicked
             val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -389,7 +386,7 @@ class HomeFragment : Fragment() {
             favHandler.post {
                 if (searchByCityName) {
                     if (entity != null) {
-                        if (entity.favourite) {
+                        if (entity.favourite!!) {
                             isClicked = true
                             loadImage(R.drawable.ic_favorite_filed, iv_favourite)
                         } else {
@@ -422,7 +419,7 @@ class HomeFragment : Fragment() {
 
     private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
         Executors.newSingleThreadExecutor().execute {
-            val entity = WeatherMapper(mBlizzardViewModel).mapToEntity(weatherDataResponse)
+            val entity = mBlizzardViewModel?.let { WeatherMapper(it).mapToEntity(weatherDataResponse) }
             mBlizzardViewModel?.saveWeather(entity)
             checkIfIsFavourite()
         }
@@ -450,18 +447,18 @@ class HomeFragment : Fragment() {
         data_loading.visibility = View.VISIBLE
         iv_no_internet.visibility = View.INVISIBLE
         tv_no_internet.visibility = View.INVISIBLE
-        val cityName = weatherDataResponse.name + ", " + weatherDataResponse.sys.country
+        val cityName = weatherDataResponse.name + ", " + weatherDataResponse.sys?.country
         tv_cityName?.text = cityName
-        val temp = weatherDataResponse.main.temp
-        tv_tempValue?.text = TempConverter.kelToCelsius(temp)
-        val humidity = weatherDataResponse.main.humidity.toString() + "%"
+        val temp = weatherDataResponse.main?.temp
+        tv_tempValue?.text = temp?.let { TempConverter.kelToCelsius(it) }
+        val humidity = weatherDataResponse.main?.humidity.toString() + "%"
         tv_humidityValue?.text = humidity
-        val weather = weatherDataResponse.weather[0]
-        tv_weatherDescription?.text = weather.description
-        loadImage(weather.icon)
-        val windSpeed = weatherDataResponse.wind.speed.toString() + " m/s"
+        val weather = weatherDataResponse.weather?.get(0)
+        tv_weatherDescription?.text = weather?.description
+        weather?.icon?.let { loadImage(it) }
+        val windSpeed = weatherDataResponse.wind?.speed.toString() + " m/s"
         tv_windSpeed?.text = windSpeed
-        tv_dayTime?.text = mTimeUtil.time
+        tv_dayTime?.text = mTimeUtil.timeAmPm
         data_loading.visibility = View.INVISIBLE
         showViews()
     }
