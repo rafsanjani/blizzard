@@ -11,7 +11,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,12 +26,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.blizzard.data.database.WeatherMapper
 import com.example.blizzard.model.WeatherDataResponse
-import com.example.blizzard.util.NetworkMonitor
 import com.example.blizzard.util.TempConverter
 import com.example.blizzard.util.TimeUtil
 import com.example.blizzard.viewmodel.BlizzardViewModel
@@ -44,8 +41,13 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.home_fragment.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
-import java.util.concurrent.Executors
 
 class HomeFragment : Fragment() {
     private val mTimeUtil = TimeUtil()
@@ -128,11 +130,15 @@ class HomeFragment : Fragment() {
             if (isClicked) {
                 isClicked = false
                 loadImage(R.drawable.ic_favorite, iv_favourite)
-                updateIsFavourite(false)
+                CoroutineScope(IO).launch {
+                    updateIsFavourite(false)
+                }
             } else {
                 isClicked = true
                 loadImage(R.drawable.ic_favorite_filed, iv_favourite)
-                updateIsFavourite(true)
+                CoroutineScope(IO).launch {
+                    updateIsFavourite(true)
+                }
             }
         }
     }
@@ -156,12 +162,9 @@ class HomeFragment : Fragment() {
 
     private fun updateIsFavourite(b: Boolean) {
         if (cityName != null) {
-            Executors.newSingleThreadExecutor()
-                    .execute {
-                        val weatherDataEntity = mBlizzardViewModel?.getWeatherByCityName(cityName)
-                        weatherDataEntity?.favourite = b
-                        mBlizzardViewModel?.updateWeatherData(weatherDataEntity)
-                    }
+            val weatherDataEntity = mBlizzardViewModel?.getWeatherByCityName(cityName)
+            weatherDataEntity?.favourite = b
+            mBlizzardViewModel?.updateWeatherData(weatherDataEntity)
         }
     }
 
@@ -347,7 +350,7 @@ class HomeFragment : Fragment() {
         }
 
     private fun observeWeatherChanges() {
-        mBlizzardViewModel?.weatherLiveData?.observe(viewLifecycleOwner, Observer { weatherData: WeatherDataResponse? ->
+        mBlizzardViewModel?.weatherLiveData?.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
             if (weatherData != null) {
                 cityName = weatherData.name
                 saveState()
@@ -358,13 +361,17 @@ class HomeFragment : Fragment() {
             } else {
                 if (searchByCityName) {
                     if (!mDeviceConnected) {
-                        showSnackBar(false)
-                        val handler = Handler(Looper.getMainLooper())
-                        handler.postDelayed({ reverseViewAnimToInit() }, 1000L)
+                        showSnackBar()
+                        CoroutineScope(Main).launch {
+                            delay(1000L)
+                            reverseViewAnimToInit()
+                        }
                     } else {
                         Snackbar.make(requireView(), "Error getting Location", Snackbar.LENGTH_SHORT).show()
-                        val handler = Handler(Looper.getMainLooper())
-                        handler.postDelayed({ reverseViewAnimToInit() }, 1000L)
+                        CoroutineScope(Main).launch {
+                            delay(1000L)
+                            reverseViewAnimToInit()
+                        }
                     }
                 } else if (!mDeviceConnected) {
                     if (showDialogOnce < 1) showNetworkDialog()
@@ -378,12 +385,11 @@ class HomeFragment : Fragment() {
         })
     }
 
-    private fun checkIfIsFavourite() {
+    private suspend fun checkIfIsFavourite() {
         try {
             val entity = mBlizzardViewModel?.getWeatherByCityName(cityName)
             Log.d(TAG, "checkIfIsFavourite: city name is $cityName")
-            val favHandler = Handler(Looper.getMainLooper())
-            favHandler.post {
+            withContext(Main) {
                 if (searchByCityName) {
                     if (entity != null) {
                         if (entity.favourite!!) {
@@ -408,8 +414,8 @@ class HomeFragment : Fragment() {
                             .start()
 
                     // delayed handler needed for fade out animation to run
-                    Handler(Looper.getMainLooper())
-                            .postDelayed({ iv_favourite.visibility = View.INVISIBLE }, 2000)
+                    delay(2000L)
+                    iv_favourite.visibility = View.INVISIBLE
                 }
             }
         } catch (e: NullPointerException) {
@@ -418,7 +424,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
-        Executors.newSingleThreadExecutor().execute {
+        CoroutineScope(IO).launch {
             val entity = mBlizzardViewModel?.let { WeatherMapper(it).mapToEntity(weatherDataResponse) }
             mBlizzardViewModel?.saveWeather(entity)
             checkIfIsFavourite()
@@ -509,29 +515,15 @@ class HomeFragment : Fragment() {
                 .show()
     }
 
-    private fun showSnackBar(isNetworkAvailable: Boolean) {
-        val message: String
-        val color: Int
-        if (isNetworkAvailable) {
-            message = "You are Online"
-            color = Color.WHITE
-            val snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
-            snackbar.setBackgroundTint(resources.getColor(R.color.snackBarOnline, null))
-            val view = snackbar.view
-            val textView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
-            textView.setTextColor(color)
-            textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-            snackbar.show()
-        } else {
-            message = "You are Offline"
-            color = Color.WHITE
-            val snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
-            val view = snackbar.view
-            val textView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
-            textView.setTextColor(color)
-            textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
-            snackbar.show()
-        }
+    private fun showSnackBar() {
+        val message= "You are Offline"
+        val color: Int = Color.WHITE
+        val snackbar = Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+        val view = snackbar.view
+        val textView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+        textView.setTextColor(color)
+        textView.textAlignment = View.TEXT_ALIGNMENT_CENTER
+        snackbar.show()
     }
 
     companion object {

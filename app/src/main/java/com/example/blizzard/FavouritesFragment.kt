@@ -14,8 +14,12 @@ import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.util.FavouriteFragmentAdapter
 import com.example.blizzard.viewmodel.BlizzardViewModel
 import kotlinx.android.synthetic.main.fragment_favourites.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
 class FavouritesFragment : Fragment() {
@@ -34,54 +38,61 @@ class FavouritesFragment : Fragment() {
         rv_fav.layoutManager = layoutManager
         adapter = FavouriteFragmentAdapter(requireContext(), ArrayList())
         rv_fav.adapter = adapter
-        initialiseAdapter()
+
+
+        CoroutineScope(IO).launch {
+            initialiseAdapter()
+        }
+
+
     }
 
-    private fun initialiseAdapter() {
+    private suspend fun initialiseAdapter() {
         val viewModel = ViewModelProvider(requireActivity()).get(BlizzardViewModel::class.java)
         val entities = AtomicReference<List<WeatherDataEntity>>()
-        Executors.newSingleThreadExecutor().execute {
-            val dataEntities = viewModel.allDataFromDb
-            val favWeather: MutableList<WeatherDataEntity> = ArrayList()
-            if (dataEntities != null) {
-                for (dataEntity in dataEntities) {
-                    if (dataEntity != null) {
-                        if (dataEntity.favourite!!) {
-                            favWeather.add(dataEntity)
-                        }
+
+        val dataEntities = viewModel.allDataFromDb
+        val favWeather: MutableList<WeatherDataEntity> = ArrayList()
+        if (dataEntities != null) {
+            for (dataEntity in dataEntities) {
+                if (dataEntity != null) {
+                    if (dataEntity.favourite!!) {
+                        favWeather.add(dataEntity)
                     }
                 }
             }
-            entities.set(favWeather)
-            makeViewsVisible(entities)
         }
+        entities.set(favWeather)
+        makeViewsVisible(entities)
     }
 
-    private fun makeViewsVisible(entities: AtomicReference<List<WeatherDataEntity>>) {
-        if (entities.get().isNotEmpty()) {
-            favHandler?.post {
-                adapter?.insertWeatherEntities(entities.get())
-                iv_no_data.visibility = View.INVISIBLE
-                rv_fav.visibility = View.VISIBLE
-                tv_no_data.visibility = View.INVISIBLE
+    private suspend fun makeViewsVisible(entities: AtomicReference<List<WeatherDataEntity>>) {
+        withContext(Main){
+            if (entities.get().isNotEmpty()) {
+                favHandler?.post {
+                    adapter?.insertWeatherEntities(entities.get())
+                    iv_no_data.visibility = View.INVISIBLE
+                    rv_fav.visibility = View.VISIBLE
+                    tv_no_data.visibility = View.INVISIBLE
+                }
+            } else {
+                favHandler?.postDelayed({
+                    iv_no_data.alpha = 0f
+                    tv_no_data.alpha = 0f
+                    iv_no_data.animate()
+                            .alpha(1f)
+                            .setDuration(100)
+                            .setInterpolator(AnticipateInterpolator())
+                            .start()
+                    tv_no_data.animate()
+                            .alpha(1f)
+                            .setDuration(100)
+                            .setInterpolator(AnticipateInterpolator())
+                            .start()
+                    iv_no_data.visibility = View.VISIBLE
+                    tv_no_data.visibility = View.VISIBLE
+                }, 1000)
             }
-        } else {
-            favHandler?.postDelayed({
-                iv_no_data.alpha = 0f
-                tv_no_data.alpha = 0f
-                iv_no_data.animate()
-                        .alpha(1f)
-                        .setDuration(100)
-                        .setInterpolator(AnticipateInterpolator())
-                        .start()
-                tv_no_data.animate()
-                        .alpha(1f)
-                        .setDuration(100)
-                        .setInterpolator(AnticipateInterpolator())
-                        .start()
-                iv_no_data.visibility = View.VISIBLE
-                tv_no_data.visibility = View.VISIBLE
-            }, 1000)
         }
     }
 }
