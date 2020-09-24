@@ -9,13 +9,12 @@ import android.view.ViewGroup
 import android.view.animation.AnticipateInterpolator
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.util.FavouriteFragmentAdapter
 import com.example.blizzard.viewmodel.BlizzardViewModel
 import kotlinx.android.synthetic.main.fragment_favourites.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,7 +39,7 @@ class FavouritesFragment : Fragment() {
         rv_fav.adapter = adapter
 
 
-        CoroutineScope(IO).launch {
+        lifecycleScope.launch {
             initialiseAdapter()
         }
 
@@ -51,7 +50,7 @@ class FavouritesFragment : Fragment() {
         val viewModel = ViewModelProvider(requireActivity()).get(BlizzardViewModel::class.java)
         val entities = AtomicReference<List<WeatherDataEntity>>()
 
-        val dataEntities = viewModel.allDataFromDb
+        val dataEntities = viewModel.getAll()
         val favWeather: MutableList<WeatherDataEntity> = ArrayList()
         if (dataEntities != null) {
             for (dataEntity in dataEntities) {

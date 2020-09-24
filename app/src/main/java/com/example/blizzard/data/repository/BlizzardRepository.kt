@@ -17,8 +17,11 @@ import retrofit2.internal.EverythingIsNonNull
  */
 class BlizzardRepository(context: Context?) {
     private val mWeatherDatabase: WeatherDatabase = WeatherDatabase.getInstance(context)
-    val allDataFromDb: List<WeatherDataEntity?>?
-        get() = mWeatherDatabase.weatherDao()?.allWeather
+
+    fun getAll() : List<WeatherDataEntity?>? {
+        return mWeatherDatabase.weatherDao()?.allWeather
+    }
+
 
     fun saveWeatherData(weatherDataEntity: WeatherDataEntity?) {
         mWeatherDatabase.weatherDao()?.saveWeather(weatherDataEntity)

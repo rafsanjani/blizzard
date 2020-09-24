@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.blizzard.data.database.WeatherMapper
 import com.example.blizzard.model.WeatherDataResponse
@@ -41,12 +42,9 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.home_fragment.*
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 
 class HomeFragment : Fragment() {
@@ -75,7 +73,7 @@ class HomeFragment : Fragment() {
                 val location = locationResult.lastLocation
                 val latitude = location.latitude
                 val longitude = location.longitude
-                mBlizzardViewModel?.getWeather(latitude, longitude)
+                lifecycleScope.launch { mBlizzardViewModel?.getWeather(latitude, longitude) }
             }
 
         }
@@ -111,17 +109,18 @@ class HomeFragment : Fragment() {
             val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view.windowToken,
                     InputMethodManager.HIDE_NOT_ALWAYS)
-            if (Objects.requireNonNull(et_cityName.text).toString().isEmpty()) {
+            if (et_cityName.text.toString().isEmpty()) {
                 et_cityName.error = "Enter city name"
-            } /* else if (!mDeviceConnected) {
-                searchBox.setError(getString(R.string.no_internet));
-            }*/ else {
+            } else {
+                showProgressBar()
                 val searchText = et_cityName.text.toString()
                 loadByCityName(searchText)
                 animateViews()
             }
         }
         btn_current_location.setOnClickListener {
+            searchByCityName = false
+            showProgressBar()
             ensureLocationIsEnabled()
             reverseViewAnim()
         }
@@ -130,13 +129,13 @@ class HomeFragment : Fragment() {
             if (isClicked) {
                 isClicked = false
                 loadImage(R.drawable.ic_favorite, iv_favourite)
-                CoroutineScope(IO).launch {
+                lifecycleScope.launch(IO) {
                     updateIsFavourite(false)
                 }
             } else {
                 isClicked = true
                 loadImage(R.drawable.ic_favorite_filed, iv_favourite)
-                CoroutineScope(IO).launch {
+                lifecycleScope.launch(IO) {
                     updateIsFavourite(true)
                 }
             }
@@ -145,8 +144,12 @@ class HomeFragment : Fragment() {
 
     private fun loadByCityName(city_name: String?) {
         searchByCityName = true
-        mBlizzardViewModel?.getWeather(city_name)
-        observeWeatherChanges()
+        lifecycleScope.launch {
+            mBlizzardViewModel?.getWeather(city_name)
+            delay(1000L)
+            observeWeatherChanges()
+        }
+
     }
 
     private fun saveState() {
@@ -160,7 +163,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun updateIsFavourite(b: Boolean) {
+    private suspend fun updateIsFavourite(b: Boolean) {
         if (cityName != null) {
             val weatherDataEntity = mBlizzardViewModel?.getWeatherByCityName(cityName)
             weatherDataEntity?.favourite = b
@@ -229,6 +232,14 @@ class HomeFragment : Fragment() {
         //        progressBar.setVisibility(View.INVISIBLE);
         tv_humidityTitle.visibility = View.INVISIBLE
         tv_windTitle.visibility = View.INVISIBLE
+    }
+
+    private fun showProgressBar() {
+        data_loading.visibility = View.VISIBLE
+        makeViewsInvisible()
+        iv_favourite.visibility = View.INVISIBLE
+        iv_no_internet.visibility = View.INVISIBLE
+        tv_no_internet.visibility = View.INVISIBLE
     }
 
     private fun makeProgressBarInvisible() {
@@ -337,8 +348,11 @@ class HomeFragment : Fragment() {
                     Log.d(TAG, "getUserLocation: User Location identified, Getting Weather data for coordinates")
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    mBlizzardViewModel?.getWeather(latitude, longitude)
-                    observeWeatherChanges()
+                    lifecycleScope.launch {
+                        mBlizzardViewModel?.getWeather(latitude, longitude)
+                        delay(1000L)
+                        observeWeatherChanges()
+                    }
                 } else {
                     Log.d(TAG, "getUserLocation: Location is null, Requesting periodic Location Updates")
                     requestLocationUpdates()
@@ -352,6 +366,7 @@ class HomeFragment : Fragment() {
     private fun observeWeatherChanges() {
         mBlizzardViewModel?.weatherLiveData?.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
             if (weatherData != null) {
+                mDeviceConnected = true
                 cityName = weatherData.name
                 saveState()
                 saveToDb(weatherData)
@@ -424,7 +439,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun saveToDb(weatherDataResponse: WeatherDataResponse) {
-        CoroutineScope(IO).launch {
+        lifecycleScope.launch(IO) {
             val entity = mBlizzardViewModel?.let { WeatherMapper(it).mapToEntity(weatherDataResponse) }
             mBlizzardViewModel?.saveWeather(entity)
             checkIfIsFavourite()

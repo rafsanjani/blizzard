@@ -13,6 +13,9 @@ import com.example.blizzard.util.BlizzardThread.Companion.instance
 import com.example.blizzard.util.NotificationHelper.Companion.getInstance
 import com.example.blizzard.util.TempConverter.kelToCelsius2
 import com.google.common.util.concurrent.ListenableFuture
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -75,8 +78,8 @@ class DataUpdateWorker(context: Context, workerParams: WorkerParameters) : Liste
     private val allFromDb: Unit
         get() {
             val weatherDataEntities = AtomicReference<List<WeatherDataEntity?>?>()
-            blizzardThread!!.diskIO.execute {
-                weatherDataEntities.set(repository.allDataFromDb)
+            CoroutineScope(IO).launch {
+                weatherDataEntities.set(repository.getAll())
                 Log.d(TAG, "getAllFromDb: done fetching")
                 populate(weatherDataEntities.get())
             }

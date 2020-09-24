@@ -1,13 +1,13 @@
 package com.example.blizzard.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.*
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.data.repository.BlizzardRepository
 import com.example.blizzard.model.WeatherDataResponse
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 /**
  * Created by tony on 8/9/2020
@@ -35,26 +35,32 @@ class BlizzardViewModel(application: Application, private val savedStateHandle: 
         }
 
     fun saveWeather(weatherDataEntity: WeatherDataEntity?) {
-        mBlizzardRepository.saveWeatherData(weatherDataEntity)
+        viewModelScope.launch(IO) { mBlizzardRepository.saveWeatherData(weatherDataEntity) }
     }
 
     fun getWeather(cityName: String?) {
-        weatherLiveData = mBlizzardRepository.getWeather(cityName)
+        viewModelScope.launch(IO) { weatherLiveData = mBlizzardRepository.getWeather(cityName) }
     }
 
-    fun getWeatherByCityName(cityName: String?): WeatherDataEntity? {
-        return mBlizzardRepository.getWeatherByCityName(cityName)
+    suspend fun getWeatherByCityName(cityName: String?): WeatherDataEntity? {
+        val job = viewModelScope.async(IO) { mBlizzardRepository.getWeatherByCityName(cityName) }
+        job.await().let { weatherDataEntity ->
+            return weatherDataEntity
+        }
     }
 
     fun updateWeatherData(entity: WeatherDataEntity?) {
-        mBlizzardRepository.updateWeather(entity)
+        viewModelScope.launch(IO) { mBlizzardRepository.updateWeather(entity) }
     }
 
-    val allDataFromDb: List<WeatherDataEntity?>?
-        get() = mBlizzardRepository.allDataFromDb
+    suspend fun getAll(): List<WeatherDataEntity?>? {
+        val job = viewModelScope.async(IO) { mBlizzardRepository.getAll() }
+        job.await().let { weatherDataEntityList -> return weatherDataEntityList }
+    }
+
 
     fun getWeather(lat: Double?, lon: Double?) {
-        weatherLiveData = mBlizzardRepository.getWeather(lat, lon)
+        viewModelScope.launch(IO) { weatherLiveData = mBlizzardRepository.getWeather(lat, lon) }
     }
 
     companion object {

@@ -7,13 +7,14 @@ import com.example.blizzard.viewmodel.BlizzardViewModel
 
 /* Created by Rafsanjani on 15/08/2020. */
 class WeatherMapper(private var viewModel: BlizzardViewModel) {
-    fun mapToEntity(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
+    suspend fun mapToEntity(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
         return checkIfAlreadyExists(weatherDataResponse)
     }
 
-    private fun checkIfAlreadyExists(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
+    private suspend fun checkIfAlreadyExists(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
         var exists = false
         try {
+
             val entity = viewModel.getWeatherByCityName(weatherDataResponse.name)
             exists = entity?.favourite!!
         } catch (e: NullPointerException) {
