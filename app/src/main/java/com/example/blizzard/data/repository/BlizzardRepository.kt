@@ -14,7 +14,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * Created by tony on 8/9/2020
  */
-class BlizzardRepository(context: Context?) {
+class BlizzardRepository(context: Context) {
+    private val openWeatherService: OpenWeatherApi = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenWeatherApi::class.java)
+
     private val mWeatherDatabase: WeatherDatabase = WeatherDatabase.getInstance(context)
 
     private val interceptor = HttpLoggingInterceptor().apply {
@@ -47,7 +53,7 @@ class BlizzardRepository(context: Context?) {
         mWeatherDatabase.weatherDao()?.updateWeatherData(entity)
     }
 
-    suspend fun getWeather(cityName: String): WeatherDataResponse {
+    suspend fun getWeather(cityName: String?): WeatherDataResponse {
         return openWeatherService.getWeatherByCityName(cityName, ApiKeyHolder.API_KEY)
     }
 
@@ -56,6 +62,7 @@ class BlizzardRepository(context: Context?) {
     }
 
     companion object {
+        private const val TAG = "BlizzardRepository"
         private const val BASE_URL = "http://api.openweathermap.org/data/2.5/"
     }
 }
