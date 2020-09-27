@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:foregroundTint="#FFFCFC"
     android:visibility="visible"
-    tools:context=".HomeFragment">
+    tools:context=".views.HomeFragment">
 
 
     <com.google.android.material.button.MaterialButton

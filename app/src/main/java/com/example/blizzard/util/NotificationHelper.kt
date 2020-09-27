@@ -8,7 +8,7 @@ import android.os.Bundle
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavDeepLinkBuilder
-import com.example.blizzard.HomeFragment
+import com.example.blizzard.views.HomeFragment
 import com.example.blizzard.R
 
 class NotificationHelper private constructor(val context: Context, private val cityName: String, private val prevTemp: Int, private val curTemp: Int) {

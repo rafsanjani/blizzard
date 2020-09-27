@@ -1,6 +1,7 @@
 package com.example.blizzard.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.data.repository.BlizzardRepository
@@ -14,8 +15,7 @@ import kotlinx.coroutines.launch
  */
 class BlizzardViewModel(application: Application, private val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
     private val mBlizzardRepository: BlizzardRepository = BlizzardRepository(application)
-    var weatherLiveData: LiveData<WeatherDataResponse?> = MutableLiveData()
-        private set
+    private var response : WeatherDataResponse? = null
 
     fun saveAppState(cityName: String?) {
         savedStateHandle.set(CITY_NAME, cityName)
@@ -38,10 +38,6 @@ class BlizzardViewModel(application: Application, private val savedStateHandle: 
         viewModelScope.launch(IO) { mBlizzardRepository.saveWeatherData(weatherDataEntity) }
     }
 
-    fun getWeather(cityName: String?) {
-        viewModelScope.launch(IO) { weatherLiveData = mBlizzardRepository.getWeather(cityName) }
-    }
-
     suspend fun getWeatherByCityName(cityName: String?): WeatherDataEntity? {
         val job = viewModelScope.async(IO) { mBlizzardRepository.getWeatherByCityName(cityName) }
         job.await().let { weatherDataEntity ->
@@ -58,14 +54,29 @@ class BlizzardViewModel(application: Application, private val savedStateHandle: 
         job.await().let { weatherDataEntityList -> return weatherDataEntityList }
     }
 
+    fun getWeather(lat: Double?, lon: Double?) = liveData {
+        try {
+            response = mBlizzardRepository.getWeather(lat, lon)
+            emit(response)
+            Log.i(TAG, "getWeather: weather data acquired")
+        } catch (e: Throwable) {
+            Log.e(TAG, "getWeather: Error getting data", e)
+        }
+    }
 
-    fun getWeather(lat: Double?, lon: Double?) {
-        viewModelScope.launch(IO) { weatherLiveData = mBlizzardRepository.getWeather(lat, lon) }
+    fun getWeather(cityName: String) = liveData {
+        try {
+            response = mBlizzardRepository.getWeather(cityName)
+            emit(response)
+            Log.i(TAG, "getWeather: weather data acquired")
+        } catch (e: Throwable) {
+            Log.e(TAG, "getWeather: Error getting weather data", e)
+        }
     }
 
     companion object {
         const val CITY_NAME = "com.example.blizzard.viewmodel.cityName"
         const val SEARCH_BOX_TEXT = "com.example.blizzard.viewmodel.searchBoxText"
+        const val TAG = "BlizzardViewModel"
     }
-
 }

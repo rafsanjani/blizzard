@@ -14,7 +14,6 @@ class WeatherMapper(private var viewModel: BlizzardViewModel) {
     private suspend fun checkIfAlreadyExists(weatherDataResponse: WeatherDataResponse): WeatherDataEntity {
         var exists = false
         try {
-
             val entity = viewModel.getWeatherByCityName(weatherDataResponse.name)
             exists = entity?.favourite!!
         } catch (e: NullPointerException) {
@@ -22,11 +21,11 @@ class WeatherMapper(private var viewModel: BlizzardViewModel) {
         }
         return WeatherDataEntity(
                 weatherDataResponse.name!!,
-                weatherDataResponse.sys?.country,
-                weatherDataResponse.main?.temp,
-                weatherDataResponse.main?.humidity,
+                weatherDataResponse.sys?.country!!,
+                weatherDataResponse.main?.temp!!,
+                weatherDataResponse.main.humidity,
                 weatherDataResponse.weather?.get(0)?.description!!,
-                weatherDataResponse.wind?.speed,
+                weatherDataResponse.wind?.speed!!,
                 weatherDataResponse.dt,
                 weatherDataResponse.timezone,
                 exists
