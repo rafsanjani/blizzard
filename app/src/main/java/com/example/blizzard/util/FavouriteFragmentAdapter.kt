@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.blizzard.R
 import com.example.blizzard.data.entities.WeatherDataEntity
+import com.example.blizzard.data.entities.extensions.StringCelsius
 
 /**
  * Created by kelvin_clark on 8/19/2020
@@ -33,7 +34,7 @@ class FavouriteFragmentAdapter(private val mContext: Context, private val weathe
         holder.tvDescription.text = entity.description
         val humidity = entity.humidity.toString() + "%"
         holder.tvHumidity.text = humidity
-        holder.tvTemperature.text = entity.temperature?.let { TempConverter.kelToCelsius(it) }
+        holder.tvTemperature.text = entity.StringCelsius
         holder.tvTime.text = timeUtil.getTime()
         val windSpeed = entity.windSpeed.toString() + " m/s"
         holder.tvWindSpeed.text = windSpeed
