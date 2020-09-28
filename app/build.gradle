@@ -45,19 +45,24 @@ android {
 }
 
 dependencies {
+    // kotlin coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+
     // retrofit dependencies
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation("com.squareup.okhttp3:logging-interceptor:4.8.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
 
     // Glide dependencies
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    implementation 'androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
+    implementation 'androidx.concurrent:concurrent-listenablefuture-callback:1.0.0-beta01'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
     // play services location
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.1.0'
 
     // room dependencies
     def room_version = "2.2.5"
@@ -70,23 +75,29 @@ dependencies {
 
     // workManager dependency
     def work_version = "2.4.0"
-    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
     // lifecycle dependency for saved state view model
     def lifecycle_version = "2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-    implementation 'androidx.navigation:navigation-fragment:2.3.0'
-    implementation 'androidx.navigation:navigation-ui:2.3.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:2.3.0"
+    implementation "androidx.navigation:navigation-ui-ktx:2.3.0"
     implementation "androidx.concurrent:concurrent-futures:1.1.0"
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation "androidx.core:core-ktx:1.3.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 
+}
+repositories {
+    mavenCentral()
 }

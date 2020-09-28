@@ -6,6 +6,8 @@ import com.example.blizzard.data.database.WeatherDatabase
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.model.WeatherDataResponse
 import com.example.blizzard.util.ApiKeyHolder
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -13,15 +15,26 @@ import retrofit2.converter.gson.GsonConverterFactory
  * Created by tony on 8/9/2020
  */
 class BlizzardRepository(context: Context) {
+
+    private val interceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+    private val client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
     private val openWeatherService: OpenWeatherApi = Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenWeatherApi::class.java)
 
     private val mWeatherDatabase: WeatherDatabase = WeatherDatabase.getInstance(context)
-    val allDataFromDb: List<WeatherDataEntity?>?
-        get() = mWeatherDatabase.weatherDao()?.allWeather
+
+    fun getAll(): List<WeatherDataEntity?>? {
+        return mWeatherDatabase.weatherDao()?.allWeather
+    }
 
     fun saveWeatherData(weatherDataEntity: WeatherDataEntity?) {
         mWeatherDatabase.weatherDao()?.saveWeather(weatherDataEntity)
@@ -44,7 +57,6 @@ class BlizzardRepository(context: Context) {
     }
 
     companion object {
-        private const val TAG = "BlizzardRepository"
         private const val BASE_URL = "http://api.openweathermap.org/data/2.5/"
     }
 }

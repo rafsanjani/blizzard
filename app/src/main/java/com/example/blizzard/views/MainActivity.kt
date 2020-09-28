@@ -1,4 +1,4 @@
-package com.example.blizzard
+package com.example.blizzard.views
 
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
 import androidx.work.*
+import com.example.blizzard.R
 import com.example.blizzard.workers.DataUpdateWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.concurrent.TimeUnit
@@ -39,15 +40,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
         return if (id == R.id.action_settings) {
             true
