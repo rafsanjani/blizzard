@@ -21,7 +21,7 @@ class WeatherMapper(private var viewModel: BlizzardViewModel) {
         }
         return WeatherDataEntity(
                 weatherDataResponse.name!!,
-                weatherDataResponse.sys?.country!!,
+                weatherDataResponse.sys?.country,
                 weatherDataResponse.main?.temp!!,
                 weatherDataResponse.main.humidity,
                 weatherDataResponse.weather?.get(0)?.description!!,
