@@ -53,11 +53,11 @@ class FavouriteFragmentAdapter(private val mContext: Context, private val weathe
         var tvTime: TextView
 
         init {
-            tvCityName = itemView.findViewById(R.id.tv_cityName)
+            tvCityName = itemView.findViewById(R.id.city_name)
             tvDescription = itemView.findViewById(R.id.tv_description)
             tvHumidity = itemView.findViewById(R.id.tv_humidity)
             tvTemperature = itemView.findViewById(R.id.tv_temp)
-            tvWindSpeed = itemView.findViewById(R.id.tv_windSpeed)
+            tvWindSpeed = itemView.findViewById(R.id.wind_speed)
             tvTime = itemView.findViewById(R.id.tv_day_time)
         }
     }

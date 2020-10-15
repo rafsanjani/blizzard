@@ -40,90 +40,114 @@ Create by kelvin clark on 9/27/2020
  */
 
 fun HomeFragment.animateViews() {
-    binding.etLayoutContainer.startAnimation(slideRight)
-    binding.searchBtn.startAnimation(slideRight)
-    binding.btnCurrentLocation.startAnimation(slideLeft)
-    binding.fabSearch.startAnimation(slideLeft)
-    binding.etLayoutContainer.visibility = View.INVISIBLE
-    binding.searchBtn.visibility = View.INVISIBLE
-    binding.searchBtn.isClickable = false
-    binding.btnCurrentLocation.visibility = View.VISIBLE
-    binding.btnCurrentLocation.isClickable = true
-    binding.fabSearch.visibility = View.VISIBLE
-    binding.fabSearch.isClickable = true
+    binding.textLayoutContainer.apply {
+        startAnimation(slideRight)
+        visibility = View.INVISIBLE
+    }
+    binding.searchBtn.apply {
+        startAnimation(slideRight)
+        visibility = View.INVISIBLE
+        isClickable = false
+    }
+    binding.btnCurrentLocation.apply{
+        startAnimation(slideLeft)
+        visibility = View.VISIBLE
+        isClickable = true
+    }
+    binding.fabSearch.apply {
+        startAnimation(slideLeft)
+        visibility = View.VISIBLE
+        isClickable = true
+    }
 }
 
 fun HomeFragment.showViews() {
-    binding.tvCityName.visibility = View.VISIBLE
-    binding.tvWeatherDescription.visibility = View.VISIBLE
-    binding.tvHumidityValue.visibility = View.VISIBLE
-    binding.tvTempValue.visibility = View.VISIBLE
-    binding.tvWindSpeed.visibility = View.VISIBLE
-    binding.tvDayTime.visibility = View.VISIBLE
+    binding.cityName.visibility = View.VISIBLE
+    binding.weatherDescription.visibility = View.VISIBLE
+    binding.humidityValue.visibility = View.VISIBLE
+    binding.tempValue.visibility = View.VISIBLE
+    binding.windSpeed.visibility = View.VISIBLE
+    binding.weatherDateTime.visibility = View.VISIBLE
     binding.weatherIcon.visibility = View.VISIBLE
-    binding.tvHumidityTitle.visibility = View.VISIBLE
-    binding.tvWindTitle.visibility = View.VISIBLE
+    binding.textHumidity.visibility = View.VISIBLE
+    binding.textWind.visibility = View.VISIBLE
 }
 
 fun HomeFragment.reverseViewAnimToInit() {
     if (!curLocIsVisible) {
-        binding.fabSearch.startAnimation(slideRight)
-        binding.etLayoutContainer.startAnimation(slideLeft)
-        binding.searchBtn.startAnimation(slideLeft)
-        binding.fabSearch.visibility = View.INVISIBLE
-        binding.fabSearch.isClickable = false
-        binding.etLayoutContainer.visibility = View.VISIBLE
-        binding.searchBtn.visibility = View.VISIBLE
-        binding.searchBtn.isClickable = true
+        binding.fabSearch.apply {
+            startAnimation(slideRight)
+            visibility = View.INVISIBLE
+            isClickable = false
+        }
+        binding.textLayoutContainer.apply {
+            startAnimation(slideLeft)
+            visibility = View.VISIBLE
+        }
+        binding.searchBtn.apply {
+            startAnimation(slideLeft)
+            visibility = View.VISIBLE
+            isClickable = true
+        }
         curLocIsVisible = true
     } else {
-        binding.fabSearch.startAnimation(slideRight)
-        binding.btnCurrentLocation.startAnimation(slideRight)
-        binding.etLayoutContainer.startAnimation(slideLeft)
-        binding.searchBtn.startAnimation(slideLeft)
-        binding.fabSearch.visibility = View.INVISIBLE
-        binding.fabSearch.isClickable = false
-        binding.etLayoutContainer.visibility = View.INVISIBLE
-        binding.etLayoutContainer.isClickable = false
-        binding.etLayoutContainer.visibility = View.VISIBLE
-        binding.searchBtn.visibility = View.VISIBLE
-        binding.searchBtn.isClickable = true
+        binding.fabSearch.apply {
+            startAnimation(slideRight)
+            visibility = View.INVISIBLE
+            isClickable = false
+        }
+        binding.btnCurrentLocation.apply{
+            startAnimation(slideRight)
+            visibility = View.INVISIBLE
+            isClickable = false
+        }
+        binding.textLayoutContainer.apply {
+            startAnimation(slideLeft)
+            visibility = View.INVISIBLE
+            isClickable = false
+            visibility = View.VISIBLE
+        }
+        binding.searchBtn.apply {
+            startAnimation(slideLeft)
+            visibility = View.VISIBLE
+            isClickable = true
+        }
         curLocIsVisible = true
-        binding.btnCurrentLocation.visibility = View.INVISIBLE
-        binding.btnCurrentLocation.isClickable = false
     }
 }
 
 fun HomeFragment.reverseViewAnim() {
     curLocIsVisible = false
-    binding.btnCurrentLocation.startAnimation(slideRight)
-    binding.btnCurrentLocation.visibility = View.INVISIBLE
-    binding.btnCurrentLocation.isClickable = false
+    binding.btnCurrentLocation.apply {
+        startAnimation(slideRight)
+        visibility = View.INVISIBLE
+        isClickable = false
+    }
 }
 
 fun HomeFragment.makeViewsInvisible() {
-    binding.tvCityName.visibility = View.INVISIBLE
-    binding.tvWeatherDescription.visibility = View.INVISIBLE
-    binding.tvHumidityValue.visibility = View.INVISIBLE
-    binding.tvTempValue.visibility = View.INVISIBLE
-    binding.tvWindSpeed.visibility = View.INVISIBLE
-    binding.tvDayTime.visibility = View.INVISIBLE
+    binding.cityName.visibility = View.INVISIBLE
+    binding.weatherDescription.visibility = View.INVISIBLE
+    binding.humidityValue.visibility = View.INVISIBLE
+    binding.tempValue.visibility = View.INVISIBLE
+    binding.windSpeed.visibility = View.INVISIBLE
+    binding.weatherDateTime.visibility = View.INVISIBLE
     binding.weatherIcon.visibility = View.INVISIBLE
-    binding.tvHumidityTitle.visibility = View.INVISIBLE
-    binding.tvWindTitle.visibility = View.INVISIBLE
+    binding.textHumidity.visibility = View.INVISIBLE
+    binding.textWind.visibility = View.INVISIBLE
 }
 
 fun HomeFragment.makeProgressBarInvisible() {
-    binding.dataLoading.visibility = View.INVISIBLE
-    binding.ivFavourite.visibility = View.INVISIBLE
+    binding.progressBar.visibility = View.INVISIBLE
+    binding.imageFavourite.visibility = View.INVISIBLE
 }
 
 fun HomeFragment.showProgressBar() {
-    binding.dataLoading.visibility = View.VISIBLE
+    binding.progressBar.visibility = View.VISIBLE
     makeViewsInvisible()
-    binding.ivFavourite.visibility = View.INVISIBLE
-    binding.ivNoInternet.visibility = View.INVISIBLE
-    binding.tvNoInternet.visibility = View.INVISIBLE
+    binding.imageFavourite.visibility = View.INVISIBLE
+    binding.imageNoInternet.visibility = View.INVISIBLE
+    binding.textNoInternet.visibility = View.INVISIBLE
 }
 
 fun HomeFragment.showSnackBar() {
@@ -138,26 +162,26 @@ fun HomeFragment.showSnackBar() {
 }
 
 fun HomeFragment.resolveAppState(weatherDataResponse: WeatherDataResponse) {
-    binding.dataLoading.visibility = View.VISIBLE
-    binding.ivNoInternet.visibility = View.INVISIBLE
-    binding.tvNoInternet.visibility = View.INVISIBLE
+    binding.progressBar.visibility = View.VISIBLE
+    binding.imageNoInternet.visibility = View.INVISIBLE
+    binding.textNoInternet.visibility = View.INVISIBLE
     val cityName = weatherDataResponse.name + ", " + weatherDataResponse.sys?.country
-    binding.tvCityName.text = cityName
-    binding.tvTempValue.text = weatherDataResponse.StringCelsius
+    binding.cityName.text = cityName
+    binding.tempValue.text = weatherDataResponse.StringCelsius
     val humidity = weatherDataResponse.main?.humidity.toString() + "%"
-    binding.tvHumidityValue.text = humidity
+    binding.humidityValue.text = humidity
     val weather = weatherDataResponse.weather?.get(0)
-    binding.tvWeatherDescription.text = weather?.description
+    binding.weatherDescription.text = weather?.description
     weather?.icon?.let { loadImage(it) }
     val windSpeed = weatherDataResponse.wind?.speed.toString() + " m/s"
-    binding.tvWindSpeed.text = windSpeed
-    binding.tvDayTime.text = mTimeUtil.timeAmPm
-    binding.dataLoading.visibility = View.INVISIBLE
+    binding.windSpeed.text = windSpeed
+    binding.weatherDateTime.text = mTimeUtil.timeAmPm
+    binding.progressBar.visibility = View.INVISIBLE
     showViews()
 }
 
 fun HomeFragment.saveState() {
-    val searchText = Objects.requireNonNull(binding.etCityName.text).toString()
+    val searchText = Objects.requireNonNull(binding.textCityName.text).toString()
     if (searchText.isNotEmpty()) {
         Log.d(HomeFragment.TAG, "saveState: saving state")
         mBlizzardViewModel?.saveAppState(cityName, searchText)
@@ -177,20 +201,20 @@ suspend fun HomeFragment.checkIfIsFavourite() {
                 if (entity != null) {
                     if (entity.favourite!!) {
                         isClicked = true
-                        loadImage(R.drawable.ic_favorite_filed, binding.ivFavourite)
+                        loadImage(R.drawable.ic_favorite_filed, binding.imageFavourite)
                     } else {
                         isClicked = false
-                        loadImage(R.drawable.ic_favorite, binding.ivFavourite)
+                        loadImage(R.drawable.ic_favorite, binding.imageFavourite)
                     }
                 }
-                binding.ivFavourite.animate()
+                binding.imageFavourite.animate()
                         .alpha(1f)
                         .setInterpolator(AnticipateInterpolator())
                         .setDuration(100)
                         .start()
-                binding.ivFavourite.visibility = View.VISIBLE
+                binding.imageFavourite.visibility = View.VISIBLE
             } else {
-                binding.ivFavourite.animate()
+                binding.imageFavourite.animate()
                         .alpha(0f)
                         .setInterpolator(AnticipateInterpolator())
                         .setDuration(100)
@@ -198,7 +222,7 @@ suspend fun HomeFragment.checkIfIsFavourite() {
 
                 // delayed handler needed for fade out animation to run
                 delay(2000L)
-                binding.ivFavourite.visibility = View.INVISIBLE
+                binding.imageFavourite.visibility = View.INVISIBLE
             }
         }
     } catch (e: NullPointerException) {
@@ -222,10 +246,10 @@ fun HomeFragment.loadImage(drawable: Int, imageView: ImageView?) {
             .into(imageView!!)
 }
 
-suspend fun HomeFragment.updateIsFavourite(b: Boolean) {
+suspend fun HomeFragment.updateIsFavourite(isFavourite: Boolean) {
     if (cityName != null) {
         val weatherDataEntity = mBlizzardViewModel?.getWeatherByCityName(cityName)
-        weatherDataEntity?.favourite = b
+        weatherDataEntity?.favourite = isFavourite
         mBlizzardViewModel?.updateWeatherData(weatherDataEntity)
     }
 }
@@ -286,18 +310,19 @@ fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse?>?
                 showDialogOnce++
                 makeProgressBarInvisible()
                 if (!searchByCityName) makeViewsInvisible()
-                binding.ivNoInternet.visibility = View.VISIBLE
-                binding.tvNoInternet.visibility = View.VISIBLE
+                binding.imageNoInternet.visibility = View.VISIBLE
+                binding.textNoInternet.visibility = View.VISIBLE
             }
         }
     })
 }
 
 fun HomeFragment.ensureLocationIsEnabled() {
-    mLocationRequest = LocationRequest.create()
-    mLocationRequest?.interval = 10000
-    mLocationRequest?.fastestInterval = 5000
-    mLocationRequest?.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+    mLocationRequest = LocationRequest.create().apply {
+        interval = 10000
+        fastestInterval = 5000
+        priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+    }
     val builder = LocationSettingsRequest.Builder()
     builder.addLocationRequest(mLocationRequest!!)
     val settingsClient = LocationServices.getSettingsClient(requireActivity())

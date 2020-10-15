@@ -40,8 +40,8 @@ class HomeFragment : Fragment() {
     var isClicked = false
     var cityName: String? = null
     var showDialogOnce = 0
-    private var HomeBinding : HomeFragmentBinding? = null
-    val binding get() = HomeBinding!!
+    private var homeBinding : HomeFragmentBinding? = null
+    val binding get() = homeBinding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +64,7 @@ class HomeFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        HomeBinding = HomeFragmentBinding.inflate(inflater, container, false)
+        homeBinding = HomeFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -75,7 +75,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        HomeBinding = null
+        homeBinding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -90,7 +90,7 @@ class HomeFragment : Fragment() {
             if (savedCityName != null && savedCityName.isNotEmpty()) {
                 loadByCityName(savedCityName)
                 if (savedSearchBoxText != null && savedSearchBoxText.isNotEmpty()) {
-                    binding.etCityName.setText(savedSearchBoxText)
+                    binding.textCityName.setText(savedSearchBoxText)
                 }
             } else {
                 Log.d(TAG, "onViewCreated: no data saved")
@@ -106,34 +106,34 @@ class HomeFragment : Fragment() {
             val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view.windowToken,
                     InputMethodManager.HIDE_NOT_ALWAYS)
-            if (binding.etCityName.text.toString().isEmpty()) {
-                binding.etCityName.error = "Enter city name"
+            if (binding.textCityName.text.toString().isEmpty()) {
+                binding.textCityName.error = "Enter city name"
             } else {
                 showProgressBar()
-                val searchText = binding.etCityName.text.toString()
+                val searchText = binding.textCityName.text.toString()
                 searchByCityName = true
                 loadByCityName(searchText)
                 animateViews()
             }
         }
         binding.btnCurrentLocation.setOnClickListener {
-            binding.etCityName.setText("")
+            binding.textCityName.setText("")
             searchByCityName = false
             showProgressBar()
             ensureLocationIsEnabled()
             reverseViewAnim()
         }
         binding.fabSearch.setOnClickListener { reverseViewAnimToInit() }
-        binding.ivFavourite.setOnClickListener {
+        binding.imageFavourite.setOnClickListener {
             if (isClicked) {
                 isClicked = false
-                loadImage(R.drawable.ic_favorite, binding.ivFavourite)
+                loadImage(R.drawable.ic_favorite, binding.imageFavourite)
                 lifecycleScope.launch(IO) {
                     updateIsFavourite(false)
                 }
             } else {
                 isClicked = true
-                loadImage(R.drawable.ic_favorite_filed, binding.ivFavourite)
+                loadImage(R.drawable.ic_favorite_filed, binding.imageFavourite)
                 lifecycleScope.launch(IO) {
                     updateIsFavourite(true)
                 }

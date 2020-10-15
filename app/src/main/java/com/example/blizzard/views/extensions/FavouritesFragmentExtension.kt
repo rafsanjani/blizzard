@@ -19,27 +19,26 @@ Create by kelvin clark on 9/27/2020
 suspend fun FavouritesFragment.makeViewsVisible(entities: AtomicReference<List<WeatherDataEntity>>) {
     withContext(Dispatchers.Main) {
         if (entities.get().isNotEmpty()) {
-            adapter?.insertWeatherEntities(entities.get())
-            binding.ivNoData.visibility = View.INVISIBLE
-            binding.rvFav.visibility = View.VISIBLE
-            binding.tvNoData.visibility = View.INVISIBLE
-
+            favouritesAdapter?.insertWeatherEntities(entities.get())
+            binding.imageNoData.visibility = View.INVISIBLE
+            binding.listFavourites.visibility = View.VISIBLE
+            binding.textNoData.visibility = View.INVISIBLE
         } else {
             delay(1000L)
-            binding.ivNoData.alpha = 0f
-            binding.tvNoData.alpha = 0f
-            binding.ivNoData.animate()
+            binding.imageNoData.alpha = 0f
+            binding.textNoData.alpha = 0f
+            binding.imageNoData.animate()
                     .alpha(1f)
                     .setDuration(100)
                     .setInterpolator(AnticipateInterpolator())
                     .start()
-            binding.tvNoData.animate()
+            binding.textNoData.animate()
                     .alpha(1f)
                     .setDuration(100)
                     .setInterpolator(AnticipateInterpolator())
                     .start()
-            binding.ivNoData.visibility = View.VISIBLE
-            binding.tvNoData.visibility = View.VISIBLE
+            binding.imageNoData.visibility = View.VISIBLE
+            binding.textNoData.visibility = View.VISIBLE
 
         }
     }

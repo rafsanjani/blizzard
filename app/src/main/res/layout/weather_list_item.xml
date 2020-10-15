@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    tools:viewBindingIgnore="true"
     android:layout_height="wrap_content">
 
     <com.google.android.material.card.MaterialCardView
@@ -28,7 +29,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_cityName"
+                android:id="@+id/city_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -48,7 +49,7 @@
                 android:layout_marginTop="12dp"
                 android:textAppearance="@style/weather_list_details"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_cityName"
+                app:layout_constraintTop_toBottomOf="@+id/city_name"
                 tools:text="Clear clouds" />
 
             <TextView
@@ -103,12 +104,12 @@
                 android:layout_marginEnd="7dp"
                 android:text="@string/wind_title"
                 android:textAppearance="@style/weather_list_details"
-                app:layout_constraintEnd_toStartOf="@+id/tv_windSpeed"
+                app:layout_constraintEnd_toStartOf="@+id/wind_speed"
                 app:layout_constraintStart_toStartOf="@+id/textView8"
                 app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
             <TextView
-                android:id="@+id/tv_windSpeed"
+                android:id="@+id/wind_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"

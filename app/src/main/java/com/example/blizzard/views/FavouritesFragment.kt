@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class FavouritesFragment : Fragment() {
-    var adapter: FavouriteFragmentAdapter? = null
+    var favouritesAdapter: FavouriteFragmentAdapter? = null
     private var FavouritesBinding : FragmentFavouritesBinding? = null
     val binding get() = FavouritesBinding!!
 
@@ -27,9 +27,9 @@ class FavouritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val layoutManager = LinearLayoutManager(context)
-        binding.rvFav.layoutManager = layoutManager
-        adapter = FavouriteFragmentAdapter(requireContext(), ArrayList())
-        binding.rvFav.adapter = adapter
+        binding.listFavourites.layoutManager = layoutManager
+        favouritesAdapter = FavouriteFragmentAdapter(requireContext(), ArrayList())
+        binding.listFavourites.adapter = favouritesAdapter
         lifecycleScope.launch {
             initialiseAdapter()
         }

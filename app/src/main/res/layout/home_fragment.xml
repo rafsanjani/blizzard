@@ -18,9 +18,9 @@
         android:padding="@dimen/button_dimen"
         android:paddingBottom="@dimen/home_margin"
         android:text="@string/search"
-        app:layout_constraintEnd_toEndOf="@id/etLayoutContainer"
-        app:layout_constraintStart_toStartOf="@+id/etLayoutContainer"
-        app:layout_constraintTop_toBottomOf="@+id/etLayoutContainer"
+        app:layout_constraintEnd_toEndOf="@id/text_layout_container"
+        app:layout_constraintStart_toStartOf="@+id/text_layout_container"
+        app:layout_constraintTop_toBottomOf="@+id/text_layout_container"
         tools:visibility="invisible" />
 
 
@@ -45,25 +45,25 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_cloud"
                 android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@+id/tv_tempValue"
-                app:layout_constraintStart_toStartOf="@+id/tv_tempValue"
-                app:layout_constraintTop_toBottomOf="@+id/tv_tempValue"
+                app:layout_constraintEnd_toEndOf="@+id/temp_value"
+                app:layout_constraintStart_toStartOf="@+id/temp_value"
+                app:layout_constraintTop_toBottomOf="@+id/temp_value"
                 tools:ignore="ContentDescription" />
 
             <TextView
-                android:id="@+id/tv_windTitle"
+                android:id="@+id/text_wind"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/home_margin"
                 android:text="@string/wind_title"
                 android:textSize="14sp"
                 android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_windSpeed"
-                app:layout_constraintEnd_toStartOf="@+id/tv_windSpeed"
-                app:layout_constraintTop_toTopOf="@+id/tv_windSpeed" />
+                app:layout_constraintBottom_toBottomOf="@+id/wind_speed"
+                app:layout_constraintEnd_toStartOf="@+id/wind_speed"
+                app:layout_constraintTop_toTopOf="@+id/wind_speed" />
 
             <TextView
-                android:id="@+id/tv_windSpeed"
+                android:id="@+id/wind_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -75,7 +75,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_dayTime"
+                android:id="@+id/weather_date_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/home_margin"
@@ -83,12 +83,12 @@
                 android:textSize="14sp"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/tv_weatherDescription"
-                app:layout_constraintStart_toStartOf="@+id/tv_weatherDescription"
-                app:layout_constraintTop_toBottomOf="@+id/tv_weatherDescription" />
+                app:layout_constraintEnd_toEndOf="@+id/weather_description"
+                app:layout_constraintStart_toStartOf="@+id/weather_description"
+                app:layout_constraintTop_toBottomOf="@+id/weather_description" />
 
             <TextView
-                android:id="@+id/tv_humidityTitle"
+                android:id="@+id/text_humidity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -100,7 +100,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_cityName"
+                android:id="@+id/city_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/home_margin"
@@ -113,7 +113,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_weatherDescription"
+                android:id="@+id/weather_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/home_margin"
@@ -125,7 +125,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/weather_icon" />
 
             <TextView
-                android:id="@+id/tv_tempValue"
+                android:id="@+id/temp_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/temp_21_u2103"
@@ -135,31 +135,31 @@
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_cityName" />
+                app:layout_constraintTop_toBottomOf="@+id/city_name" />
 
             <TextView
-                android:id="@+id/tv_humidityValue"
+                android:id="@+id/humidity_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/home_margin"
                 android:text="@string/humidity_placeHolder"
                 android:textSize="14sp"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_humidityTitle"
-                app:layout_constraintStart_toEndOf="@+id/tv_humidityTitle"
-                app:layout_constraintTop_toTopOf="@+id/tv_humidityTitle" />
+                app:layout_constraintBottom_toBottomOf="@+id/text_humidity"
+                app:layout_constraintStart_toEndOf="@+id/text_humidity"
+                app:layout_constraintTop_toTopOf="@+id/text_humidity" />
 
             <ProgressBar
-                android:id="@+id/data_loading"
+                android:id="@+id/progress_bar"
                 style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
                 app:layout_constraintBottom_toBottomOf="@+id/weather_icon"
-                app:layout_constraintStart_toStartOf="@+id/tv_tempValue" />
+                app:layout_constraintStart_toStartOf="@+id/temp_value" />
 
             <ImageView
-                android:id="@+id/iv_no_internet"
+                android:id="@+id/image_no_internet"
                 android:layout_width="149dp"
                 android:layout_height="93dp"
                 android:contentDescription="@string/no_internet"
@@ -172,19 +172,19 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/tv_no_internet"
+                android:id="@+id/text_no_internet"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/no_internet"
                 android:textSize="18sp"
                 android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@+id/iv_no_internet"
-                app:layout_constraintStart_toStartOf="@+id/iv_no_internet"
-                app:layout_constraintTop_toTopOf="@+id/tv_weatherDescription" />
+                app:layout_constraintEnd_toEndOf="@+id/image_no_internet"
+                app:layout_constraintStart_toStartOf="@+id/image_no_internet"
+                app:layout_constraintTop_toTopOf="@+id/weather_description" />
 
             <ImageView
-                android:id="@+id/iv_favourite"
+                android:id="@+id/image_favourite"
                 android:layout_width="31dp"
                 android:layout_height="35dp"
                 android:layout_marginTop="4dp"
@@ -201,7 +201,7 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/etLayoutContainer"
+        android:id="@+id/text_layout_container"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -214,7 +214,7 @@
         tools:visibility="invisible">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_cityName"
+            android:id="@+id/text_city_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="0dp"
@@ -237,7 +237,7 @@
         android:text="@string/current_location"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/search_btn"
-        app:layout_constraintEnd_toEndOf="@+id/etLayoutContainer"
+        app:layout_constraintEnd_toEndOf="@+id/text_layout_container"
         app:layout_constraintTop_toBottomOf="@+id/materialCardView" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -254,6 +254,7 @@
         android:visibility="invisible"
         app:backgroundTint="#6200EA"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_current_location" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_current_location"
+        android:contentDescription="@string/search_buton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
