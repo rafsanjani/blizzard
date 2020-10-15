@@ -6,11 +6,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.viewmodel.BlizzardViewModel
 import com.example.blizzard.views.FavouritesFragment
-import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -21,26 +20,26 @@ suspend fun FavouritesFragment.makeViewsVisible(entities: AtomicReference<List<W
     withContext(Dispatchers.Main) {
         if (entities.get().isNotEmpty()) {
             adapter?.insertWeatherEntities(entities.get())
-            iv_no_data.visibility = View.INVISIBLE
-            rv_fav.visibility = View.VISIBLE
-            tv_no_data.visibility = View.INVISIBLE
+            binding.ivNoData.visibility = View.INVISIBLE
+            binding.rvFav.visibility = View.VISIBLE
+            binding.tvNoData.visibility = View.INVISIBLE
 
         } else {
             delay(1000L)
-            iv_no_data.alpha = 0f
-            tv_no_data.alpha = 0f
-            iv_no_data.animate()
+            binding.ivNoData.alpha = 0f
+            binding.tvNoData.alpha = 0f
+            binding.ivNoData.animate()
                     .alpha(1f)
                     .setDuration(100)
                     .setInterpolator(AnticipateInterpolator())
                     .start()
-            tv_no_data.animate()
+            binding.tvNoData.animate()
                     .alpha(1f)
                     .setDuration(100)
                     .setInterpolator(AnticipateInterpolator())
                     .start()
-            iv_no_data.visibility = View.VISIBLE
-            tv_no_data.visibility = View.VISIBLE
+            binding.ivNoData.visibility = View.VISIBLE
+            binding.tvNoData.visibility = View.VISIBLE
 
         }
     }

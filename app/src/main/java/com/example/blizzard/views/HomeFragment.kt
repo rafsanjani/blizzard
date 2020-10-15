@@ -18,12 +18,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.blizzard.R
+import com.example.blizzard.databinding.HomeFragmentBinding
 import com.example.blizzard.util.TimeUtil
 import com.example.blizzard.viewmodel.BlizzardViewModel
 import com.example.blizzard.views.extensions.*
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.OnSuccessListener
-import kotlinx.android.synthetic.main.home_fragment.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 
@@ -40,6 +40,9 @@ class HomeFragment : Fragment() {
     var isClicked = false
     var cityName: String? = null
     var showDialogOnce = 0
+    private var HomeBinding : HomeFragmentBinding? = null
+    val binding get() = HomeBinding!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBlizzardViewModel = ViewModelProvider(requireActivity()).get(BlizzardViewModel::class.java)
@@ -61,12 +64,18 @@ class HomeFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.home_fragment, container, false)
+        HomeBinding = HomeFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onStop() {
         super.onStop()
         saveState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        HomeBinding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,7 +90,7 @@ class HomeFragment : Fragment() {
             if (savedCityName != null && savedCityName.isNotEmpty()) {
                 loadByCityName(savedCityName)
                 if (savedSearchBoxText != null && savedSearchBoxText.isNotEmpty()) {
-                    et_cityName.setText(savedSearchBoxText)
+                    binding.etCityName.setText(savedSearchBoxText)
                 }
             } else {
                 Log.d(TAG, "onViewCreated: no data saved")
@@ -92,39 +101,39 @@ class HomeFragment : Fragment() {
             bundle.getString(CITY_NAME)?.let { loadByCityName(it) }
         }
 
-        search_btn?.setOnClickListener {
+        binding.searchBtn.setOnClickListener {
             //Hide the Keyboard when search button is clicked
             val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view.windowToken,
                     InputMethodManager.HIDE_NOT_ALWAYS)
-            if (et_cityName.text.toString().isEmpty()) {
-                et_cityName.error = "Enter city name"
+            if (binding.etCityName.text.toString().isEmpty()) {
+                binding.etCityName.error = "Enter city name"
             } else {
                 showProgressBar()
-                val searchText = et_cityName.text.toString()
+                val searchText = binding.etCityName.text.toString()
                 searchByCityName = true
                 loadByCityName(searchText)
                 animateViews()
             }
         }
-        btn_current_location.setOnClickListener {
-            et_cityName.setText("")
+        binding.btnCurrentLocation.setOnClickListener {
+            binding.etCityName.setText("")
             searchByCityName = false
             showProgressBar()
             ensureLocationIsEnabled()
             reverseViewAnim()
         }
-        fab_search?.setOnClickListener { reverseViewAnimToInit() }
-        iv_favourite.setOnClickListener {
+        binding.fabSearch.setOnClickListener { reverseViewAnimToInit() }
+        binding.ivFavourite.setOnClickListener {
             if (isClicked) {
                 isClicked = false
-                loadImage(R.drawable.ic_favorite, iv_favourite)
+                loadImage(R.drawable.ic_favorite, binding.ivFavourite)
                 lifecycleScope.launch(IO) {
                     updateIsFavourite(false)
                 }
             } else {
                 isClicked = true
-                loadImage(R.drawable.ic_favorite_filed, iv_favourite)
+                loadImage(R.drawable.ic_favorite_filed, binding.ivFavourite)
                 lifecycleScope.launch(IO) {
                     updateIsFavourite(true)
                 }
