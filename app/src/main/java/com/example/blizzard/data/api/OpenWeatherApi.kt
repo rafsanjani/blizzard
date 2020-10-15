@@ -1,7 +1,6 @@
 package com.example.blizzard.data.api
 
 import com.example.blizzard.model.WeatherDataResponse
-import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -10,15 +9,15 @@ import retrofit2.http.Query
  */
 interface OpenWeatherApi {
     @GET("weather?")
-    fun getWeatherByCityName(
+    suspend fun getWeatherByCityName(
             @Query("q") cityName: String?,
             @Query("appid") apiKey: String?
-    ): Call<WeatherDataResponse?>?
+    ): WeatherDataResponse
 
     @GET("weather?")
-    fun getWeatherByLongitudeLatitude(
+    suspend fun getWeatherByLongitudeLatitude(
             @Query("lat") latitude: Double?,
             @Query("lon") longitude: Double?,
             @Query("appid") apiKey: String?
-    ): Call<WeatherDataResponse?>?
+    ): WeatherDataResponse
 }

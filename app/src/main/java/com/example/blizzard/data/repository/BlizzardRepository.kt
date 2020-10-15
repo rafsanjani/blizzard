@@ -1,24 +1,40 @@
 package com.example.blizzard.data.repository
 
 import android.content.Context
-import android.util.Log
-import androidx.lifecycle.MutableLiveData
+import com.example.blizzard.data.api.OpenWeatherApi
 import com.example.blizzard.data.database.WeatherDatabase
 import com.example.blizzard.data.entities.WeatherDataEntity
-import com.example.blizzard.model.OpenWeatherService
 import com.example.blizzard.model.WeatherDataResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.internal.EverythingIsNonNull
+import com.example.blizzard.util.ApiKeyHolder
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 /**
  * Created by tony on 8/9/2020
  */
-class BlizzardRepository(context: Context?) {
+class BlizzardRepository(context: Context) {
+
+    private val interceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+    private val client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+    private val openWeatherService: OpenWeatherApi = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenWeatherApi::class.java)
+
     private val mWeatherDatabase: WeatherDatabase = WeatherDatabase.getInstance(context)
-    val allDataFromDb: List<WeatherDataEntity?>?
-        get() = mWeatherDatabase.weatherDao()?.allWeather
+
+    fun getAll(): List<WeatherDataEntity?>? {
+        return mWeatherDatabase.weatherDao()?.allWeather
+    }
 
     fun saveWeatherData(weatherDataEntity: WeatherDataEntity?) {
         mWeatherDatabase.weatherDao()?.saveWeather(weatherDataEntity)
@@ -32,51 +48,15 @@ class BlizzardRepository(context: Context?) {
         mWeatherDatabase.weatherDao()?.updateWeatherData(entity)
     }
 
-    fun getWeather(cityName: String?): MutableLiveData<WeatherDataResponse?> {
-        val searchCityMutableLiveData = MutableLiveData<WeatherDataResponse?>()
-        OpenWeatherService().getWeather(cityName)?.enqueue(object : Callback<WeatherDataResponse?> {
-            @EverythingIsNonNull
-            override fun onResponse(call: Call<WeatherDataResponse?>, response: Response<WeatherDataResponse?>) {
-                if (response.isSuccessful) {
-                    searchCityMutableLiveData.setValue(response.body())
-                } else {
-                    //response failed for some reason
-                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody())
-                    searchCityMutableLiveData.setValue(null)
-                }
-            }
-
-            @EverythingIsNonNull
-            override fun onFailure(call: Call<WeatherDataResponse?>, t: Throwable) {
-                searchCityMutableLiveData.value = null
-            }
-        })
-        return searchCityMutableLiveData
+    suspend fun getWeather(cityName: String?): WeatherDataResponse {
+        return openWeatherService.getWeatherByCityName(cityName, ApiKeyHolder.API_KEY)
     }
 
-    fun getWeather(lat: Double?, lon: Double?): MutableLiveData<WeatherDataResponse?> {
-        val currentCityMutableLiveData = MutableLiveData<WeatherDataResponse?>()
-        OpenWeatherService().getWeather(lat, lon)?.enqueue(object : Callback<WeatherDataResponse?> {
-            @EverythingIsNonNull
-            override fun onResponse(call: Call<WeatherDataResponse?>, response: Response<WeatherDataResponse?>) {
-                if (response.isSuccessful) {
-                    currentCityMutableLiveData.postValue(response.body())
-                } else {
-                    //response failed for some reason
-                    Log.e(TAG, "onResponse: Request Failed " + response.errorBody())
-                }
-            }
-
-            @EverythingIsNonNull
-            override fun onFailure(call: Call<WeatherDataResponse?>, t: Throwable) {
-                currentCityMutableLiveData.value = null
-            }
-        })
-        return currentCityMutableLiveData
+    suspend fun getWeather(lat: Double?, lon: Double?): WeatherDataResponse {
+        return openWeatherService.getWeatherByLongitudeLatitude(lat, lon, ApiKeyHolder.API_KEY)
     }
 
     companion object {
-        private const val TAG = "BlizzardRepository"
+        private const val BASE_URL = "http://api.openweathermap.org/data/2.5/"
     }
-
 }
