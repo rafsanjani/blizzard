@@ -1,20 +1,20 @@
 package com.example.blizzard.util
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.blizzard.R
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.data.entities.extensions.StringCelsius
+import com.example.blizzard.databinding.ItemWeatherBinding
 
 /**
  * Created by kelvin_clark on 8/19/2020
  */
-class FavouriteFragmentAdapter(private val mContext: Context, private val weatherDataEntities: MutableList<WeatherDataEntity>) : RecyclerView.Adapter<FavouriteFragmentAdapter.ViewHolder>() {
+class FavouriteFragmentAdapter(private val weatherDataEntities: MutableList<WeatherDataEntity>) : RecyclerView.Adapter<FavouriteFragmentAdapter.ViewHolder>() {
     private val timeUtil = TimeUtil()
+    private var binding: ItemWeatherBinding? = null
+
     fun insertWeatherEntities(entities: List<WeatherDataEntity>) {
         weatherDataEntities.clear()
         weatherDataEntities.addAll(entities)
@@ -22,8 +22,8 @@ class FavouriteFragmentAdapter(private val mContext: Context, private val weathe
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(mContext).inflate(R.layout.weather_list_item, parent, false)
-        return ViewHolder(view)
+        binding = ItemWeatherBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding!!)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -44,7 +44,11 @@ class FavouriteFragmentAdapter(private val mContext: Context, private val weathe
         return weatherDataEntities.size
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    fun destroyBinding() {
+        binding = null
+    }
+
+    class ViewHolder(binding: ItemWeatherBinding) : RecyclerView.ViewHolder(binding.root) {
         var tvCityName: TextView
         var tvDescription: TextView
         var tvTemperature: TextView
@@ -53,12 +57,12 @@ class FavouriteFragmentAdapter(private val mContext: Context, private val weathe
         var tvTime: TextView
 
         init {
-            tvCityName = itemView.findViewById(R.id.city_name)
-            tvDescription = itemView.findViewById(R.id.tv_description)
-            tvHumidity = itemView.findViewById(R.id.tv_humidity)
-            tvTemperature = itemView.findViewById(R.id.tv_temp)
-            tvWindSpeed = itemView.findViewById(R.id.wind_speed)
-            tvTime = itemView.findViewById(R.id.tv_day_time)
+            tvCityName = binding.cityName
+            tvDescription = binding.tvDescription
+            tvHumidity = binding.tvHumidity
+            tvTemperature = binding.tvTemp
+            tvWindSpeed = binding.windSpeed
+            tvTime = binding.tvDayTime
         }
     }
 }

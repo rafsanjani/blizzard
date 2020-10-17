@@ -19,7 +19,7 @@ Create by kelvin clark on 9/27/2020
 suspend fun FavouritesFragment.makeViewsVisible(entities: AtomicReference<List<WeatherDataEntity>>) {
     withContext(Dispatchers.Main) {
         if (entities.get().isNotEmpty()) {
-            favouritesAdapter?.insertWeatherEntities(entities.get())
+            favouritesAdapter.insertWeatherEntities(entities.get())
             binding.imageNoData.visibility = View.INVISIBLE
             binding.listFavourites.visibility = View.VISIBLE
             binding.textNoData.visibility = View.INVISIBLE

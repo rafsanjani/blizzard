@@ -16,7 +16,7 @@
         app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/weather_list_item" />
+        tools:listitem="@layout/item_weather" />
 
     <ImageView
         android:id="@+id/image_no_data"
