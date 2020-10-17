@@ -6,11 +6,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.blizzard.data.entities.WeatherDataEntity
 import com.example.blizzard.viewmodel.BlizzardViewModel
 import com.example.blizzard.views.FavouritesFragment
-import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -20,27 +19,26 @@ Create by kelvin clark on 9/27/2020
 suspend fun FavouritesFragment.makeViewsVisible(entities: AtomicReference<List<WeatherDataEntity>>) {
     withContext(Dispatchers.Main) {
         if (entities.get().isNotEmpty()) {
-            adapter?.insertWeatherEntities(entities.get())
-            iv_no_data.visibility = View.INVISIBLE
-            rv_fav.visibility = View.VISIBLE
-            tv_no_data.visibility = View.INVISIBLE
-
+            favouritesAdapter.insertWeatherEntities(entities.get())
+            binding.imageNoData.visibility = View.INVISIBLE
+            binding.listFavourites.visibility = View.VISIBLE
+            binding.textNoData.visibility = View.INVISIBLE
         } else {
             delay(1000L)
-            iv_no_data.alpha = 0f
-            tv_no_data.alpha = 0f
-            iv_no_data.animate()
+            binding.imageNoData.alpha = 0f
+            binding.textNoData.alpha = 0f
+            binding.imageNoData.animate()
                     .alpha(1f)
                     .setDuration(100)
                     .setInterpolator(AnticipateInterpolator())
                     .start()
-            tv_no_data.animate()
+            binding.textNoData.animate()
                     .alpha(1f)
                     .setDuration(100)
                     .setInterpolator(AnticipateInterpolator())
                     .start()
-            iv_no_data.visibility = View.VISIBLE
-            tv_no_data.visibility = View.VISIBLE
+            binding.imageNoData.visibility = View.VISIBLE
+            binding.textNoData.visibility = View.VISIBLE
 
         }
     }

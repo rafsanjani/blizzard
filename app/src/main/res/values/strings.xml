@@ -41,4 +41,5 @@
     <string name="temperature">Temperature</string>
     <string name="no_data_to_show">No data to show</string>
     <string name="favourite_button">Favourite button</string>
+    <string name="search_buton">search buton</string>
 </resources>

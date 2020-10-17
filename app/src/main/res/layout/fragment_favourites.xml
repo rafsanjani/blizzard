@@ -7,7 +7,7 @@
     tools:context=".views.FavouritesFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_fav"
+        android:id="@+id/list_favourites"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="invisible"
@@ -16,10 +16,10 @@
         app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/weather_list_item" />
+        tools:listitem="@layout/item_weather" />
 
     <ImageView
-        android:id="@+id/iv_no_data"
+        android:id="@+id/image_no_data"
         android:layout_width="226dp"
         android:layout_height="179dp"
         android:contentDescription="@string/no_data"
@@ -33,7 +33,7 @@
         app:srcCompat="@drawable/ic_sad_cloud_light_mode" />
 
     <TextView
-        android:id="@+id/tv_no_data"
+        android:id="@+id/text_no_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -43,5 +43,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_no_data" />
+        app:layout_constraintTop_toBottomOf="@+id/image_no_data" />
 </androidx.constraintlayout.widget.ConstraintLayout>

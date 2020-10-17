@@ -7,29 +7,37 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.blizzard.R
+import com.example.blizzard.databinding.FragmentFavouritesBinding
 import com.example.blizzard.util.FavouriteFragmentAdapter
 import com.example.blizzard.views.extensions.initialiseAdapter
-import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.coroutines.launch
 import java.util.*
 
 class FavouritesFragment : Fragment() {
-    var adapter: FavouriteFragmentAdapter? = null
+    lateinit var favouritesAdapter: FavouriteFragmentAdapter
+    private var FavouritesBinding : FragmentFavouritesBinding? = null
+    val binding get() = FavouritesBinding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_favourites, container, false)
+        FavouritesBinding = FragmentFavouritesBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val layoutManager = LinearLayoutManager(context)
-        rv_fav.layoutManager = layoutManager
-        adapter = FavouriteFragmentAdapter(requireContext(), ArrayList())
-        rv_fav.adapter = adapter
+        binding.listFavourites.layoutManager = layoutManager
+        favouritesAdapter = FavouriteFragmentAdapter(ArrayList())
+        binding.listFavourites.adapter = favouritesAdapter
         lifecycleScope.launch {
             initialiseAdapter()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        FavouritesBinding = null
+        favouritesAdapter.destroyBinding()
     }
 }
