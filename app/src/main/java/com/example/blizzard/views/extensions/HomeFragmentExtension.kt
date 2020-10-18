@@ -287,7 +287,7 @@ fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse?>?
             if (searchByCityName)
                 cityName = weatherData.name
             saveToDb(weatherData)
-            mTimeUtil.setTime(weatherData.dt, weatherData.timezone)
+            weatherData.dt?.let { weatherData.timezone?.let { it1 -> mTimeUtil.setTime(it, it1) } }
             resolveAppState(weatherData)
             showDialogOnce++
         } else {
