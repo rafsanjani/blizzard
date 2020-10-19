@@ -3,8 +3,8 @@ package com.example.blizzard.model
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-data class Wind (
-    @SerializedName("speed")
+data class Sys (
+    @SerializedName("country")
     @Expose
-    var speed: Double = 0.0
+    var country: String? = null
 )
