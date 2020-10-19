@@ -27,7 +27,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -49,7 +48,7 @@ fun HomeFragment.animateViews() {
         visibility = View.INVISIBLE
         isClickable = false
     }
-    binding.btnCurrentLocation.apply{
+    binding.btnCurrentLocation.apply {
         startAnimation(slideLeft)
         visibility = View.VISIBLE
         isClickable = true
@@ -96,7 +95,7 @@ fun HomeFragment.reverseViewAnimToInit() {
             visibility = View.INVISIBLE
             isClickable = false
         }
-        binding.btnCurrentLocation.apply{
+        binding.btnCurrentLocation.apply {
             startAnimation(slideRight)
             visibility = View.INVISIBLE
             isClickable = false
@@ -262,24 +261,6 @@ fun HomeFragment.saveToDb(weatherDataResponse: WeatherDataResponse) {
     }
 }
 
-fun HomeFragment.showNetworkDialog() {
-    val materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext(),
-            R.style.RoundShapeTheme)
-    val customTitleView = View.inflate(requireContext(), R.layout.alert_dialog, null)
-    materialAlertDialogBuilder
-            .setCustomTitle(customTitleView)
-            .setMessage("""    No internet connection found!
-                            Please, turn on your Mobile data and hit OK""")
-            .setPositiveButton("OK") { _: DialogInterface?, _: Int ->
-                if (HomeFragment.mDeviceConnected) {
-                    ensureLocationIsEnabled()
-                }
-            }
-            .setNeutralButton("LATER") { _: DialogInterface?, _: Int -> }
-            .setCancelable(false)
-            .show()
-}
-
 fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse?>?) {
     liveData?.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
         if (weatherData != null) {
@@ -290,30 +271,41 @@ fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse?>?
             weatherData.dt?.let { weatherData.timezone?.let { it1 -> mTimeUtil.setTime(it, it1) } }
             resolveAppState(weatherData)
             showDialogOnce++
-        } else {
+        }
+    })
+
+
+    mBlizzardViewModel?.isNull?.observe(viewLifecycleOwner, { isNull: Boolean ->
+        if (isNull) {
             if (searchByCityName) {
-                if (!HomeFragment.mDeviceConnected) {
-                    showSnackBar()
-                    lifecycleScope.launch {
-                        delay(1000L)
-                        reverseViewAnimToInit()
-                    }
-                } else {
-                    Snackbar.make(requireView(), "Error getting Location", Snackbar.LENGTH_SHORT).show()
-                    lifecycleScope.launch {
-                        delay(1000L)
-                        reverseViewAnimToInit()
-                    }
+                Snackbar.make(requireView(), "Error getting Location", Snackbar.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    delay(1000L)
+                    reverseViewAnimToInit()
+                    mBlizzardViewModel?.isIOException?.postValue(false)
+                    checkLocationPermission()
                 }
-            } else if (!HomeFragment.mDeviceConnected) {
-                if (showDialogOnce < 1) showNetworkDialog()
-                showDialogOnce++
+            }
+        }
+    })
+
+    mBlizzardViewModel?.isIOException?.observe(viewLifecycleOwner, { isIOError: Boolean ->
+        if (isIOError) {
+            if (searchByCityName) {
+                showSnackBar()
+                lifecycleScope.launch {
+                    delay(1000L)
+                    reverseViewAnimToInit()
+                }
+            } else {
+                showSnackBar()
                 makeProgressBarInvisible()
                 if (!searchByCityName) makeViewsInvisible()
                 binding.imageNoInternet.visibility = View.VISIBLE
                 binding.textNoInternet.visibility = View.VISIBLE
             }
         }
+        mBlizzardViewModel?.isIOException?.postValue(false)
     })
 }
 
