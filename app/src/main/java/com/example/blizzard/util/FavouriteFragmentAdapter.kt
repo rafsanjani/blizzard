@@ -21,6 +21,8 @@ class FavouriteFragmentAdapter(private val weatherDataEntities: MutableList<Weat
         notifyDataSetChanged()
     }
 
+    fun clearEntities() = weatherDataEntities.clear()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         binding = ItemWeatherBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding!!)

@@ -283,31 +283,19 @@ fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse>?)
                     lifecycleScope.launch {
                         delay(1000L)
                         reverseViewAnimToInit()
-                        mBlizzardViewModel?.isIOException?.postValue(false)
-                        checkLocationPermission()
+                        mBlizzardViewModel?.isNull?.postValue(false)
+                        userLocation
                     }
-                }
-            }
-        })
-
-        mBlizzardViewModel?.isIOException?.observe(viewLifecycleOwner, { isIOError: Boolean ->
-            if (isIOError) {
-                if (searchByCityName) {
-                    showSnackBar()
-                    lifecycleScope.launch {
-                        delay(1000L)
-                        reverseViewAnimToInit()
-                    }
-                } else {
+                }else {
                     showSnackBar()
                     makeProgressBarInvisible()
-                    if (!searchByCityName) makeViewsInvisible()
+                    makeViewsInvisible()
                     binding.imageNoInternet.visibility = View.VISIBLE
                     binding.textNoInternet.visibility = View.VISIBLE
                 }
             }
-            mBlizzardViewModel?.isIOException?.postValue(false)
         })
+
     }
 }
 

@@ -9,7 +9,6 @@ import com.example.blizzard.views.FavouritesFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -61,4 +60,5 @@ suspend fun FavouritesFragment.initialiseAdapter() {
     }
     entities.set(favWeather)
     makeViewsVisible(entities)
+    favWeather.clear()
 }
