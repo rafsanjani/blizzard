@@ -9,13 +9,17 @@ import com.example.blizzard.model.WeatherDataResponse
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 /**
  * Created by tony on 8/9/2020
  */
 class BlizzardViewModel(application: Application, private val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
+
     private val mBlizzardRepository: BlizzardRepository = BlizzardRepository(application)
     private var response : WeatherDataResponse? = null
+    var isIOException = MutableLiveData<Boolean>()
+    var isNull = MutableLiveData<Boolean>()
 
     fun saveAppState(cityName: String?) {
         savedStateHandle.set(CITY_NAME, cityName)
@@ -55,22 +59,40 @@ class BlizzardViewModel(application: Application, private val savedStateHandle: 
     }
 
     fun getWeather(lat: Double?, lon: Double?) = liveData {
+        isIOException.value = false
+        isNull.value = false
         try {
             response = mBlizzardRepository.getWeather(lat, lon)
+            isIOException.value = false
+            isNull.value = false
             emit(response)
             Log.i(TAG, "getWeather: weather data acquired")
         } catch (e: Throwable) {
             Log.e(TAG, "getWeather: Error getting data", e)
+            if (e is IOException){
+                isIOException.value = true
+            }else {
+                isNull.value = true
+            }
         }
     }
 
     fun getWeather(cityName: String) = liveData {
+        isIOException.value = false
+        isNull.value = false
         try {
             response = mBlizzardRepository.getWeather(cityName)
+            isIOException.value = false
+            isNull.value = false
             emit(response)
             Log.i(TAG, "getWeather: weather data acquired")
         } catch (e: Throwable) {
-            Log.e(TAG, "getWeather: Error getting weather data", e)
+            Log.e(TAG, "getWeather: Error getting data", e)
+            if (e is IOException){
+                isIOException.value = true
+            }else {
+                isNull.value = true
+            }
         }
     }
 
