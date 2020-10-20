@@ -261,52 +261,42 @@ fun HomeFragment.saveToDb(weatherDataResponse: WeatherDataResponse) {
     }
 }
 
-fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse?>?) {
-    liveData?.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
-        if (weatherData != null) {
-            HomeFragment.mDeviceConnected = true
-            if (searchByCityName)
-                cityName = weatherData.name
-            saveToDb(weatherData)
-            weatherData.dt?.let { weatherData.timezone?.let { it1 -> mTimeUtil.setTime(it, it1) } }
-            resolveAppState(weatherData)
-            showDialogOnce++
-        }
-    })
+fun HomeFragment.observeWeatherChanges(liveData: LiveData<WeatherDataResponse>?) {
+    lifecycleScope.launch {
+        liveData?.observe(viewLifecycleOwner, { weatherData: WeatherDataResponse? ->
+            if (weatherData != null) {
+                HomeFragment.mDeviceConnected = true
+                if (searchByCityName)
+                    cityName = weatherData.name
+                saveToDb(weatherData)
+                weatherData.dt?.let { weatherData.timezone?.let { it1 -> mTimeUtil.setTime(it, it1) } }
+                resolveAppState(weatherData)
+                showDialogOnce++
+            }
+        })
 
 
-    mBlizzardViewModel?.isNull?.observe(viewLifecycleOwner, { isNull: Boolean ->
-        if (isNull) {
-            if (searchByCityName) {
-                Snackbar.make(requireView(), "Error getting Location", Snackbar.LENGTH_SHORT).show()
-                lifecycleScope.launch {
-                    delay(1000L)
-                    reverseViewAnimToInit()
-                    mBlizzardViewModel?.isIOException?.postValue(false)
-                    checkLocationPermission()
+        mBlizzardViewModel?.isNull?.observe(viewLifecycleOwner, { isNull: Boolean ->
+            if (isNull) {
+                if (searchByCityName) {
+                    Snackbar.make(requireView(), "Error getting Location", Snackbar.LENGTH_SHORT).show()
+                    lifecycleScope.launch {
+                        delay(1000L)
+                        reverseViewAnimToInit()
+                        mBlizzardViewModel?.isNull?.postValue(false)
+                        userLocation
+                    }
+                }else {
+                    showSnackBar()
+                    makeProgressBarInvisible()
+                    makeViewsInvisible()
+                    binding.imageNoInternet.visibility = View.VISIBLE
+                    binding.textNoInternet.visibility = View.VISIBLE
                 }
             }
-        }
-    })
+        })
 
-    mBlizzardViewModel?.isIOException?.observe(viewLifecycleOwner, { isIOError: Boolean ->
-        if (isIOError) {
-            if (searchByCityName) {
-                showSnackBar()
-                lifecycleScope.launch {
-                    delay(1000L)
-                    reverseViewAnimToInit()
-                }
-            } else {
-                showSnackBar()
-                makeProgressBarInvisible()
-                if (!searchByCityName) makeViewsInvisible()
-                binding.imageNoInternet.visibility = View.VISIBLE
-                binding.textNoInternet.visibility = View.VISIBLE
-            }
-        }
-        mBlizzardViewModel?.isIOException?.postValue(false)
-    })
+    }
 }
 
 fun HomeFragment.ensureLocationIsEnabled() {

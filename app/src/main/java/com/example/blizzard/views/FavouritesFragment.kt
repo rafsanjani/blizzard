@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.blizzard.databinding.FragmentFavouritesBinding
 import com.example.blizzard.util.FavouriteFragmentAdapter
 import com.example.blizzard.views.extensions.initialiseAdapter
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -30,7 +31,7 @@ class FavouritesFragment : Fragment() {
         binding.listFavourites.layoutManager = layoutManager
         favouritesAdapter = FavouriteFragmentAdapter(ArrayList())
         binding.listFavourites.adapter = favouritesAdapter
-        lifecycleScope.launch {
+        lifecycleScope.launch(IO) {
             initialiseAdapter()
         }
     }
@@ -39,5 +40,10 @@ class FavouritesFragment : Fragment() {
         super.onDestroy()
         FavouritesBinding = null
         favouritesAdapter.destroyBinding()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        favouritesAdapter.clearEntities()
     }
 }

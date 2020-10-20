@@ -2,8 +2,6 @@ package com.example.blizzard.views
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
@@ -40,17 +38,6 @@ class MainActivity : AppCompatActivity() {
                 .enqueueUniquePeriodicWork(WEATHER_UPDATE_CHECKER, ExistingPeriodicWorkPolicy.KEEP, request)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        return if (id == R.id.action_settings) {
-            true
-        } else super.onOptionsItemSelected(item)
-    }
 
     companion object {
         private const val TAG = "MainActivity"
